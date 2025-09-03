@@ -1,4 +1,3 @@
-import logo from "../assets/logo.svg"
 const NavBar = () => {
   return (
     <div className="flex flex-row items-center justify-between bg-black h-16 w-full px-4 border-b border-gray-800">

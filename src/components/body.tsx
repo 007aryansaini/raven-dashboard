@@ -1,11 +1,22 @@
-import { ArrowDown, ArrowUp, Info, MoveRight } from "lucide-react"
-import { useRef, useState } from "react"
+import { ArrowDown, ArrowUp, Info, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
+import { useRef, useState, useEffect } from "react"
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
+import card1 from "../assets/card1.svg"
+import card2 from "../assets/card2.svg"
+import card3 from "../assets/card3.svg"
+import card4 from "../assets/card4.svg"
+import card5 from "../assets/card5.svg"
+import card6 from "../assets/card6.svg"
 
 const body = () => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState("")
+  const [currentSlide, setCurrentSlide] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isAutoPlay, setIsAutoPlay] = useState(true)
+  const totalSlides = 3 // 9 cards / 3 cards per slide = 3 slides
+  const autoPlayInterval = 4000 // 4 seconds between slides
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
@@ -26,8 +37,80 @@ const body = () => {
     }
   }
 
+  const goToPreviousSlide = () => {
+    if (isTransitioning) return
+    pauseAutoPlay()
+    setIsTransitioning(true)
+    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : totalSlides - 1))
+    setTimeout(() => setIsTransitioning(false), 500)
+  }
+
+  const goToNextSlide = () => {
+    if (isTransitioning) return
+    pauseAutoPlay()
+    setIsTransitioning(true)
+    setCurrentSlide((prev) => (prev < totalSlides - 1 ? prev + 1 : 0))
+    setTimeout(() => setIsTransitioning(false), 500)
+  }
+
+  const goToSlide = (slideIndex: number) => {
+    if (isTransitioning || slideIndex === currentSlide) return
+    pauseAutoPlay()
+    setIsTransitioning(true)
+    setCurrentSlide(slideIndex)
+    setTimeout(() => setIsTransitioning(false), 500)
+  }
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isAutoPlay || isTransitioning) return
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const nextSlide = prev < totalSlides - 1 ? prev + 1 : 0
+        setIsTransitioning(true)
+        setTimeout(() => setIsTransitioning(false), 500)
+        return nextSlide
+      })
+    }, autoPlayInterval)
+
+    return () => clearInterval(interval)
+  }, [isAutoPlay, isTransitioning, autoPlayInterval, totalSlides])
+
+  // Pause auto-play on user interaction
+  const pauseAutoPlay = () => {
+    setIsAutoPlay(false)
+    // Resume auto-play after 10 seconds of inactivity
+    setTimeout(() => setIsAutoPlay(true), 10000)
+  }
+
+  // Define different card sets for each slide to show animation
+  const getCardSet = (slideIndex: number) => {
+    const cardSets = [
+      // Slide 1: Original cards
+      [
+        { src: card1, alt: "Fed Decision Card" },
+        { src: card2, alt: "Russia Ukraine Card" },
+        { src: card3, alt: "TCU vs North Carolina Card" }
+      ],
+      // Slide 2: Different arrangement
+      [
+        { src: card4, alt: "Crypto Trading Card" },
+        { src: card5, alt: "Market Analysis Card" },
+        { src: card6, alt: "Prediction Card" }
+      ],
+      // Slide 3: Mixed arrangement
+      [
+        { src: card1, alt: "Fed Decision Card" },
+        { src: card4, alt: "Crypto Trading Card" },
+        { src: card2, alt: "Russia Ukraine Card" }
+      ]
+    ]
+    return cardSets[slideIndex] || cardSets[0]
+  }
+
   return (
-    <div className="flex flex-col h-full bg-black items-center justtify-between py-15 px-5 gap-15">
+    <div className="flex flex-col h-full bg-black items-center justtify-between py-15 px-5 gap-20">
            <div className="flex flex-col gap-3">
                  <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Artificial Prediction Intelligence</div>
                 <div className="w-full flex flex-row justify-center items-center">
@@ -39,8 +122,112 @@ const body = () => {
 
            </div>
 
-           <div className="flex flex-col gap-4 w-5xl h-60 bg-[#141414] rounded-lg p-4">
+           {/* Carousel Container */}
+           <div 
+             className="relative w-5xl"
+             onMouseEnter={() => setIsAutoPlay(false)}
+             onMouseLeave={() => setIsAutoPlay(true)}
+           >
+             {/* Left Navigation Indicator */}
+             <button 
+               onClick={goToPreviousSlide}
+               disabled={isTransitioning}
+               className={`absolute left-[-60px] top-1/2 transform -translate-y-1/2 z-10 rounded-full p-3 transition-all duration-200 ${
+                 isTransitioning 
+                   ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
+                   : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
+               }`}
+             >
+               <ChevronLeft className={`h-6 w-6 transition-colors duration-200 ${
+                 isTransitioning ? 'text-gray-500' : 'text-white'
+               }`} />
+             </button>
 
+             {/* Right Navigation Indicator */}
+             <button 
+               onClick={goToNextSlide}
+               disabled={isTransitioning}
+               className={`absolute right-[-60px] top-1/2 transform -translate-y-1/2 z-10 rounded-full p-3 transition-all duration-200 ${
+                 isTransitioning 
+                   ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
+                   : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
+               }`}
+             >
+               <ChevronRight className={`h-6 w-6 transition-colors duration-200 ${
+                 isTransitioning ? 'text-gray-500' : 'text-white'
+               }`} />
+             </button>
+
+             {/* Auto-play Indicator */}
+             {isAutoPlay && (
+               <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-[#1A1A1A] rounded-full px-2 py-1">
+                 <div className="w-2 h-2 bg-[#45FFAE] rounded-full animate-pulse"></div>
+                 <span className="text-xs text-[#808080] font-urbanist">Auto</span>
+               </div>
+             )}
+
+             {/* Carousel Content */}
+             <div className="flex flex-col gap-4 w-full h-96 bg-[#141414] rounded-lg p-4 overflow-hidden relative">
+               {/* Animated Card Container */}
+               <div 
+                 className={`flex flex-col gap-4 w-full transition-all duration-500 ease-in-out ${
+                   isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+                 }`}
+               >
+                 <div className="flex flex-row items-center justify-between">
+                   {getCardSet(currentSlide).map((card, index) => (
+                     <img 
+                       key={`${currentSlide}-${index}`}
+                       src={card.src} 
+                       alt={card.alt} 
+                       className={`h-[176px] w-[300px] flex-shrink-0 transition-all duration-300 ease-out ${
+                         isTransitioning 
+                           ? 'transform translate-x-[-20px] opacity-0' 
+                           : 'transform translate-x-0 opacity-100'
+                       }`}
+                       style={{
+                         transitionDelay: `${index * 100}ms`
+                       }}
+                     />
+                   ))}
+                 </div>
+                 <div className="flex flex-row items-center justify-between">
+                   {getCardSet(currentSlide).map((card, index) => (
+                     <img 
+                       key={`${currentSlide}-${index + 3}`}
+                       src={card.src} 
+                       alt={card.alt} 
+                       className={`h-[176px] w-[300px] flex-shrink-0 transition-all duration-300 ease-out ${
+                         isTransitioning 
+                           ? 'transform translate-x-[20px] opacity-0' 
+                           : 'transform translate-x-0 opacity-100'
+                       }`}
+                       style={{
+                         transitionDelay: `${(index + 3) * 100}ms`
+                       }}
+                     />
+                   ))}
+                 </div>
+               </div>
+             </div>
+
+             {/* Pagination Dots */}
+             <div className="flex justify-center mt-6 gap-2">
+               {Array.from({ length: totalSlides }, (_, index) => (
+                 <button
+                   key={index}
+                   onClick={() => goToSlide(index)}
+                   disabled={isTransitioning}
+                   className={`w-3 h-3 rounded-sm transition-all duration-300 ${
+                     index === currentSlide 
+                       ? 'bg-[#45FFAE] scale-110 shadow-lg shadow-[#45FFAE]/30' 
+                       : isTransitioning
+                       ? 'bg-[#1A1A1A] cursor-not-allowed'
+                       : 'bg-[#2A2A2A] hover:bg-[#3A3A3A] hover:scale-105'
+                   }`}
+                 />
+               ))}
+             </div>
            </div>
 
 

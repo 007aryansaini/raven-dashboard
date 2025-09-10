@@ -11,7 +11,7 @@ import discord from "../assets/discord.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import polymarketMarket from "../assets/polymarketLogo.svg"
 import { useTab } from "../contexts/TabContext"
-import { useNavigate, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 interface SideBarProps {
   onChatClick: () => void
@@ -20,9 +20,6 @@ interface SideBarProps {
 const SideBar = ({ onChatClick }: SideBarProps) => {
   const { activeTab, setActiveTab } = useTab()
   const navigate = useNavigate()
-  const location = useLocation()
-  
-  const isActive = (path: string) => location.pathname === path
 
   return (
     <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">

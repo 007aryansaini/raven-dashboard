@@ -3,10 +3,14 @@ import SideBar from "./SideBar"
 import ChatSideBar from "./ChatSideBar"
 import NavBar from "./NavBar"
 import Body from "./body"
+import CryptoBody from "./CryptoBody"
+
+type TabType = 'polymarket' | 'crypto'
 
 const Dashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSlidingOut, setIsSlidingOut] = useState(false)
+  const [activeTab, setActiveTab] = useState<TabType>('polymarket')
 
   const handleChatClick = () => {
     setIsChatOpen(true)
@@ -22,6 +26,10 @@ const Dashboard = () => {
     }, 300)
   }
 
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab)
+  }
+
   return (
 
     <div className="flex flex-row">
@@ -29,7 +37,7 @@ const Dashboard = () => {
     <div className="flex flex-row relative overflow-hiddens">
       {/* SideBar - stays in place */}
       <div>
-        <SideBar onChatClick={handleChatClick} />
+        <SideBar onChatClick={handleChatClick} onTabChange={handleTabChange} activeTab={activeTab} />
       </div>
       
       {/* ChatSideBar - slides in from right to left, slides out from left to right */}
@@ -48,9 +56,11 @@ const Dashboard = () => {
       )}
     </div>
 
-    <div className="flex flex-col w-full">
+    <div className={`flex flex-col w-full transition-colors duration-500 ${
+      activeTab === 'polymarket' ? 'bg-black' : 'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900'
+    }`}>
       <NavBar />
-      <Body />
+      {activeTab === 'polymarket' ? <Body /> : <CryptoBody />}
     </div>
     </div>
   )

@@ -7,7 +7,7 @@ const NavBar = () => {
           </div> */}
 
 
-          <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/4 border-t border-l border-[#45FFAE] rounded-lg p-2 cursor-pointer hover:bg-[#45FFAE]/8 hover:scale-105 transition-all duration-200 ease-in-out">
+          <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-2 cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out">
              <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
              <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
              Connect Wallet

@@ -158,13 +158,6 @@ const body = () => {
                }`} />
              </button>
 
-             {/* Auto-play Indicator */}
-             {isAutoPlay && (
-               <div className="absolute top-2 right-2 z-20 flex items-center gap-1 bg-[#1A1A1A] rounded-full px-2 py-1">
-                 <div className="w-2 h-2 bg-[#45FFAE] rounded-full animate-pulse"></div>
-                 <span className="text-xs text-[#808080] font-urbanist">Auto</span>
-               </div>
-             )}
 
              {/* Carousel Content */}
              <div className="flex flex-col gap-4 w-full h-96 bg-[#141414] rounded-lg p-4 overflow-hidden relative">

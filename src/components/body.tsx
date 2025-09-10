@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Info, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowDown, ArrowUp, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"

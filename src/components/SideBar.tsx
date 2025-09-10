@@ -10,16 +10,14 @@ import twitter from "../assets/twitter.svg"
 import discord from "../assets/discord.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import polymarketMarket from "../assets/polymarketLogo.svg"
-
-type TabType = 'polymarket' | 'crypto'
+import { useTab } from "../contexts/TabContext"
 
 interface SideBarProps {
   onChatClick: () => void
-  onTabChange: (tab: TabType) => void
-  activeTab: TabType
 }
 
-const SideBar = ({ onChatClick, onTabChange, activeTab }: SideBarProps) => {
+const SideBar = ({ onChatClick }: SideBarProps) => {
+  const { activeTab, setActiveTab } = useTab()
 
   return (
     <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
@@ -34,7 +32,7 @@ const SideBar = ({ onChatClick, onTabChange, activeTab }: SideBarProps) => {
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
-  onClick={() => onTabChange('polymarket')}
+  onClick={() => setActiveTab('polymarket')}
 >
   <img src={polymarketMarket} alt="polymarket"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
@@ -49,7 +47,7 @@ const SideBar = ({ onChatClick, onTabChange, activeTab }: SideBarProps) => {
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
-  onClick={() => onTabChange('crypto')}
+  onClick={() => setActiveTab('crypto')}
 >
   <img src={cryptoTrade} alt="crypto"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${

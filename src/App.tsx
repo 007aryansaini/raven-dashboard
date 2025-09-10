@@ -1,10 +1,12 @@
 import Dashboard from "./components/Dashboard"
+import { TabProvider } from "./contexts/TabContext"
+
 function App() {
 
   return (
-    <div>
-       <Dashboard />
-    </div>
+    <TabProvider>
+      <Dashboard />
+    </TabProvider>
   )
 }
 

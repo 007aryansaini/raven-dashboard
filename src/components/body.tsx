@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp, Info, MoveRight, ChevronLeft, ChevronRight } from "
 import { useRef, useState, useEffect } from "react"
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
+import polymarketLogo from "../assets/polymarketLogo.svg"
 import card1 from "../assets/card1.svg"
 import card2 from "../assets/card2.svg"
 import card3 from "../assets/card3.svg"
@@ -110,7 +111,16 @@ const body = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-black items-center justtify-between py-5 gap-5">
+    <div className="flex flex-col h-full items-center justtify-between py-5 gap-5 relative" 
+         style={{
+           background: `
+             radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),
+             linear-gradient(90deg, rgba(69, 255, 174, 0.05) 1px, transparent 1px),
+             linear-gradient(rgba(69, 255, 174, 0.05) 1px, transparent 1px)
+           `,
+           backgroundSize: '100% 100%, 60px 60px, 60px 60px',
+           backgroundColor: '#000000'
+         }}>
            <div className="flex flex-col gap-3">
                  <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Artificial Prediction Intelligence</div>
                 <div className="w-full flex flex-row justify-center items-center">
@@ -160,7 +170,7 @@ const body = () => {
 
 
              {/* Carousel Content */}
-             <div className="flex flex-col gap-4 w-full h-96 bg-[#141414] rounded-lg p-4 overflow-hidden relative">
+             <div className="flex flex-col gap-4 w-full h-96 p-4 overflow-hidden relative">
                {/* Animated Card Container */}
                <div 
                  className={`flex flex-col gap-4 w-full transition-all duration-500 ease-in-out ${
@@ -262,42 +272,15 @@ const body = () => {
 
          </div>
 
-         <div className="flex flex-row items-center justify-start gap-2">
+         <div className="flex flex-row items-center justify-start">
 
-              <div className="flex flex-row items-center justify-between gap-2 bg-[#282828] rounded-lg p-2 cursor-pointer">
-                       <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">
-                           Timeframe
+              <div className="flex flex-row items-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-fit">
+                       <img src={polymarketLogo} alt="polymarket" className="h-4 w-4"/>
+                       <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF] mr-4">
+                           Polymarket
                        </div>
-                       <Info className="text-[#808080] h-3 w-3"/>
-
-                       <div>
                        <ArrowDown className="text-[#808080] h-3 w-3"/>
-                       </div>
               </div>
-
-              <div className="flex flex-row items-center justify-between gap-2 bg-[#282828] rounded-lg p-2 cursor-pointer">
-                       <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">
-                           Analysis
-                       </div>
-                       <Info className="text-[#808080] h-3 w-3"/>
-
-                       <div>
-                       <ArrowDown className="text-[#808080] h-3 w-3"/>
-                       </div>
-              </div>
-
-              <div className="flex flex-row items-center justify-between gap-2 bg-[#282828] rounded-lg p-2 cursor-pointer">
-                       <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">
-                           Assets
-                       </div>
-                       <Info className="text-[#808080] h-3 w-3"/>
-
-                       <div>
-                       <ArrowDown className="text-[#808080] h-3 w-3"/>
-                       </div>
-              </div>
-
-            
 
          </div>
 

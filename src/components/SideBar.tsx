@@ -11,6 +11,7 @@ import discord from "../assets/discord.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import polymarketMarket from "../assets/polymarketLogo.svg"
 import { useTab } from "../contexts/TabContext"
+import { useNavigate, useLocation } from "react-router-dom"
 
 interface SideBarProps {
   onChatClick: () => void
@@ -18,6 +19,10 @@ interface SideBarProps {
 
 const SideBar = ({ onChatClick }: SideBarProps) => {
   const { activeTab, setActiveTab } = useTab()
+  const navigate = useNavigate()
+  const location = useLocation()
+  
+  const isActive = (path: string) => location.pathname === path
 
   return (
     <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
@@ -28,11 +33,14 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
 
 <div 
   className={`flex flex-row items-center gap-1 rounded-lg p-2 cursor-pointer transition-all duration-200 ${
-    activeTab === 'polymarket' 
+    activeTab === 'polymarket'
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
-  onClick={() => setActiveTab('polymarket')}
+  onClick={() => {
+    navigate('/')
+    setActiveTab('polymarket')
+  }}
 >
   <img src={polymarketMarket} alt="polymarket"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
@@ -43,11 +51,14 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
 
 <div 
   className={`flex flex-row items-center gap-1 rounded-lg p-2 cursor-pointer transition-all duration-200 ${
-    activeTab === 'crypto' 
+    activeTab === 'crypto'
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
-  onClick={() => setActiveTab('crypto')}
+  onClick={() => {
+    navigate('/')
+    setActiveTab('crypto')
+  }}
 >
   <img src={cryptoTrade} alt="crypto"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
@@ -81,7 +92,7 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
 </div>
 </div>
 
-<div className="group flex flex-row items-center justify-between gap-2 w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out">
+<div className="group flex flex-row items-center justify-between gap-2 w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out" onClick={() => navigate('/points')}>
 <div className="flex flex-row items-center gap-2">
 <img className="w-8 h-8 group-hover:fill-[#45FFAE] transition-all duration-200" src={points} alt="points" />
 <div className="font-urbanist font-normal text-sm leading-none tracking-[0%] group-hover:text-[#45FFAE] text-[#808080] transition-colors duration-200">Points</div>

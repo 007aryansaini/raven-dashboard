@@ -1,12 +1,15 @@
+import { BrowserRouter as Router } from "react-router-dom"
 import Dashboard from "./components/Dashboard"
 import { TabProvider } from "./contexts/TabContext"
 
 function App() {
 
   return (
-    <TabProvider>
-      <Dashboard />
-    </TabProvider>
+    <Router>
+      <TabProvider>
+        <Dashboard />
+      </TabProvider>
+    </Router>
   )
 }
 

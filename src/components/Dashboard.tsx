@@ -1,15 +1,18 @@
 import { useState } from "react"
+import { useLocation } from "react-router-dom"
 import SideBar from "./SideBar"
 import ChatSideBar from "./ChatSideBar"
 import NavBar from "./NavBar"
 import Body from "./body"
 import CryptoBody from "./CryptoBody"
+import Points from "./Points"
 import { useTab } from "../contexts/TabContext"
 
 const Dashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSlidingOut, setIsSlidingOut] = useState(false)
   const { activeTab } = useTab()
+  const location = useLocation()
 
   const handleChatClick = () => {
     setIsChatOpen(true)
@@ -52,11 +55,9 @@ const Dashboard = () => {
       )}
     </div>
 
-    <div className={`flex flex-col w-full transition-colors duration-500 ${
-      activeTab === 'polymarket' ? 'bg-black' : 'bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900'
-    }`}>
+    <div className="flex flex-col w-full bg-black">
       <NavBar />
-      {activeTab === 'polymarket' ? <Body /> : <CryptoBody />}
+      {location.pathname === '/points' ? <Points /> : (activeTab === 'crypto' ? <CryptoBody /> : <Body />)}
     </div>
     </div>
   )

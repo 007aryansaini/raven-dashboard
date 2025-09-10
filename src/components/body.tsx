@@ -110,7 +110,7 @@ const body = () => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-black items-center justtify-between py-15 px-5 gap-20">
+    <div className="flex flex-col h-full bg-black items-center justtify-between py-5 gap-5">
            <div className="flex flex-col gap-3">
                  <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Artificial Prediction Intelligence</div>
                 <div className="w-full flex flex-row justify-center items-center">

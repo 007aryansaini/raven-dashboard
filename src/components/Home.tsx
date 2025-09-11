@@ -28,7 +28,7 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col h-full items-center justify-center py-5 gap-5 relative" 
+    <div className="flex flex-col h-full items-center justify-center py-5 gap-20 relative" 
          style={{
            background: `
              radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),

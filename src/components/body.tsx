@@ -122,7 +122,7 @@ const body = () => {
            backgroundColor: '#000000'
          }}>
            <div className="flex flex-col gap-3">
-                 <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Artificial Prediction Intelligence</div>
+                 <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Polymarket Predictions</div>
                 <div className="w-full flex flex-row justify-center items-center">
                  <div className="flex flex-row border border-gray-500 w-fit h-10 rounded-full mt-2 gap-4 items-center p-2">
                     <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>

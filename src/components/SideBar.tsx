@@ -11,55 +11,64 @@ import discord from "../assets/discord.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import polymarketMarket from "../assets/polymarketLogo.svg"
 import { useTab } from "../contexts/TabContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 interface SideBarProps {
   onChatClick: () => void
 }
 
 const SideBar = ({ onChatClick }: SideBarProps) => {
-  const { activeTab, setActiveTab } = useTab()
+  const { setActiveTab } = useTab()
   const navigate = useNavigate()
+  const location = useLocation()
 
   return (
     <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
-      <img className="w-30 h-10 mt-6 ml-3 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out" src={logo} alt="logo" />
+      <img 
+        className="w-30 h-10 mt-6 ml-3 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out" 
+        src={logo} 
+        alt="logo" 
+        onClick={() => {
+          navigate('/')
+          setActiveTab(null)
+        }}
+      />
 
       <div className="flex flex-col gap-2 mb-40">
       <div className="flex flex-row items-center  gap-2 bg-[#141414] rounded-lg p-2 w-56 h-12 ml-3">
 
 <div 
   className={`flex flex-row items-center gap-1 rounded-lg p-2 cursor-pointer transition-all duration-200 ${
-    activeTab === 'polymarket'
+    location.pathname === '/polymarket'
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
   onClick={() => {
-    navigate('/')
+    navigate('/polymarket')
     setActiveTab('polymarket')
   }}
 >
   <img src={polymarketMarket} alt="polymarket"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
-    activeTab === 'polymarket' ? 'text-[#FFFFFF]' : 'text-[#808080]'
+    location.pathname === '/polymarket' ? 'text-[#FFFFFF]' : 'text-[#808080]'
   }`}>Polymarket</div>
 </div>
 
 
 <div 
   className={`flex flex-row items-center gap-1 rounded-lg p-2 cursor-pointer transition-all duration-200 ${
-    activeTab === 'crypto'
+    location.pathname === '/crypto'
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
   onClick={() => {
-    navigate('/')
+    navigate('/crypto')
     setActiveTab('crypto')
   }}
 >
   <img src={cryptoTrade} alt="crypto"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
-    activeTab === 'crypto' ? 'text-[#FFFFFF]' : 'text-[#808080]'
+    location.pathname === '/crypto' ? 'text-[#FFFFFF]' : 'text-[#808080]'
   }`}>Crypto</div>
 </div>
 </div>

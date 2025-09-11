@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type TabType = 'polymarket' | 'crypto'
+export type TabType = 'polymarket' | 'crypto' | null
 
 interface TabContextType {
   activeTab: TabType
@@ -15,7 +15,7 @@ interface TabProviderProps {
 }
 
 export const TabProvider: React.FC<TabProviderProps> = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<TabType>('polymarket')
+  const [activeTab, setActiveTab] = useState<TabType>(null)
 
   const value = {
     activeTab,

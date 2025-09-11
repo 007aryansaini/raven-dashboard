@@ -6,12 +6,11 @@ import NavBar from "./NavBar"
 import Body from "./body"
 import CryptoBody from "./CryptoBody"
 import Points from "./Points"
-import { useTab } from "../contexts/TabContext"
+import Home from "./Home"
 
 const Dashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isSlidingOut, setIsSlidingOut] = useState(false)
-  const { activeTab } = useTab()
   const location = useLocation()
 
   const handleChatClick = () => {
@@ -57,7 +56,10 @@ const Dashboard = () => {
 
     <div className="flex flex-col w-full bg-black">
       <NavBar />
-      {location.pathname === '/points' ? <Points /> : (activeTab === 'crypto' ? <CryptoBody /> : <Body />)}
+      {location.pathname === '/points' ? <Points /> : 
+       location.pathname === '/polymarket' ? <Body /> :
+       location.pathname === '/crypto' ? <CryptoBody /> :
+       <Home />}
     </div>
     </div>
   )

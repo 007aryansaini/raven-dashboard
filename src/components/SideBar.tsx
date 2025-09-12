@@ -12,6 +12,8 @@ import cryptoTrade from "../assets/cryptoTrade.svg"
 import polymarketMarket from "../assets/polymarketLogo.svg"
 import { useTab } from "../contexts/TabContext"
 import { useNavigate, useLocation } from "react-router-dom"
+import { useState, useEffect } from "react"
+import Setting from "./Setting"
 
 interface SideBarProps {
   onChatClick: () => void
@@ -21,9 +23,43 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
   const { setActiveTab } = useTab()
   const navigate = useNavigate()
   const location = useLocation()
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+
+  // Handle click outside to close settings
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      // Close if clicking outside the modal and not on the settings button
+      if (!target.closest('[data-settings-modal]') && !target.closest('[data-settings-button]')) {
+        setIsSettingsOpen(false)
+      }
+    }
+
+    if (isSettingsOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isSettingsOpen])
+
+  const handleSettingsClick = () => {
+    setIsSettingsOpen(!isSettingsOpen)
+  }
+
+  const handleCloseSettings = () => {
+    setIsSettingsOpen(false)
+  }
 
   return (
-    <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
+    <>
+      {isSettingsOpen && (
+        <Setting 
+          onClose={handleCloseSettings} 
+        />
+      )}
+      <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
       <img 
         className="w-30 h-10 mt-6 ml-3 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out" 
         src={logo} 
@@ -121,7 +157,13 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
         <div className="flex flex-row items-center justify-between w-56 h-14 p-1 gap-2.5">
           <img className="w-8  h-8" src={userProfile} alt="logout" />
           <div className="font-urbanist font-medium text-base leading-none tracking-[0%] text-[#808080]">Username@123</div>
-          <img className="w-12  h-12 cursor-pointer hover:scale-110 transition-transform duration-200 ease-in-out" src={settings} alt="logout" />
+          <img 
+            className="w-12  h-12 cursor-pointer hover:scale-110 transition-transform duration-200 ease-in-out" 
+            src={settings} 
+            alt="settings" 
+            onClick={handleSettingsClick}
+            data-settings-button
+          />
         </div>
 
         <div className="flex flex-row items-center justify-center w-64 gap-6">
@@ -131,6 +173,7 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

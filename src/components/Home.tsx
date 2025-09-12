@@ -1,12 +1,19 @@
 
 import { ArrowDown, ArrowUp, MoveRight } from "lucide-react"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
 
 const Home = () => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState("")
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    // Trigger animation after component mounts
+    const timer = setTimeout(() => setIsVisible(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
@@ -38,27 +45,47 @@ const Home = () => {
            backgroundSize: '100% 100%, 60px 60px, 60px 60px',
            backgroundColor: '#000000'
          }}>
-           <div className="flex flex-col gap-3">
+           <div className={`flex flex-col gap-3 transition-all duration-700 ease-out ${
+             isVisible 
+               ? 'opacity-100 translate-y-0' 
+               : 'opacity-0 translate-y-8'
+           }`}>
                  <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Artificial Prediction Intelligence</div>
                 <div className="w-full flex flex-row justify-center items-center">
-                 <div className="flex flex-row border border-gray-500 w-fit h-10 rounded-full mt-2 gap-4 items-center p-2">
+                 <div className={`flex flex-row border border-gray-500 w-fit h-10 rounded-full mt-2 gap-4 items-center p-2 transition-all duration-500 ease-out ${
+                   isVisible 
+                     ? 'opacity-100 translate-y-0' 
+                     : 'opacity-0 translate-y-4'
+                 }`} style={{ transitionDelay: isVisible ? '200ms' : '0ms' }}>
                     <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
                     <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
            </div>
 
-           <div className="flex flex-col gap-4 w-5xl h-44 bg-[#141414] rounded-lg p-4 justify-between">
+           <div className={`flex flex-col gap-4 w-5xl h-44 bg-[#141414] rounded-lg p-4 justify-between transition-all duration-600 ease-out ${
+             isVisible 
+               ? 'opacity-100 translate-y-0' 
+               : 'opacity-0 translate-y-6'
+           }`} style={{ transitionDelay: isVisible ? '400ms' : '0ms' }}>
                
                <div className="flex flex-row items-center justify-between">
-                       <div className="flex flex-row gap-2 items-center">
+                       <div className={`flex flex-row gap-2 items-center transition-all duration-400 ease-out ${
+                         isVisible 
+                           ? 'opacity-100 translate-x-0' 
+                           : 'opacity-0 -translate-x-4'
+                       }`} style={{ transitionDelay: isVisible ? '600ms' : '0ms' }}>
                             <img src={bolt} alt="bolt"  className="h-3 w-3"/>
                             <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
                             <MoveRight className="text-[#808080] text-center"/>
                        </div>
                </div>
 
-          <div className="h-30 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 items-start justify-between" >
+          <div className={`h-30 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 items-start justify-between transition-all duration-500 ease-out ${
+            isVisible 
+              ? 'opacity-100 scale-100' 
+              : 'opacity-0 scale-95'
+          }`} style={{ transitionDelay: isVisible ? '800ms' : '0ms' }}>
 
             <div className="flex flex-row items-center justify-between gap-2 flex-1">
                 <img src={blackDot} alt="history" className="h-5 w-5"/>
@@ -81,7 +108,11 @@ const Home = () => {
 
          </div>
 
-         <div className="flex flex-row items-center justify-start">
+         <div className={`flex flex-row items-center justify-start transition-all duration-400 ease-out ${
+           isVisible 
+             ? 'opacity-100 translate-x-0' 
+             : 'opacity-0 translate-x-4'
+         }`} style={{ transitionDelay: isVisible ? '1000ms' : '0ms' }}>
 
               <div className="flex flex-row items-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-fit">
                        <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF] mr-4">

@@ -54,11 +54,6 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
 
   return (
     <>
-      {isSettingsOpen && (
-        <Setting 
-          onClose={handleCloseSettings} 
-        />
-      )}
       <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
       <img 
         className="w-30 h-10 mt-6 ml-3 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out" 
@@ -154,7 +149,7 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
           <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">Upgrade plan</div>
         </div>
 
-        <div className="flex flex-row items-center justify-between w-56 h-14 p-1 gap-2.5">
+        <div className="relative flex flex-row items-center justify-between w-56 h-14 p-1 gap-2.5">
           <img className="w-8  h-8" src={userProfile} alt="logout" />
           <div className="font-urbanist font-medium text-base leading-none tracking-[0%] text-[#808080]">Username@123</div>
           <img 
@@ -164,6 +159,11 @@ const SideBar = ({ onChatClick }: SideBarProps) => {
             onClick={handleSettingsClick}
             data-settings-button
           />
+          {isSettingsOpen && (
+            <Setting 
+              onClose={handleCloseSettings} 
+            />
+          )}
         </div>
 
         <div className="flex flex-row items-center justify-center w-64 gap-6">

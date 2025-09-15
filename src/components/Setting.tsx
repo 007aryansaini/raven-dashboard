@@ -8,8 +8,12 @@ interface SettingProps {
 const Setting = ({ onClose: _onClose }: SettingProps) => {
   return (
     <div 
-      className="fixed z-50 bg-[#1f1f1f] rounded-lg p-4 w-65 shadow-2xl border border-gray-700" 
-      style={{ position: 'fixed', top: `${330}px`, left: `${200}px` }}
+      className="absolute z-50 bg-[#1f1f1f] rounded-lg p-4 w-65 shadow-2xl border border-gray-700" 
+      style={{ 
+        position: 'absolute', 
+        bottom: '45px', 
+        left: '202px' 
+      }}
       data-settings-modal
     >
       {/* Header */}

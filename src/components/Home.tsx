@@ -1,19 +1,50 @@
 
 import { ArrowDown, ArrowUp, MoveRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
 
 const Home = () => {
+
+  
   const inputRef = useRef<HTMLInputElement>(null)
   const [inputValue, setInputValue] = useState("")
   const [isVisible, setIsVisible] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const navigate = useNavigate()
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Trigger animation after component mounts
     const timer = setTimeout(() => setIsVisible(true), 100)
     return () => clearTimeout(timer)
   }, [])
+
+  // Close dropdown on outside click or Escape key
+  useEffect(() => {
+    if (!isDropdownOpen) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isDropdownOpen])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
@@ -114,11 +145,35 @@ const Home = () => {
              : 'opacity-0 translate-x-4'
          }`} style={{ transitionDelay: isVisible ? '1000ms' : '0ms' }}>
 
-              <div className="flex flex-row items-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-fit">
-                       <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF] mr-4">
-                           Market
-                       </div>
-                       <ArrowDown className="text-[#808080] h-3 w-3"/>
+              <div className="relative" ref={dropdownRef}>
+                <button 
+                  className="flex flex-row items-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-fit hover:bg-opacity-80"
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                >
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF] mr-4">
+                      Market
+                  </div>
+                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
+                </button>
+
+                {isDropdownOpen && (
+                  <div 
+                    className="absolute mt-2 left-0 z-50 w-40 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl"
+                  >
+                    <div 
+                      className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm rounded-t-lg"
+                      onClick={() => { setIsDropdownOpen(false); navigate('/polymarket') }}
+                    >
+                      Polymarket
+                    </div>
+                    <div 
+                      className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm rounded-b-lg"
+                      onClick={() => { setIsDropdownOpen(false); navigate('/crypto') }}
+                    >
+                      Crypto
+                    </div>
+                  </div>
+                )}
               </div>
 
          </div>

@@ -1,0 +1,27 @@
+{
+  "name": "raven-contracts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:ignition:sepolia": "hardhat ignition deploy ./ignition/modules/AuthorizationRegistry.ts --network sepolia",
+    "verify:sepolia": "hardhat verify --network sepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "@nomicfoundation/hardhat-ignition": "^0.15.8",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/chai": "^4.3.10",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^22.7.5",
+    "chai": "^4.4.1",
+    "dotenv": "^17.2.2",
+    "ethers": "^6.13.4",
+    "hardhat": "^2.22.17",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.8.3"
+  }
+}

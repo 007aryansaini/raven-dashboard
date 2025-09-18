@@ -1,0 +1,77 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/pavankumarkv/Desktop/Web3 Dev/raven-dashboard/contracts/src/AuthorizationRegistry.sol": {
+      "lastModificationDate": 1757945436310,
+      "contentHash": "50abd3d47441aa5b9eca0a390b96847f",
+      "sourceName": "src/AuthorizationRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "AuthorizationRegistry"
+      ]
+    },
+    "/Users/pavankumarkv/Desktop/Web3 Dev/raven-dashboard/contracts/src/DemoRelayTarget.sol": {
+      "lastModificationDate": 1757960338697,
+      "contentHash": "faf7f0343d27b779df41e359b9edbcae",
+      "sourceName": "src/DemoRelayTarget.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "DemoRelayTarget"
+      ]
+    }
+  }
+}

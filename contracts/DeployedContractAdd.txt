@@ -1,0 +1,62 @@
+AuthorizationRegistryModule#AuthorizationRegistry - 0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7
+ETHERSCAN_API_KEY=R8IWCQK8QV6F95B9WAMT2PUJIB4W6ZCEEQ  REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 npx hardhat run scripts/verify.ts --network sepolia
+DemoRelayTarget#DemoRelayTarget - 0x04DF92cA26D6Fea1797DE2d8B289b78E5861CE60
+# inside contracts/
+export ETHERSCAN_API_KEY=R8IWCQK8QV6F95B9WAMT2PUJIB4W6ZCEEQ
+npx hardhat verify --network sepolia 0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 "RavenAuth" "1"
+
+
+cd contracts
+AUTHORIZER_PK=0x<authorizer_pk> DELEGATE=0x<delegate> REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/<key> \
+npx hardhat run scripts/signAuthorization.ts --network sepolia > payload.json
+curl -s -X POST http://localhost:8787/relay/execute -H "Content-Type: application/json" -d @payload.json
+
+
+REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 \
+DELEGATE=0x3a86861b069F168577679a31265a2c8fD267340A \
+npx hardhat run scripts/addDelegation.ts --network sepolia
+
+curl -s "http://localhost:8787/registry/is-active?authorizer=0x$(cast wallet address --private-key $PRIVATE_KEY)&delegate=0x3a86861b069F168577679a31265a2c8fD267340A&scope=0x$(cast keccak256 'test-scope')"
+
+export REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7
+export SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/EH0YqqZKDFerFHCBkSo4a15uusnCGdpx
+npm run dev
+
+
+AUTHORIZER_PK=0xbe9ee3b499bf3a95d1608953c001d4e2b7e5f9f51317ec059045b733c9f24e40 \
+DELEGATE=0x3a86861b069F168577679a31265a2c8fD267340A \
+REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 \
+SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/EH0YqqZKDFerFHCBkSo4a15uusnCGdpx \
+npx hardhat run scripts/signAuthorization.ts --network sepolia > payload.json
+
+curl -s -X POST http://localhost:8787/relay/execute -H "Content-Type: application/json" -d @payload.json
+
+cd contracts
+AUTHORIZER_PK=0xbe9ee3b499bf3a95d1608953c001d4e2b7e5f9f51317ec059045b733c9f24e40 \
+DELEGATE=0x3a86861b069F168577679a31265a2c8fD267340A \
+REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 \
+SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/EH0YqqZKDFerFHCBkSo4a15uusnCGdpx \
+npx hardhat run scripts/signAuthorization.ts --network sepolia | sed -n '/^{/,$p' > payload.json
+
+
+AUTHORIZER_PK=0xbe9ee3b499bf3a95d1608953c001d4e2b7e5f9f51317ec059045b733c9f24e40 DELEGATE=0x3a86861b069F168577679a31265a2c8fD267340A REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/EH0YqqZKDFerFHCBkSo4a15uusnCGdpx \
+npx hardhat run scripts/signAuthorization.ts --network sepolia > payload.json
+curl -s -X POST http://localhost:8787/relay/execute -H "Content-Type: application/json" -d @payload.json
+
+
+cd contracts
+AUTHORIZER_PK=0xbe9ee3b499bf3a95d1608953c001d4e2b7e5f9f51317ec059045b733c9f24e40 DELEGATE=0x3a86861b069F168577679a31265a2c8fD267340A REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7 SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/EH0YqqZKDFerFHCBkSo4a15uusnCGdpx \
+npx hardhat run scripts/signAuthorization.ts --network sepolia | tail -n 1 > payload.json
+
+cd server
+export SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/EH0YqqZKDFerFHCBkSo4a15uusnCGdpx
+export PRIVATE_KEY=0xbe9ee3b499bf3a95d1608953c001d4e2b7e5f9f51317ec059045b733c9f24e40
+export REGISTRY_ADDRESS=0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7
+npm run dev
+
+https://sepolia.etherscan.io/tx/0x66cebfd76da8202d1ed23c228c69d0a3fb494bcc04827eec0ba191359d26452f
+
+curl -s -X POST http://localhost:8787/relay/batch -H "Content-Type: application/json" -d "[`cat payload.json`, `cat payload.json`]"
+
+Failed tnx due to same nonce. check on smc.
+https://sepolia.etherscan.io/tx/0x2f5597063f881d3f753b42449cb3be36b8a74c79ff2d2b06886af5d921956117

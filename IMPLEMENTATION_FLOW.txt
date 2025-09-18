@@ -1,0 +1,51 @@
+Raven V1 – Flow Summary (Sepolia)
+
+What we shipped
+- Wallet connect with MetaMask (WalletConnect optional), wrong‑chain prompt/switch to Sepolia
+- EIP‑712 sign‑in (nonce → sign → verify) with short‑lived JWT + refresh
+- AuthorizationRegistry (on‑chain delegations, nonce/expiry enforcement), tests + verified deploy
+- Relayer service (validates EIP‑712, anti‑replay, queues, submits txs, batch + ABI encode helper)
+- Delegations UI (create, revoke, check active, local list, relay test, and demo ping)
+
+How auth works
+1) FE asks GET /auth/nonce?address=0x… → receives typed‑data (domain/types/message/expiry)
+2) User signs typed‑data → FE sends POST /auth/verify { address, signature, nonce }
+3) BE verifies signature, mints JWT (10m) + refresh (7d). POST /auth/refresh rotates tokens
+
+How delegations work
+- addDelegation(authorizer, delegate, scope, nonce, expiry, sig) stores the delegation
+- Nonce must strictly increase; expiry is enforced; isDelegationActive checks scope+revocation+expiry
+
+Relayer flow
+1) FE composes { authorization (EIP‑712), call { to, data, value } }
+2) POST /relay/execute validates signature, checks anti‑replay + active delegation, enqueues, submits
+3) POST /relay/batch supports multiple; POST /encode helps build calldata for any ABI
+
+Frontend quick tour
+- src/components/NavBar.tsx: connect, chainId, sign in/out
+- src/contexts/AuthContext.tsx: signIn(), refresh, fetchWithAuth
+- src/components/Delegations.tsx: check active, create, revoke, local list, relay tests
+
+Key endpoints (server/src/index.ts)
+- GET /auth/nonce, POST /auth/verify, POST /auth/refresh, GET /me
+- GET /registry/is-active
+- POST /relay/execute, POST /relay/batch, POST /encode
+
+Addresses (Sepolia)
+- AuthorizationRegistry: 0x6553c9F9c59224ef6fd7D15556B358f14DE00CF7
+- DemoRelayTarget (ping): 0x04DF92cA26D6Fea1797DE2d8B289b78E5861CE60
+
+Env (examples)
+- Frontend: VITE_WC_PROJECT_ID (optional), VITE_REGISTRY_ADDRESS (optional)
+- Server: SEPOLIA_RPC_URL, PRIVATE_KEY (relayer), REGISTRY_ADDRESS, TARGET_CHAIN_ID=11155111
+- Redis (optional): REDIS_URL (falls back to memory if unset)
+
+Going mainnet later
+- Switch Wagmi chain to mainnet; TARGET_CHAIN_ID=1; mainnet RPC + registry address
+- Deploy + verify AuthorizationRegistry; fund relayer with ETH
+
+Out of scope for V1 (planned V2)
+- SC‑03: Raven contract reads registry/accepts proofs for delegated execution
+
+This is a  summary of live in V1.
+ENDED.

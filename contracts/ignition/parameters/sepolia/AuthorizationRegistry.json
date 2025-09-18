@@ -1,0 +1,7 @@
+{
+  "AuthorizationRegistryModule": {
+    "name": "RavenAuth",
+    "version": "1"
+  }
+}
+

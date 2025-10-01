@@ -18,16 +18,22 @@ const body = () => {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isTfOpen, setIsTfOpen] = useState(false)
-  const [isAnalysisOpen, setIsAnalysisOpen] = useState(false)
-  const [isAssetsOpen, setIsAssetsOpen] = useState(false)
+  const [isLiquidityOpen, setIsLiquidityOpen] = useState(false)
+  const [isVolumeOpen, setIsVolumeOpen] = useState(false)
+  const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
+  const [isNewestOpen, setIsNewestOpen] = useState(false)
+  const [isEndingSoonOpen, setIsEndingSoonOpen] = useState(false)
+  const [selectedLiquidity, setSelectedLiquidity] = useState<string | null>(null)
+  const [selectedVolume, setSelectedVolume] = useState<string | null>(null)
   const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null)
-  const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null)
-  const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
+  const [selectedNewest, setSelectedNewest] = useState<string | null>(null)
+  const [selectedEndingSoon, setSelectedEndingSoon] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const tfRef = useRef<HTMLDivElement>(null)
-  const analysisRef = useRef<HTMLDivElement>(null)
-  const assetsRef = useRef<HTMLDivElement>(null)
+  const liquidityRef = useRef<HTMLDivElement>(null)
+  const volumeRef = useRef<HTMLDivElement>(null)
+  const timeframeRef = useRef<HTMLDivElement>(null)
+  const newestRef = useRef<HTMLDivElement>(null)
+  const endingSoonRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const totalSlides = 3 // 9 cards / 3 cards per slide = 3 slides
   const autoPlayInterval = 4000 // 4 seconds between slides
@@ -53,31 +59,37 @@ const body = () => {
 
   // Close dropdowns on outside click or Escape
   useEffect(() => {
-    const anyOpen = isDropdownOpen || isTfOpen || isAnalysisOpen || isAssetsOpen
+    const anyOpen = isDropdownOpen || isLiquidityOpen || isVolumeOpen || isTimeframeOpen || isNewestOpen || isEndingSoonOpen
     if (!anyOpen) return
 
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
       if (
         (dropdownRef.current && dropdownRef.current.contains(target)) ||
-        (tfRef.current && tfRef.current.contains(target)) ||
-        (analysisRef.current && analysisRef.current.contains(target)) ||
-        (assetsRef.current && assetsRef.current.contains(target))
+        (liquidityRef.current && liquidityRef.current.contains(target)) ||
+        (volumeRef.current && volumeRef.current.contains(target)) ||
+        (timeframeRef.current && timeframeRef.current.contains(target)) ||
+        (newestRef.current && newestRef.current.contains(target)) ||
+        (endingSoonRef.current && endingSoonRef.current.contains(target))
       ) {
         return
       }
       setIsDropdownOpen(false)
-      setIsTfOpen(false)
-      setIsAnalysisOpen(false)
-      setIsAssetsOpen(false)
+      setIsLiquidityOpen(false)
+      setIsVolumeOpen(false)
+      setIsTimeframeOpen(false)
+      setIsNewestOpen(false)
+      setIsEndingSoonOpen(false)
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setIsDropdownOpen(false)
-        setIsTfOpen(false)
-        setIsAnalysisOpen(false)
-        setIsAssetsOpen(false)
+        setIsLiquidityOpen(false)
+        setIsVolumeOpen(false)
+        setIsTimeframeOpen(false)
+        setIsNewestOpen(false)
+        setIsEndingSoonOpen(false)
       }
     }
 
@@ -87,7 +99,7 @@ const body = () => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isDropdownOpen, isTfOpen, isAnalysisOpen, isAssetsOpen])
+  }, [isDropdownOpen, isLiquidityOpen, isVolumeOpen, isTimeframeOpen, isNewestOpen, isEndingSoonOpen])
 
   const goToPreviousSlide = () => {
     if (isTransitioning) return
@@ -342,51 +354,85 @@ const body = () => {
                 )}
               </div>
 
-              {/* Timeframe Dropdown */}
-              <div className="relative" ref={tfRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsTfOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
+              {/* Liquidity Dropdown */}
+              <div className="relative" ref={liquidityRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsLiquidityOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
+                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
                 </button>
-                {isTfOpen && (
+                {isLiquidityOpen && (
+                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
+                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                      {['High','Medium','Low'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedLiquidity(v); setIsLiquidityOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Volume Dropdown */}
+              <div className="relative" ref={volumeRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsVolumeOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
+                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
+                </button>
+                {isVolumeOpen && (
+                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
+                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                      {['High','Medium','Low'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedVolume(v); setIsVolumeOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Timeframe Dropdown */}
+              <div className="relative" ref={timeframeRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsTimeframeOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
+                </button>
+                {isTimeframeOpen && (
                   <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
                     <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
                       {['1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedTimeframe(v); setIsTfOpen(false) }}>{v}</div>
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedTimeframe(v); setIsTimeframeOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Analysis Dropdown */}
-              <div className="relative" ref={analysisRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAnalysisOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
+              {/* Newest Dropdown */}
+              <div className="relative" ref={newestRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsNewestOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
+                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
                 </button>
-                {isAnalysisOpen && (
+                {isNewestOpen && (
                   <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
                     <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
-                      {['AI signals','On-chain','Macro','Sentiment','Technical','Fundamental','News','Community'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
+                      {['Today','This Week','This Month'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedNewest(v); setIsNewestOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Assets Dropdown */}
-              <div className="relative" ref={assetsRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAssetsOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
+              {/* Ending Soon Dropdown */}
+              <div className="relative" ref={endingSoonRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsEndingSoonOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
+                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
                 </button>
-                {isAssetsOpen && (
+                {isEndingSoonOpen && (
                   <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
                     <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
-                      {['BTC','ETH','SOL','XRP'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
+                      {['1h','6h','12h','24h','3d','7d'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 
-import { Share2, Copy, X, Twitter, MessageCircle } from "lucide-react"
+import { Share2, Copy, X, Twitter, MessageCircle, Check } from "lucide-react"
 import { useState } from "react"
 
 const Points = () => {
@@ -196,14 +196,73 @@ const Points = () => {
                        )}
 
                        {activeTab === "Points history" && (
-                         <div className="flex flex-col items-center justify-center w-full mt-2 flex-1">
-                           <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#808080]">Points history content coming soon</div>
+                         <div className="flex flex-col w-full mt-2 flex-1">
+                           <div className="flex flex-col gap-4">
+                             <div className="flex flex-col gap-2">
+                               <h3 className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#FFFFFF]">Points received</h3>
+                               <p className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#808080]">Points will be updated every 24 hours</p>
+                             </div>
+                             
+                             <div className="flex flex-col gap-3">
+                               {/* Points History Items */}
+                               {[
+                                 { action: "Share on twitter", points: "+25 RP", status: "Received" },
+                                 { action: "Share on twitter", points: "+25 RP", status: "Received" },
+                                 { action: "Share on twitter", points: "+25 RP", status: "Received" }
+                               ].map((item, index) => (
+                                 <div key={index} className="flex flex-row items-center gap-4 w-full bg-[#1A1A1A] rounded-lg p-3">
+                                   <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
+                                     <Twitter className="w-5 h-5 text-[#808080]" />
+                                   </div>
+                                   <div className="flex-1">
+                                     <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">{item.action}</div>
+                                   </div>
+                                   <div className="font-urbanist font-bold text-sm leading-none tracking-[0%] text-[#45FFAE]">{item.points}</div>
+                                   <div className="flex flex-row items-center gap-1 px-3 py-1 bg-[#45FFAE] rounded-full">
+                                     <span className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-black">{item.status}</span>
+                                     <Check className="w-3 h-3 text-black" />
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
                          </div>
                        )}
 
                        {activeTab === "Leaderboard" && (
-                         <div className="flex flex-col items-center justify-center w-full mt-2 flex-1">
-                           <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#808080]">Leaderboard content coming soon</div>
+                         <div className="flex flex-col w-full mt-2 flex-1">
+                           <div className="flex flex-col gap-4">
+                             {/* User's Current Standing */}
+                             <div className="flex flex-row items-center justify-between w-full bg-[#1A1A1A] rounded-lg p-3">
+                               <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">You</div>
+                               <div className="font-urbanist font-bold text-sm leading-none tracking-[0%] text-[#45FFAE]">+995.565</div>
+                             </div>
+                             
+                             {/* Leaderboard Table */}
+                             <div className="flex flex-col gap-3 bg-[#1A1A1A]">
+                               {/* Table Header */}
+                               <div className="flex flex-row items-center gap-4 w-full  rounded-lg p-3">
+                                 <div className="w-16 font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Rank</div>
+                                 <div className="flex-1 font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Wallet</div>
+                                 <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Points</div>
+                               </div>
+                               
+                               {/* Leaderboard Entries */}
+                               {[
+                                 { rank: 1, wallet: "0xAlbC...789", points: "+995.565" },
+                                 { rank: 2, wallet: "0xD3ef...456", points: "+987.654" },
+                                 { rank: 3, wallet: "0x85oD...123", points: "+543.210" },
+                                 { rank: 4, wallet: "0xC7eE...890", points: "+321.098" },
+                                 { rank: 5, wallet: "0xF9bC...234", points: "+123.456" }
+                               ].map((entry, index) => (
+                                 <div key={index} className="flex flex-row items-center gap-4 w-full bg-[#1A1A1A] rounded-lg p-3">
+                                   <div className="w-16 font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">{entry.rank}</div>
+                                   <div className="flex-1 font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">{entry.wallet}</div>
+                                   <div className="font-urbanist font-bold text-sm leading-none tracking-[0%] text-[#45FFAE]">{entry.points}</div>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
                          </div>
                        )}
 

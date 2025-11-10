@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowUp, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import bolt from "../assets/bolt.svg"
@@ -330,11 +330,11 @@ const body = () => {
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsDropdownOpen(prev => !prev)}>
                   <img src={polymarketLogo} alt="polymarket" className="h-4 w-4"/>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       <div className="cursor-default rounded-t-lg bg-[#222] px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0]">Polymarket</div>
                       <div className="cursor-pointer rounded-b-lg px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222]" onClick={() => { setIsDropdownOpen(false); navigate('/crypto') }}>Crypto</div>
@@ -347,10 +347,10 @@ const body = () => {
               <div className="relative" ref={liquidityRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsLiquidityOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isLiquidityOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['High','Medium','Low'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedLiquidity(v); setIsLiquidityOpen(false) }}>{v}</div>
@@ -364,10 +364,10 @@ const body = () => {
               <div className="relative" ref={volumeRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsVolumeOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isVolumeOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['High','Medium','Low'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedVolume(v); setIsVolumeOpen(false) }}>{v}</div>
@@ -381,10 +381,10 @@ const body = () => {
               <div className="relative" ref={timeframeRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsTimeframeOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTimeframeOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedTimeframe(v); setIsTimeframeOpen(false) }}>{v}</div>
@@ -398,10 +398,10 @@ const body = () => {
               <div className="relative" ref={newestRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsNewestOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isNewestOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['Today','This Week','This Month'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedNewest(v); setIsNewestOpen(false) }}>{v}</div>
@@ -415,10 +415,10 @@ const body = () => {
               <div className="relative" ref={endingSoonRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsEndingSoonOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isEndingSoonOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','6h','12h','24h','3d','7d'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>

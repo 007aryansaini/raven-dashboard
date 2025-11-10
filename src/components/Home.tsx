@@ -1,5 +1,5 @@
 
-import { ArrowDown, ArrowUp, MoveRight } from "lucide-react"
+import { ArrowUp, MoveRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import bolt from "../assets/bolt.svg"
@@ -161,12 +161,12 @@ const Home = () => {
                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF] mr-4">
                       Market
                   </div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
                   <div 
-                    className="absolute left-0 z-50 mt-2 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] shadow-xl"
+                    className="absolute bottom-full left-0 z-50 mb-2 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] shadow-xl"
                   >
                     <div 
                       className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm rounded-t-lg"

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, MoveRight } from "lucide-react"
+import { ArrowUp, MoveRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import bolt from "../assets/bolt.svg"
@@ -180,11 +180,11 @@ const body = () => {
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsDropdownOpen(prev => !prev)}>
                   <img src={cryptoTrade} alt="crypto" className="h-4 w-4"/>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       <div className="cursor-pointer rounded-t-lg px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222]" onClick={() => { setIsDropdownOpen(false); navigate('/polymarket') }}>Polymarket</div>
                       <div className="cursor-default rounded-b-lg bg-[#222] px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0]">Crypto</div>
@@ -197,10 +197,10 @@ const body = () => {
               <div className="relative" ref={tfRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsTfOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTfOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1m','5m','15m','1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedTimeframe(v); setIsTfOpen(false) }}>{v}</div>
@@ -214,10 +214,10 @@ const body = () => {
               <div className="relative" ref={analysisRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsAnalysisOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAnalysisOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['AI signals','On-chain','Macro','Sentiment','Technical','Fundamental','News','Community'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
@@ -231,10 +231,10 @@ const body = () => {
               <div className="relative" ref={assetsRef}>
                 <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsAssetsOpen(prev => !prev)}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
-                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
+                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAssetsOpen && (
-                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['BTC','ETH','SOL','XRP'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>

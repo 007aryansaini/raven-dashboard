@@ -335,7 +335,7 @@ const NavBar = () => {
    }
 
   return (
-    <div className="sticky top-0 z-30 flex h-16 w-full flex-row items-center justify-end gap-4 border-b border-gray-800 bg-black/90 px-4 py-2 backdrop-blur">
+    <div className="flex flex-row items-center justify-end bg-black h-16 w-full px-4 border-b border-gray-800 py-2 gap-4">
           {/* <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] bg-[#141414] rounded-lg p-2 ml-2 text-center" >
              Polymarket
           </div> */}

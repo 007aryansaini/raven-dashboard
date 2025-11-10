@@ -174,7 +174,7 @@ const body = () => {
   }
 
   return (
-    <div className="flex flex-col h-full items-center justtify-between py-4 gap-4 relative" 
+    <div className="relative flex min-h-full flex-col items-center justify-between gap-10 px-4 py-8 sm:px-6 lg:px-10" 
          style={{
            background: `
              radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),
@@ -184,10 +184,10 @@ const body = () => {
            backgroundSize: '100% 100%, 60px 60px, 60px 60px',
            backgroundColor: '#000000'
          }}>
-           <div className="flex flex-col gap-2.5 items-center">
-                 <div className="font-urbanist font-medium text-3xl leading-none tracking-[0%] text-[#FFFFFF] text-center">Polymarket Predictions</div>
-                <div className="w-full flex flex-row justify-center items-center">
-                 <div className="flex flex-row border border-gray-500 w-fit h-9 rounded-full mt-2 gap-3 items-center px-3 py-1.5">
+           <div className="flex flex-col items-center gap-3 text-center">
+                 <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Polymarket Predictions</div>
+                <div className="flex w-full flex-row items-center justify-center">
+                 <div className="mt-2 flex w-auto items-center gap-3 rounded-full border border-gray-500 px-4 py-2">
                     <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
                     <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
@@ -197,7 +197,7 @@ const body = () => {
 
            {/* Carousel Container */}
            <div 
-             className="relative w-5xl"
+             className="relative w-full max-w-5xl"
              onMouseEnter={() => setIsAutoPlay(false)}
              onMouseLeave={() => setIsAutoPlay(true)}
            >
@@ -205,7 +205,7 @@ const body = () => {
              <button 
                onClick={goToPreviousSlide}
                disabled={isTransitioning}
-               className={`absolute left-[-52px] top-1/2 transform -translate-y-1/2 z-10 rounded-full p-2.5 transition-all duration-200 ${
+               className={`absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition-all duration-200 sm:left-[-46px] ${
                  isTransitioning 
                    ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
                    : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
@@ -220,7 +220,7 @@ const body = () => {
              <button 
                onClick={goToNextSlide}
                disabled={isTransitioning}
-               className={`absolute right-[-52px] top-1/2 transform -translate-y-1/2 z-10 rounded-full p-2.5 transition-all duration-200 ${
+               className={`absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition-all duration-200 sm:right-[-46px] ${
                  isTransitioning 
                    ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
                    : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
@@ -233,47 +233,28 @@ const body = () => {
 
 
              {/* Carousel Content */}
-             <div className="flex flex-col gap-3.5 w-full h-96 p-4 overflow-hidden relative">
+             <div className="relative flex w-full flex-col gap-4 overflow-hidden rounded-3xl bg-[#121212]/60 p-4 backdrop-blur">
                {/* Animated Card Container */}
                <div 
-                 className={`flex flex-col gap-3.5 w-full transition-all duration-500 ease-in-out ${
-                   isTransitioning ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+                 className={`grid gap-4 transition-all duration-500 ease-in-out sm:grid-cols-2 lg:grid-cols-3 ${
+                   isTransitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'
                  }`}
                >
-                 <div className="flex flex-row items-center justify-between">
-                   {getCardSet(currentSlide).map((card, index) => (
-                     <img 
-                       key={`${currentSlide}-${index}`}
-                       src={card.src} 
-                       alt={card.alt} 
-                       className={`h-[168px] w-[292px] flex-shrink-0 transition-all duration-300 ease-out ${
-                         isTransitioning 
-                           ? 'transform translate-x-[-20px] opacity-0' 
-                           : 'transform translate-x-0 opacity-100'
-                       }`}
-                       style={{
-                         transitionDelay: `${index * 100}ms`
-                       }}
-                     />
-                   ))}
-                 </div>
-                 <div className="flex flex-row items-center justify-between">
-                   {getCardSet(currentSlide).map((card, index) => (
-                     <img 
-                       key={`${currentSlide}-${index + 3}`}
-                       src={card.src} 
-                       alt={card.alt} 
-                       className={`h-[168px] w-[292px] flex-shrink-0 transition-all duration-300 ease-out ${
-                         isTransitioning 
-                           ? 'transform translate-x-[20px] opacity-0' 
-                           : 'transform translate-x-0 opacity-100'
-                       }`}
-                       style={{
-                         transitionDelay: `${(index + 3) * 100}ms`
-                       }}
-                     />
-                   ))}
-                 </div>
+                 {getCardSet(currentSlide).map((card, index) => (
+                   <img 
+                     key={`${currentSlide}-${index}`}
+                     src={card.src} 
+                     alt={card.alt} 
+                     className={`w-full rounded-2xl border border-[#1F1F1F] bg-[#101010] object-cover transition-all duration-300 ease-out ${
+                       isTransitioning 
+                         ? 'translate-y-3 opacity-0' 
+                         : 'translate-y-0 opacity-100'
+                     }`}
+                     style={{
+                       transitionDelay: `${index * 100}ms`
+                     }}
+                   />
+                 ))}
                </div>
              </div>
 
@@ -299,7 +280,7 @@ const body = () => {
 
 
 
-           <div className="flex flex-col gap-3.5 w-5xl h-40 bg-[#141414] rounded-lg p-4 justify-between">
+           <div className="flex w-full max-w-5xl flex-col gap-4 rounded-3xl bg-[#141414] p-6">
                
                <div className="flex flex-row items-center justify-between">
                        <div className="flex flex-row gap-2 items-center">
@@ -312,11 +293,11 @@ const body = () => {
 
 
 
-          <div className="h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 items-start justify-between" >
+         <div className="flex w-full flex-col items-start justify-between gap-4 rounded-2xl bg-[#1A1A1A] p-4 sm:flex-row sm:items-center sm:p-6">
 
-            <div className="flex flex-row items-center justify-between gap-2 flex-1">
-                <img src={blackDot} alt="history" className="h-4 w-4"/>
-                <div className="font-urbanist font-medium text-base  text-[#3E3E3E]">|</div>
+            <div className="flex flex-1 items-center gap-3">
+                <img src={blackDot} alt="history" className="h-4 w-4 flex-shrink-0"/>
+                <div className="font-urbanist font-medium text-base text-[#3E3E3E]">|</div>
                 <input 
                   ref={inputRef}
                   type="text" 
@@ -324,31 +305,39 @@ const body = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="font-urbanist font-medium text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
+                  className="flex-1 bg-transparent font-urbanist text-base font-medium text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none"
                 />
             </div>
 
-            <ArrowUp 
-              className={`h-4 w-4 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
+            <button
+              type="button"
               onClick={handleSubmit}
-            />
+              className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-200 ${
+                inputValue.trim()
+                  ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20'
+                  : 'border-transparent bg-[#2A2A2A] text-[#808080]'}`}
+              aria-label="Submit query"
+              disabled={!inputValue.trim()}
+            >
+              <ArrowUp className="h-5 w-5" />
+            </button>
 
          </div>
 
-         <div className="flex flex-row items-center justify-start gap-4">
+         <div className="flex flex-wrap items-center justify-start gap-3">
 
               <div className="relative" ref={dropdownRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsDropdownOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsDropdownOpen(prev => !prev)}>
                   <img src={polymarketLogo} alt="polymarket" className="h-4 w-4"/>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
+                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
+                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
-                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
-                      <div className="px-3 py-2 text-[#E0E0E0] font-urbanist text-sm cursor-default bg-[#222] text-center rounded-t-md">Polymarket</div>
-                      <div className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center rounded-b-md" onClick={() => { setIsDropdownOpen(false); navigate('/crypto') }}>Crypto</div>
+                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
+                      <div className="cursor-default rounded-t-lg bg-[#222] px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0]">Polymarket</div>
+                      <div className="cursor-pointer rounded-b-lg px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222]" onClick={() => { setIsDropdownOpen(false); navigate('/crypto') }}>Crypto</div>
                     </div>
                   </div>
                 )}
@@ -356,15 +345,15 @@ const body = () => {
 
               {/* Liquidity Dropdown */}
               <div className="relative" ref={liquidityRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsLiquidityOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsLiquidityOpen(prev => !prev)}>
+                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
+                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isLiquidityOpen && (
-                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
-                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['High','Medium','Low'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedLiquidity(v); setIsLiquidityOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedLiquidity(v); setIsLiquidityOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -373,15 +362,15 @@ const body = () => {
 
               {/* Volume Dropdown */}
               <div className="relative" ref={volumeRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsVolumeOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsVolumeOpen(prev => !prev)}>
+                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
+                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isVolumeOpen && (
-                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
-                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['High','Medium','Low'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedVolume(v); setIsVolumeOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedVolume(v); setIsVolumeOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -390,15 +379,15 @@ const body = () => {
 
               {/* Timeframe Dropdown */}
               <div className="relative" ref={timeframeRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsTimeframeOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsTimeframeOpen(prev => !prev)}>
+                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTimeframeOpen && (
-                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
-                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedTimeframe(v); setIsTimeframeOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedTimeframe(v); setIsTimeframeOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -407,15 +396,15 @@ const body = () => {
 
               {/* Newest Dropdown */}
               <div className="relative" ref={newestRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsNewestOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsNewestOpen(prev => !prev)}>
+                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
+                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isNewestOpen && (
-                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
-                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['Today','This Week','This Month'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedNewest(v); setIsNewestOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedNewest(v); setIsNewestOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -424,15 +413,15 @@ const body = () => {
 
               {/* Ending Soon Dropdown */}
               <div className="relative" ref={endingSoonRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsEndingSoonOpen(prev => !prev)}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
-                  <ArrowDown className={`text-[#808080] h-3 w-3 transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsEndingSoonOpen(prev => !prev)}>
+                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
+                  <ArrowDown className={`h-4 w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isEndingSoonOpen && (
-                  <div className="absolute mt-4 left-0 z-50 w-36 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl p-1">
-                    <div className="bg-[#121212] rounded-md max-h-16 overflow-y-auto">
+                  <div className="absolute left-0 z-50 mt-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','6h','12h','24h','3d','7d'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>

@@ -120,120 +120,94 @@ interface ChatSideBarProps {
 
 const ChatSideBar = ({ onBackToMenu }: ChatSideBarProps) => {
     return (
-        <div className="bg-black h-screen w-3xs flex flex-col items-start p-2 border-r border-gray-800">
-            <img className="w-30 h-10 mt-6 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out" src={logo} alt="logo" />
-            <div
-                className="text-[#808080] text-sm leading-none tracking-[0%] cursor-pointer mt-10 hover:text-[#45FFAE] transition-colors duration-200 hover:scale-105 transform origin-left"
+        <div className="flex h-full max-h-screen w-64 flex-col gap-6 border-r border-gray-800 bg-black p-4 md:w-72 lg:w-80">
+            <img className="h-10 w-30 cursor-pointer transition-transform duration-200 ease-in-out hover:scale-105" src={logo} alt="logo" />
+            <button
+                className="mt-2 w-fit text-sm leading-none tracking-[0%] text-[#808080] transition-all duration-200 hover:scale-105 hover:text-[#45FFAE]"
                 onClick={onBackToMenu}
+                type="button"
             >
                 {"<"} <span className="ml-2">Back to menu</span>
+            </button>
+
+            <div className="flex w-full flex-1 flex-col gap-4 overflow-y-auto pr-1">
+                <button className="flex h-12 w-full items-center justify-center rounded-xl bg-[#141414] text-sm text-[#808080] transition-all duration-200 hover:scale-105 hover:bg-[#1a1a1a]" type="button">
+                    + Start new chat
+                </button>
+
+                <div className="flex flex-row gap-2 rounded-xl bg-[#141414] p-2">
+                    <button className="flex flex-1 items-center gap-2 rounded-lg bg-[#292929] p-2 transition-all duration-200 hover:scale-105 hover:bg-[#3a3a3a]" type="button">
+                        <img className="h-6 w-6" src={cryptoTrade} alt="add" />
+                        <span className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</span>
+                    </button>
+
+                    <button className="flex flex-1 items-center gap-2 rounded-lg p-2 transition-all duration-200 hover:scale-105 hover:bg-[#292929]" type="button">
+                        <img className="h-6 w-6" src={cryptoTrade} alt="add" />
+                        <span className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Crypto</span>
+                    </button>
+                </div>
+
+                <div className="flex flex-col gap-3 rounded-2xl bg-[#121212]/20 p-3">
+                    <div className="flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Star className="h-4 w-4 text-white" />
+                            <span className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Watchlist</span>
+                        </div>
+                        <ArrowDownNarrowWide className="h-4 w-4 cursor-pointer text-white transition-all duration-200 hover:scale-110 hover:text-[#45FFAE]" />
+                    </div>
+
+                    <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
+                        {watchlistData.map((item) => (
+                            <button
+                                key={item.id}
+                                className="flex flex-col gap-2 rounded-xl bg-[#141414] p-3 text-left transition-all duration-200 hover:-translate-y-1 hover:bg-[#1a1a1a]"
+                                type="button"
+                            >
+                                <span className="flex items-center justify-between gap-2">
+                                    <img className="h-6 w-6" src={cryptoTrade} alt="add" />
+                                    <span className="w-32 truncate font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                                        {item.title}
+                                    </span>
+                                    <ArrowRight className="h-4 w-4 text-white" />
+                                </span>
+                                <span className="flex items-center justify-between font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">
+                                    {item.volume}
+                                    <span className="text-[#FFFFFF]">{item.percentage}</span>
+                                </span>
+                                <span className="flex items-center justify-between font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">
+                                    <span className="flex items-center gap-1">
+                                        <Circle className="h-3 w-3 text-[#808080]" />
+                                        {item.frequency}
+                                    </span>
+                                    {item.change}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-3 rounded-2xl bg-[#121212]/20 p-3">
+                    <div className="flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-white" />
+                            <span className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Recent Chats</span>
+                        </div>
+                        <ArrowDownNarrowWide className="h-4 w-4 cursor-pointer text-white transition-all duration-200 hover:scale-110 hover:text-[#45FFAE]" />
+                    </div>
+
+                    <div className="flex max-h-48 flex-col gap-2 overflow-y-auto">
+                        {recentChatData.map((item) => (
+                            <button
+                                key={item.id}
+                                className="text-left font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-all duration-200 hover:-translate-y-0.5 hover:text-[#45FFAE]"
+                                type="button"
+                            >
+                                {item.title}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
-
-            <div className="flex flex-col p-2 gap-4 mt-6">
-                <div className="h-10 w-56 bg-[#141414] rounded-lg p-2 text-[#808080] text-sm leading-none tracking-[0%] flex flex-row items-center justify-center cursor-pointer hover:bg-[#1a1a1a] hover:scale-105 transition-all duration-200 ease-in-out">
-                    <div>+ Start new chat</div>
-                </div>
-
-                <div className="flex flex-row gap-2 bg-[#141414] rounded-lg p-2">
-                    <div className="flex flex-row items-center gap-1 cursor-pointer bg-[#292929] rounded-lg p-2 hover:bg-[#3a3a3a] hover:scale-105 transition-all duration-200 ease-in-out">
-                        <img className="w-6 h-6" src={cryptoTrade} alt="add" />
-                        <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
-                    </div>
-
-                    <div className="flex flex-row items-center gap-1 cursor-pointer rounded-lg p-2 hover:bg-[#292929] hover:scale-105 transition-all duration-200 ease-in-out">
-                        <img className="w-6 h-6" src={cryptoTrade} alt="add" />
-                        <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Crypto</div>
-                    </div>
-                </div>
-
-
-
-                <div className="flex flex-col gap-1 items-start mt-1 h-54">
-
-                    <div className="flex flex-row items-center justify-between w-full gap-1 mb-2">
-                        <div className="flex flex-row items-center gap-2">
-                            <Star className="w-4 h-4 text-white" />
-                            <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Watchlist</div>
-                        </div>
-
-                        <ArrowDownNarrowWide className="w-4 h-4 text-white cursor-pointer hover:scale-110 hover:text-[#45FFAE] transition-all duration-200 ease-in-out" />
-
-                    </div>
-
-                    <div className="flex flex-col gap-2 items-start p-2 w-full h-full">
-                        <div className="flex flex-col gap-2 items-start w-full overflow-y-auto flex-1">
-                            {watchlistData.map((item) => (
-                                <div key={item.id} className="flex flex-col gap-2 items-start p-3 bg-[#141414] rounded-lg w-full cursor-pointer hover:bg-[#1a1a1a] hover:scale-[1.02] transition-all duration-200 ease-in-out">
-                                    <div className="flex flex-row items-center justify-between w-full gap-1">
-                                        <img className="w-6 h-6" src={cryptoTrade} alt="add" />
-                                        <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF] truncate w-32 h-3.5">{item.title}</div>
-                                        <ArrowRight className="text-white ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-                                    </div>
-
-                                    <div className="flex flex-row items-center justify-between w-full">
-                                        <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">{item.volume}</div>
-                                        <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">{item.percentage}</div>
-                                    </div>
-
-                                    <div className="flex flex-row items-center justify-between w-full">
-                                        <div className="flex flex-row items-center gap-1">
-                                            <Circle className="w-3 h-3 text-[#808080]" />
-                                            <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">{item.frequency}</div>
-                                        </div>
-                                        <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">{item.change}</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* View More Footer - Fixed at bottom */}
-                        <div className="flex flex-row items-center justify-center w-full mt-2">
-                            <div className="font-urbanist font-normal text-sm leading-none tracking-[0%] text-[#808080] cursor-pointer hover:text-[#45FFAE] hover:scale-105 transition-all duration-200 ease-in-out">
-                                View more
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-
-                <div className="flex flex-col gap-1 items-start mt-15 h-50">
-
-                    <div className="flex flex-row items-center justify-between w-full gap-1 mb-2">
-                        <div className="flex flex-row items-center gap-2">
-                            <Clock className="w-4 h-4 text-white" />
-                            <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Recent Chats</div>
-                        </div>
-
-                        <ArrowDownNarrowWide className="w-4 h-4 text-white cursor-pointer hover:scale-110 hover:text-[#45FFAE] transition-all duration-200 ease-in-out" />
-
-                    </div>
-
-                    <div className="flex flex-col gap-2 items-start p-2 w-full h-full">
-                        <div className="flex flex-col gap-4 items-start w-full overflow-y-auto flex-1">
-                            {recentChatData.map((item) => (
-                                <div key={item.id} className={`text-sm leading-none tracking-[0%] text-[#FFFFFF] cursor-pointer hover:text-[#45FFAE] hover:scale-105 transition-all duration-200 ease-in-out transform origin-left`}>
-                                      {item.title}
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* View More Footer - Fixed at bottom */}
-                        <div className="flex flex-row items-center justify-center w-full mt-2">
-                            <div className="font-urbanist font-normal text-sm leading-none tracking-[0%] text-[#808080] cursor-pointer hover:text-[#45FFAE] hover:scale-105 transition-all duration-200 ease-in-out">
-                                View more
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-
-
-
-            </div>
-
-
         </div>
     )
 }

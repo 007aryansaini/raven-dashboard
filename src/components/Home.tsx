@@ -66,7 +66,7 @@ const Home = () => {
   }
 
   return (
-    <div className="flex flex-col h-full items-center justify-center py-5 gap-20 relative" 
+    <div className="relative flex min-h-full flex-col items-center justify-center gap-16 px-4 py-10 sm:px-6 lg:px-10" 
          style={{
            background: `
              radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),
@@ -76,14 +76,14 @@ const Home = () => {
            backgroundSize: '100% 100%, 60px 60px, 60px 60px',
            backgroundColor: '#000000'
          }}>
-           <div className={`flex flex-col gap-3 transition-all duration-700 ease-out ${
+           <div className={`flex flex-col gap-3 text-center transition-all duration-700 ease-out ${
              isVisible 
                ? 'opacity-100 translate-y-0' 
                : 'opacity-0 translate-y-8'
            }`}>
-                 <div className="font-urbanist font-medium text-4xl leading-none tracking-[0%] text-[#FFFFFF]">Artificial Prediction Intelligence</div>
-                <div className="w-full flex flex-row justify-center items-center">
-                 <div className={`flex flex-row border border-gray-500 w-fit h-10 rounded-full mt-2 gap-4 items-center p-2 transition-all duration-500 ease-out ${
+                 <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Artificial Prediction Intelligence</div>
+                <div className="flex w-full flex-row items-center justify-center">
+                 <div className={`mt-2 flex h-10 w-auto items-center gap-4 rounded-full border border-gray-500 px-4 transition-all duration-500 ease-out ${
                    isVisible 
                      ? 'opacity-100 translate-y-0' 
                      : 'opacity-0 translate-y-4'
@@ -94,7 +94,7 @@ const Home = () => {
                  </div>
            </div>
 
-           <div className={`flex flex-col gap-4 w-5xl h-44 bg-[#141414] rounded-lg p-4 justify-between transition-all duration-600 ease-out ${
+           <div className={`flex w-full max-w-4xl flex-col justify-between gap-4 rounded-3xl bg-[#141414] p-6 transition-all duration-600 ease-out sm:p-8 ${
              isVisible 
                ? 'opacity-100 translate-y-0' 
                : 'opacity-0 translate-y-6'
@@ -112,13 +112,13 @@ const Home = () => {
                        </div>
                </div>
 
-          <div className={`h-30 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 items-start justify-between transition-all duration-500 ease-out ${
+          <div className={`flex w-full flex-col items-start justify-between gap-3 rounded-2xl bg-[#1A1A1A] p-4 transition-all duration-500 ease-out sm:flex-row sm:items-center sm:p-6 ${
             isVisible 
               ? 'opacity-100 scale-100' 
               : 'opacity-0 scale-95'
           }`} style={{ transitionDelay: isVisible ? '800ms' : '0ms' }}>
 
-            <div className="flex flex-row items-center justify-between gap-2 flex-1">
+            <div className="flex w-full flex-1 items-center justify-between gap-3 sm:gap-4">
                 <img src={blackDot} alt="history" className="h-5 w-5"/>
                 <div className="font-urbanist font-medium text-lg  text-[#3E3E3E]">|</div>
                 <input 
@@ -128,14 +128,22 @@ const Home = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="font-urbanist font-medium text-lg text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
+                  className="font-urbanist font-medium text-base text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none sm:text-lg bg-transparent flex-1"
                 />
             </div>
 
-            <ArrowUp 
-              className={`h-5 w-5 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
+            <button
+              type="button"
               onClick={handleSubmit}
-            />
+              className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-200 ${
+                inputValue.trim()
+                  ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20'
+                  : 'border-transparent bg-[#2A2A2A] text-[#808080]'}`}
+              aria-label="Submit query"
+              disabled={!inputValue.trim()}
+            >
+              <ArrowUp className="h-5 w-5" />
+            </button>
 
          </div>
 
@@ -147,7 +155,7 @@ const Home = () => {
 
               <div className="relative" ref={dropdownRef}>
                 <button 
-                  className="flex flex-row items-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-fit hover:bg-opacity-80"
+                  className="flex flex-row items-center gap-2 rounded-lg bg-black/70 px-4 py-2 hover:bg-black/80"
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
                 >
                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF] mr-4">
@@ -158,7 +166,7 @@ const Home = () => {
 
                 {isDropdownOpen && (
                   <div 
-                    className="absolute mt-2 left-0 z-50 w-40 bg-[#1A1A1A] border border-gray-700 rounded-lg shadow-xl"
+                    className="absolute left-0 z-50 mt-2 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] shadow-xl"
                   >
                     <div 
                       className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm rounded-t-lg"

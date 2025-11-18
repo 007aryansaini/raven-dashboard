@@ -1,6 +1,10 @@
 import { ArrowUp, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAccount } from 'wagmi'
+import { onAuthStateChanged, type User } from "firebase/auth"
+import { auth } from '../firebase'
+import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
 import polymarketLogo from "../assets/polymarketLogo.svg"
@@ -29,6 +33,8 @@ const cardMapping: Record<string, string> = {
 }
 
 const body = () => {
+  const { isConnected } = useAccount()
+  const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const [inputValue, setInputValue] = useState("")
@@ -57,6 +63,18 @@ const body = () => {
   const navigate = useNavigate()
   const totalSlides = 3 // 9 cards / 3 cards per slide = 3 slides
   const autoPlayInterval = 4000 // 4 seconds between slides
+
+  // Monitor auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setTwitterUser(user)
+      } else {
+        setTwitterUser(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -96,6 +114,22 @@ const body = () => {
   const handleSubmit = () => {
     const trimmed = inputValue.trim()
     if (!trimmed) {
+      return
+    }
+
+    // Validate user is logged in with Twitter
+    if (!twitterUser) {
+      toast.warning('Please login with X (Twitter) to send messages', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Validate wallet is connected
+    if (!isConnected) {
+      toast.warning('Please connect your wallet to send messages', {
+        style: { fontSize: '12px' }
+      })
       return
     }
 
@@ -432,8 +466,8 @@ const body = () => {
               onClick={handleSubmit}
               className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-200 ${
                 inputValue.trim()
-                  ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20'
-                  : 'border-transparent bg-[#2A2A2A] text-[#808080]'}`}
+                  ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
+                  : 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed'}`}
               aria-label="Submit query"
               disabled={!inputValue.trim()}
             >

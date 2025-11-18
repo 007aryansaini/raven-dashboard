@@ -340,36 +340,48 @@ const NavBar = () => {
              Polymarket
           </div> */}
 
-        {/* User Credits and Inferences - Left Side */}
-        <div className="flex flex-row items-center gap-3">
-          <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
-            <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-              Credits: <span className="font-semibold">100</span>
+        {/* User Credits and Inferences - Left Side - Only show when logged in and wallet connected */}
+        {twitterUser && isConnected && (
+          <div className="flex flex-row items-center gap-3">
+            <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
+              <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
+                Credits: <span className="font-semibold">100</span>
+              </div>
+            </div>
+            <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
+              <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
+                Inferences: <span className="font-semibold">10</span>
+              </div>
             </div>
           </div>
-          <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
-            <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-              Inferences: <span className="font-semibold">10</span>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Right Side Buttons */}
         <div className="flex flex-row items-center gap-4">
-        {/* Login with X Button - Disabled when logged in */}
-        <div 
-          className={`flex flex-row items-center gap-2 border-t border-l rounded-lg p-2 transition-all duration-200 ease-in-out ${
-            twitterUser || isCheckingAuth
-              ? 'bg-[#45FFAE]/5 border-[#45FFAE]/50 cursor-not-allowed opacity-60'
-              : 'bg-[#45FFAE]/10 border-[#45FFAE] cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105'
-          }`}
-          onClick={twitterUser || isCheckingAuth ? undefined : handleLoginWithX}
-          >
-             <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
-             <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
-               {twitterUser ? getTwitterUsername(twitterUser) : (isCheckingAuth ? 'Loading...' : 'Login with X')}
-             </div>
-          </div>
+          {/* Login with X Button - Only show when user is NOT logged in */}
+          {!twitterUser && !isCheckingAuth && (
+            <div 
+              className="flex flex-row items-center gap-2 border-t border-l rounded-lg p-2 transition-all duration-200 ease-in-out bg-[#45FFAE]/10 border-[#45FFAE] cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105"
+              onClick={handleLoginWithX}
+            >
+              <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
+              <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
+                Login with X
+              </div>
+            </div>
+          )}
+
+          {/* Loading state - Only show when checking auth */}
+          {isCheckingAuth && (
+            <div 
+              className="flex flex-row items-center gap-2 border-t border-l rounded-lg p-2 bg-[#45FFAE]/5 border-[#45FFAE]/50 cursor-not-allowed opacity-60"
+            >
+              <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
+              <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
+                Loading...
+              </div>
+            </div>
+          )}
           
           {/* Connect Wallet Button - Only show when user is logged in */}
           {twitterUser && (
@@ -406,10 +418,6 @@ const NavBar = () => {
                  </div>
             </div>
           )}
-
-          {/* <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-black bg-[#45FFAE] rounded-lg p-2 ml-2 text-center cursor-pointer hover:bg-[#3dff9e] hover:scale-105 transition-all duration-200 ease-in-out" >
-             Connect Wallet
-          </div> */}
         </div>
 
       {/* Subscription Modal */}

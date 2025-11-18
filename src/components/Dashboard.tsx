@@ -59,7 +59,7 @@ const Dashboard = () => {
             <Body />
           ) : location.pathname === '/crypto' ? (
             <CryptoBody />
-          ) : location.pathname === '/benchmark' ? (
+          ) : location.pathname === '/score' ? (
             <Benchmark />
           ) : (
             <Home />

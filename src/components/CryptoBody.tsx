@@ -1,6 +1,10 @@
 import { ArrowUp, MoveRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useAccount } from 'wagmi'
+import { onAuthStateChanged, type User } from "firebase/auth"
+import { auth } from '../firebase'
+import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
@@ -15,6 +19,8 @@ type ChatMessage = {
 }
 
 const body = () => {
+  const { isConnected } = useAccount()
+  const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
   const [inputValue, setInputValue] = useState("")
@@ -32,6 +38,18 @@ const body = () => {
   const analysisRef = useRef<HTMLDivElement>(null)
   const assetsRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+
+  // Monitor auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setTwitterUser(user)
+      } else {
+        setTwitterUser(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     const anyOpen = isDropdownOpen || isTfOpen || isAnalysisOpen || isAssetsOpen
@@ -98,6 +116,22 @@ const body = () => {
   const handleSubmit = () => {
     const trimmed = inputValue.trim()
     if (!trimmed) {
+      return
+    }
+
+    // Validate user is logged in with Twitter
+    if (!twitterUser) {
+      toast.warning('Please login with X (Twitter) to send messages', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Validate wallet is connected
+    if (!isConnected) {
+      toast.warning('Please connect your wallet to send messages', {
+        style: { fontSize: '12px' }
+      })
       return
     }
 

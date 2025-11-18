@@ -7,6 +7,7 @@ import Body from "./body"
 import CryptoBody from "./CryptoBody"
 import Points from "./Points"
 import Home from "./Home"
+import Benchmark from "./Benchmark"
 
 const Dashboard = () => {
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -58,6 +59,8 @@ const Dashboard = () => {
             <Body />
           ) : location.pathname === '/crypto' ? (
             <CryptoBody />
+          ) : location.pathname === '/benchmark' ? (
+            <Benchmark />
           ) : (
             <Home />
           )}

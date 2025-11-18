@@ -13,6 +13,7 @@ function App() {
           <Route path="/polymarket" element={<Dashboard />} />
           <Route path="/crypto" element={<Dashboard />} />
           <Route path="/points" element={<Dashboard />} />
+          <Route path="/benchmark" element={<Dashboard />} />
         </Routes>
       </TabProvider>
     </Router>

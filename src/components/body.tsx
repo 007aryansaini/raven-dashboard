@@ -405,9 +405,9 @@ const body = () => {
                              alt="Selected card" 
                              className="w-40 h-40 rounded-xl border-2 border-[#45FFAE]/50 object-contain bg-[#1A1A1A] p-1"
                              style={{ display: 'block', minWidth: '160px', minHeight: '160px' }}
-                             onError={(e) => {
-                               console.error("Failed to load image:", message.imageSrc)
-                             }}
+                            onError={() => {
+                              console.error("Failed to load image:", message.imageSrc)
+                            }}
                              onLoad={() => {
                                console.log("Image loaded successfully:", message.imageSrc)
                              }}

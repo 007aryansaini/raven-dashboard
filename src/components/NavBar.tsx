@@ -341,20 +341,22 @@ const NavBar = () => {
           </div> */}
 
         {/* User Credits and Inferences - Left Side - Only show when logged in and wallet connected */}
-        {twitterUser && isConnected && (
-          <div className="flex flex-row items-center gap-3">
-            <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
-              <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                Credits: <span className="font-semibold">100</span>
+        <div className="flex flex-row items-center">
+          {twitterUser && isConnected && (
+            <div className="flex flex-row items-center gap-3">
+              <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
+                <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
+                  Credits: <span className="font-semibold">100</span>
+                </div>
+              </div>
+              <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
+                <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
+                  Inferences: <span className="font-semibold">10</span>
+                </div>
               </div>
             </div>
-            <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
-              <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                Inferences: <span className="font-semibold">10</span>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Right Side Buttons */}
         <div className="flex flex-row items-center gap-4">

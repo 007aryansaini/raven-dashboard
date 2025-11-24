@@ -20,6 +20,8 @@ type ChatMessage = {
   role: "user" | "assistant"
   content: string
   imageSrc?: string
+  reasoning?: string
+  answer?: string
 }
 
 // Card mapping: maps card source to heading text
@@ -53,6 +55,7 @@ const body = () => {
   const [selectedNewest, setSelectedNewest] = useState<string | null>(null)
   const [selectedEndingSoon, setSelectedEndingSoon] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [selectedCardImage, setSelectedCardImage] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const liquidityRef = useRef<HTMLDivElement>(null)
@@ -99,19 +102,152 @@ const body = () => {
     }, 100)
   }
 
-  const appendAssistantMessage = (question: string) => {
-    const response = `Working on that prediction insight for you. Here's a placeholder response for "${question}".`
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: response,
-      },
-    ])
+  const formatMarkdown = (text: string) => {
+    if (!text) return ''
+    
+    // Split text into lines for better processing
+    const lines = text.split('\n')
+    const formattedLines: string[] = []
+    let inTable = false
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      const isTableRow = line.trim().startsWith('|') && line.trim().endsWith('|')
+      const isTableSeparator = isTableRow && line.includes('---')
+      
+      if (isTableRow && !isTableSeparator) {
+        if (!inTable) {
+          inTable = true
+          formattedLines.push('<div class="my-2 space-y-1">')
+        }
+        const cells = line.split('|').filter(cell => cell.trim() && !cell.trim().match(/^:?-+:?$/))
+        if (cells.length > 0) {
+          formattedLines.push(
+            `<div class="flex gap-3 py-1 border-b border-[#2A2A2A]">${cells.map(cell => 
+              `<span class="text-[#E0E0E0] flex-1">${cell.trim()}</span>`
+            ).join('')}</div>`
+          )
+        }
+      } else {
+        if (inTable) {
+          inTable = false
+          formattedLines.push('</div>')
+        }
+        
+        // Handle "REASONING" and "ANSWER" headers first - style them prominently
+        if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
+          formattedLines.push(`<div class="font-urbanist font-semibold text-base text-[#45FFAE] mb-3 mt-4">${line.trim()}</div>`)
+          continue
+        }
+        
+        // Handle numbered headings (e.g., "1. Current Market Position & Momentum")
+        // These should be on new lines with green text
+        const numberedHeadingMatch = line.match(/^(\d+\.)\s+(.+)$/)
+        if (numberedHeadingMatch) {
+          const headingText = numberedHeadingMatch[2]
+          // Check if it contains bold text or looks like a heading
+          const hasBold = headingText.includes('**')
+          if (hasBold) {
+            const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+            formattedLines.push(`<div class="font-urbanist font-semibold text-sm text-[#45FFAE] mt-4 mb-2">${numberedHeadingMatch[1]} ${processedHeading}</div>`)
+          } else {
+            formattedLines.push(`<div class="font-urbanist font-semibold text-sm text-[#45FFAE] mt-4 mb-2">${numberedHeadingMatch[1]} ${headingText}</div>`)
+          }
+          continue
+        }
+        
+        // Handle bold **text** - convert to green and ensure proper line breaks
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        
+        // Handle bullet points
+        processedLine = processedLine.replace(/^(\*|\-)\s+(.+)$/, '<div class="ml-4 my-1">• $2</div>')
+        
+        // If line is not empty or already processed, add it
+        if (processedLine.trim() || line.trim() === '') {
+          formattedLines.push(processedLine || '<br />')
+        }
+      }
+    }
+    
+    if (inTable) {
+      formattedLines.push('</div>')
+    }
+    
+    return formattedLines.join('\n')
   }
 
-  const handleSubmit = () => {
+  const callAPI = async (query: string) => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('http://a898805l1laff6ulgpvbsc4rqo.ingress.h100.ams2.val.akash.pub/query', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'x-api-key': 'mcp-secret-key-xyz123abc456',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query,
+          queries: [query]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Extract reasoning and answer from response
+      let reasoning = ''
+      let answer = ''
+      
+      if (data.success && data.results && data.results.length > 0) {
+        const firstResult = data.results[0]
+        if (firstResult.results && firstResult.results.length > 0) {
+          const resultData = firstResult.results[0]
+          reasoning = resultData.reasoning || ''
+          answer = resultData.answer || ''
+        }
+      }
+
+      // Add assistant message with reasoning and answer
+      setMessages((prev) => {
+        const newMessages: ChatMessage[] = [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant" as const,
+            content: answer || 'No answer available',
+            reasoning: reasoning || undefined,
+            answer: answer || undefined,
+          },
+        ]
+        return newMessages
+      })
+    } catch (error: any) {
+      console.error('API Error:', error)
+      toast.error(`Failed to get response: ${error.message}`, {
+        style: { fontSize: '12px' }
+      })
+      // Add error message
+      setMessages((prev) => {
+        const newMessages: ChatMessage[] = [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant" as const,
+            content: 'Sorry, I encountered an error while processing your request. Please try again.',
+          },
+        ]
+        return newMessages
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSubmit = async () => {
     const trimmed = inputValue.trim()
     if (!trimmed) {
       return
@@ -155,9 +291,8 @@ const body = () => {
     setInputValue("")
     setSelectedCardImage(null) // Clear selected card after sending
 
-    setTimeout(() => {
-      appendAssistantMessage(trimmed)
-    }, 500)
+    // Call API (wallet connection is already validated above)
+    await callAPI(trimmed)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -298,58 +433,58 @@ const body = () => {
                <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Polymarket Predictions</div>
                <div className="flex w-full flex-row items-center justify-center">
                  <div className="mt-2 flex w-auto items-center gap-3 rounded-full border border-gray-500 px-4 py-2">
-                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
-               </div>
-             </div>
+                 </div>
+           </div>
            )}
 
            {messages.length === 0 ? (
              /* Carousel Container */
-             <div 
+           <div 
                className="relative w-full max-w-5xl"
-               onMouseEnter={() => setIsAutoPlay(false)}
-               onMouseLeave={() => setIsAutoPlay(true)}
-             >
-               {/* Left Navigation Indicator */}
-               <button 
-                 onClick={goToPreviousSlide}
-                 disabled={isTransitioning}
+             onMouseEnter={() => setIsAutoPlay(false)}
+             onMouseLeave={() => setIsAutoPlay(true)}
+           >
+             {/* Left Navigation Indicator */}
+             <button 
+               onClick={goToPreviousSlide}
+               disabled={isTransitioning}
                  className={`absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition-all duration-200 sm:left-[-46px] ${
-                   isTransitioning 
-                     ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
-                     : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
-                 }`}
-               >
-                 <ChevronLeft className={`h-5 w-5 transition-colors duration-200 ${
-                   isTransitioning ? 'text-gray-500' : 'text-white'
-                 }`} />
-               </button>
+                 isTransitioning 
+                   ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
+                   : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
+               }`}
+             >
+               <ChevronLeft className={`h-5 w-5 transition-colors duration-200 ${
+                 isTransitioning ? 'text-gray-500' : 'text-white'
+               }`} />
+             </button>
 
-               {/* Right Navigation Indicator */}
-               <button 
-                 onClick={goToNextSlide}
-                 disabled={isTransitioning}
+             {/* Right Navigation Indicator */}
+             <button 
+               onClick={goToNextSlide}
+               disabled={isTransitioning}
                  className={`absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full p-2 transition-all duration-200 sm:right-[-46px] ${
-                   isTransitioning 
-                     ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
-                     : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
-                 }`}
-               >
-                 <ChevronRight className={`h-5 w-5 transition-colors duration-200 ${
-                   isTransitioning ? 'text-gray-500' : 'text-white'
-                 }`} />
-               </button>
+                 isTransitioning 
+                   ? 'bg-[#0A0A0A] cursor-not-allowed opacity-50' 
+                   : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] hover:scale-110'
+               }`}
+             >
+               <ChevronRight className={`h-5 w-5 transition-colors duration-200 ${
+                 isTransitioning ? 'text-gray-500' : 'text-white'
+               }`} />
+             </button>
 
-               {/* Carousel Content */}
+             {/* Carousel Content */}
                <div className="relative flex w-full flex-col gap-4 overflow-hidden rounded-3xl bg-[#121212]/60 p-4 backdrop-blur">
-                 {/* Animated Card Container */}
-                 <div 
+               {/* Animated Card Container */}
+               <div 
                    className={`grid gap-4 transition-all duration-500 ease-in-out sm:grid-cols-2 lg:grid-cols-3 ${
                      isTransitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'
-                   }`}
-                 >
+                 }`}
+               >
                    {getCardSet(currentSlide).map((card, index) => (
                      <img 
                        key={`${currentSlide}-${index}`}
@@ -366,64 +501,91 @@ const body = () => {
                        }}
                      />
                    ))}
-                 </div>
-               </div>
-
-               {/* Pagination Dots */}
-               <div className="flex justify-center mt-4 gap-1.5">
-                 {Array.from({ length: totalSlides }, (_, index) => (
-                   <button
-                     key={index}
-                     onClick={() => goToSlide(index)}
-                     disabled={isTransitioning}
-                     className={`w-2.5 h-2.5 rounded-sm transition-all duration-300 ${
-                       index === currentSlide 
-                         ? 'bg-[#45FFAE] scale-110 shadow-lg shadow-[#45FFAE]/30' 
-                         : isTransitioning
-                         ? 'bg-[#1A1A1A] cursor-not-allowed'
-                         : 'bg-[#2A2A2A] hover:bg-[#3A3A3A] hover:scale-105'
-                     }`}
-                   />
-                 ))}
                </div>
              </div>
+
+             {/* Pagination Dots */}
+             <div className="flex justify-center mt-4 gap-1.5">
+               {Array.from({ length: totalSlides }, (_, index) => (
+                 <button
+                   key={index}
+                   onClick={() => goToSlide(index)}
+                   disabled={isTransitioning}
+                   className={`w-2.5 h-2.5 rounded-sm transition-all duration-300 ${
+                     index === currentSlide 
+                       ? 'bg-[#45FFAE] scale-110 shadow-lg shadow-[#45FFAE]/30' 
+                       : isTransitioning
+                       ? 'bg-[#1A1A1A] cursor-not-allowed'
+                       : 'bg-[#2A2A2A] hover:bg-[#3A3A3A] hover:scale-105'
+                   }`}
+                 />
+               ))}
+             </div>
+           </div>
            ) : (
              /* Chat Interface */
              <div className="flex-1 w-full max-w-5xl rounded-3xl bg-[#141414] p-6 flex flex-col min-h-0 overflow-hidden">
                <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-4 space-y-4">
                  {messages.map((message) => (
-                   <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                     <div className={`flex flex-row gap-3 max-w-[80%] rounded-2xl border border-[#1F1F1F] p-4 ${
-                       message.role === 'user' 
-                         ? 'bg-[#45FFAE]/10 border-[#45FFAE]/30' 
-                         : 'bg-[#121212]'
-                     }`}>
-                       {message.imageSrc && message.imageSrc !== '' && (
-                         <div className="flex-shrink-0">
-                           <img 
-                             src={message.imageSrc} 
-                             alt="Selected card" 
-                             className="w-40 h-40 rounded-xl border-2 border-[#45FFAE]/50 object-contain bg-[#1A1A1A] p-1"
-                             style={{ display: 'block', minWidth: '160px', minHeight: '160px' }}
-                            onError={() => {
-                              console.error("Failed to load image:", message.imageSrc)
-                            }}
-                             onLoad={() => {
-                               console.log("Image loaded successfully:", message.imageSrc)
-                             }}
-                           />
-                         </div>
-                       )}
-                       <div className="flex flex-col gap-1 flex-1 min-w-0">
-                         <div className={`font-urbanist text-sm leading-relaxed tracking-[0%] break-words ${
-                           message.role === 'user' ? 'text-[#45FFAE]' : 'text-white'
-                         }`}>
-                           {message.content}
+                   <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
+                     {message.role === 'user' ? (
+                       <div className={`flex flex-row gap-3 max-w-[80%] rounded-2xl border border-[#1F1F1F] p-4 bg-[#45FFAE]/10 border-[#45FFAE]/30`}>
+                         {message.imageSrc && message.imageSrc !== '' && (
+                           <div className="flex-shrink-0">
+                             <img 
+                               src={message.imageSrc} 
+                               alt="Selected card" 
+                               className="w-40 h-40 rounded-xl border-2 border-[#45FFAE]/50 object-contain bg-[#1A1A1A] p-1"
+                               style={{ display: 'block', minWidth: '160px', minHeight: '160px' }}
+                              onError={() => {
+                                console.error("Failed to load image:", message.imageSrc)
+                              }}
+                               onLoad={() => {
+                                 console.log("Image loaded successfully:", message.imageSrc)
+                               }}
+                             />
+                           </div>
+                         )}
+                         <div className="flex flex-col gap-1 flex-1 min-w-0">
+                           <div className="font-urbanist text-sm leading-relaxed tracking-[0%] break-words text-[#45FFAE]">
+                             {message.content}
+                           </div>
                          </div>
                        </div>
-                     </div>
+                     ) : (
+                       <div className="max-w-[85%] flex flex-col gap-3">
+                         {message.reasoning && (
+                           <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+                             <div 
+                               className="font-urbanist text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+                               dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning) }}
+                             />
+                           </div>
+                         )}
+                         {message.answer && (
+                           <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+                             <div 
+                               className="font-urbanist text-sm leading-relaxed"
+                               dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
+                             />
+                           </div>
+                         )}
+                         {!message.reasoning && !message.answer && (
+                           <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist bg-[#121212] text-[#FFFFFF]">
+                             {message.content}
+                           </div>
+                         )}
+                       </div>
+                     )}
                    </div>
                  ))}
+                 {isLoading && (
+                   <div className="flex justify-start">
+                     <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-[#121212] text-[#FFFFFF]">
+                       <div className="font-urbanist text-sm text-[#808080]">Processing your query...</div>
+                     </div>
+                   </div>
+                 )}
                  <div ref={chatEndRef} />
                </div>
              </div>
@@ -440,7 +602,6 @@ const body = () => {
                             <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
                             <MoveRight className="text-[#808080] text-center h-4 w-4"/>
                        </div>
-
                </div>
 
 

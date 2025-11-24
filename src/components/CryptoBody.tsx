@@ -10,12 +10,13 @@ import blackDot from "../assets/blackDot.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import { useTab } from "../contexts/TabContext"
 import { createChart, ColorType } from "lightweight-charts"
-
 type ChatMessage = {
   id: number
   role: "user" | "assistant"
   content: string
   chartType?: "btc"
+  reasoning?: string
+  answer?: string
 }
 
 const body = () => {
@@ -33,6 +34,7 @@ const body = () => {
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const tfRef = useRef<HTMLDivElement>(null)
   const analysisRef = useRef<HTMLDivElement>(null)
@@ -101,19 +103,152 @@ const body = () => {
     requestAnimationFrame(() => inputRef.current?.focus())
   }
 
-  const appendAssistantMessage = (question: string) => {
-    const response = `Working on that crypto insight for you. Here's a placeholder response for "${question}".`
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now() + 1,
-        role: "assistant",
-        content: response,
-      },
-    ])
+  const formatMarkdown = (text: string) => {
+    if (!text) return ''
+    
+    // Split text into lines for better processing
+    const lines = text.split('\n')
+    const formattedLines: string[] = []
+    let inTable = false
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      const isTableRow = line.trim().startsWith('|') && line.trim().endsWith('|')
+      const isTableSeparator = isTableRow && line.includes('---')
+      
+      if (isTableRow && !isTableSeparator) {
+        if (!inTable) {
+          inTable = true
+          formattedLines.push('<div class="my-2 space-y-1">')
+        }
+        const cells = line.split('|').filter(cell => cell.trim() && !cell.trim().match(/^:?-+:?$/))
+        if (cells.length > 0) {
+          formattedLines.push(
+            `<div class="flex gap-3 py-1 border-b border-[#2A2A2A]">${cells.map(cell => 
+              `<span class="text-[#E0E0E0] flex-1">${cell.trim()}</span>`
+            ).join('')}</div>`
+          )
+        }
+      } else {
+        if (inTable) {
+          inTable = false
+          formattedLines.push('</div>')
+        }
+        
+        // Handle "REASONING" and "ANSWER" headers first - style them prominently
+        if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
+          formattedLines.push(`<div class="font-urbanist font-semibold text-base text-[#45FFAE] mb-3 mt-4">${line.trim()}</div>`)
+          continue
+        }
+        
+        // Handle numbered headings (e.g., "1. Current Market Position & Momentum")
+        // These should be on new lines with green text
+        const numberedHeadingMatch = line.match(/^(\d+\.)\s+(.+)$/)
+        if (numberedHeadingMatch) {
+          const headingText = numberedHeadingMatch[2]
+          // Check if it contains bold text or looks like a heading
+          const hasBold = headingText.includes('**')
+          if (hasBold) {
+            const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+            formattedLines.push(`<div class="font-urbanist font-semibold text-sm text-[#45FFAE] mt-4 mb-2">${numberedHeadingMatch[1]} ${processedHeading}</div>`)
+          } else {
+            formattedLines.push(`<div class="font-urbanist font-semibold text-sm text-[#45FFAE] mt-4 mb-2">${numberedHeadingMatch[1]} ${headingText}</div>`)
+          }
+          continue
+        }
+        
+        // Handle bold **text** - convert to green and ensure proper line breaks
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        
+        // Handle bullet points
+        processedLine = processedLine.replace(/^(\*|\-)\s+(.+)$/, '<div class="ml-4 my-1">• $2</div>')
+        
+        // If line is not empty or already processed, add it
+        if (processedLine.trim() || line.trim() === '') {
+          formattedLines.push(processedLine || '<br />')
+        }
+      }
+    }
+    
+    if (inTable) {
+      formattedLines.push('</div>')
+    }
+    
+    return formattedLines.join('\n')
   }
 
-  const handleSubmit = () => {
+  const callAPI = async (query: string) => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('http://a898805l1laff6ulgpvbsc4rqo.ingress.h100.ams2.val.akash.pub/query', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'x-api-key': 'mcp-secret-key-xyz123abc456',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query,
+          queries: [query]
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Extract reasoning and answer from response
+      let reasoning = ''
+      let answer = ''
+      
+      if (data.success && data.results && data.results.length > 0) {
+        const firstResult = data.results[0]
+        if (firstResult.results && firstResult.results.length > 0) {
+          const resultData = firstResult.results[0]
+          reasoning = resultData.reasoning || ''
+          answer = resultData.answer || ''
+        }
+      }
+
+      // Add assistant message with reasoning and answer
+      setMessages((prev) => {
+        const newMessages: ChatMessage[] = [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant" as const,
+            content: answer || 'No answer available',
+            reasoning: reasoning || undefined,
+            answer: answer || undefined,
+          },
+        ]
+        return newMessages
+      })
+    } catch (error: any) {
+      console.error('API Error:', error)
+      toast.error(`Failed to get response: ${error.message}`, {
+        style: { fontSize: '12px' }
+      })
+      // Add error message
+      setMessages((prev) => {
+        const newMessages: ChatMessage[] = [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant" as const,
+            content: 'Sorry, I encountered an error while processing your request. Please try again.',
+          },
+        ]
+        return newMessages
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSubmit = async () => {
     const trimmed = inputValue.trim()
     if (!trimmed) {
       return
@@ -153,17 +288,23 @@ const body = () => {
         },
       ]
 
-      setMessages((prev) => [...prev, userMessage, ...assistantMessages])
+      setMessages((prev) => {
+        const newMessages: ChatMessage[] = [...prev, userMessage, ...assistantMessages]
+        return newMessages
+      })
       setInputValue("")
       return
     }
 
+
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
 
-    setTimeout(() => {
-      appendAssistantMessage(trimmed)
-    }, 500)
+    // Call API (wallet connection is already validated above)
+    // Only call API if it's not a chart request
+    if (!isChartRequest) {
+      await callAPI(trimmed)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -186,61 +327,61 @@ const body = () => {
            <div className="flex flex-col items-center gap-3 text-center">
                 {messages.length === 0 && (
                   <>
-                    <div className="font-urbanist font-medium text-3xl leading-none tracking-[0%] text-[#FFFFFF] text-center">
-                      {activeTab === 'polymarket' ? 'Polymarket Predictions' : 'Crypto Market Predictions'}
-                    </div>
-                   <div className="w-full flex flex-row justify-center items-center">
-                     <div className="flex flex-row border border-gray-500 w-fit h-9 rounded-full mt-2 gap-3 items-center px-3 py-1.5">
-                       <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                       <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
-                     </div>
-                   </div>
+                 <div className="font-urbanist font-medium text-3xl leading-none tracking-[0%] text-[#FFFFFF] text-center">
+                   {activeTab === 'polymarket' ? 'Polymarket Predictions' : 'Crypto Market Predictions'}
+                 </div>
+                <div className="w-full flex flex-row justify-center items-center">
+                 <div className="flex flex-row border border-gray-500 w-fit h-9 rounded-full mt-2 gap-3 items-center px-3 py-1.5">
+                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                 </div>
+                 </div>
                   </>
                 )}
- 
+
            </div>
- 
+
       <div className="flex w-full max-w-5xl flex-1 flex-col gap-6 min-h-0">
         {messages.length === 0 ? (
-          <div className="w-5xl">
-            <div className="flex flex-col gap-5 w-full h-96 p-4 items-center justify-center">
-              <div className="flex flex-col gap-3.5 items-center">
-                <div className="flex flex-row gap-2">
+           <div className="w-5xl">
+             <div className="flex flex-col gap-5 w-full h-96 p-4 items-center justify-center">
+               <div className="flex flex-col gap-3.5 items-center">
+                 <div className="flex flex-row gap-2">
                   <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('What will the BTC price be in the next 5 mins?')}>
-                    <span className="text-white font-urbanist font-medium text-sm">What will the BTC price be in the next 5 mins?</span>
-                    <MoveRight className="text-white h-4 w-4 ml-2" />
-                  </div>
+                     <span className="text-white font-urbanist font-medium text-sm">What will the BTC price be in the next 5 mins?</span>
+                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                   </div>
                   <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('Where will BTC close by the end of this month?')}>
-                    <span className="text-white font-urbanist font-medium text-sm">Where will BTC close by the end of this month?</span>
-                    <MoveRight className="text-white h-4 w-4 ml-2" />
-                  </div>
-                </div>
-
-                <div className="flex flex-row gap-2">
+                     <span className="text-white font-urbanist font-medium text-sm">Where will BTC close by the end of this month?</span>
+                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                   </div>
+                 </div>
+                 
+                 <div className="flex flex-row gap-2">
                   <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('Will ETH outperform BTC this week?')}>
-                    <span className="text-white font-urbanist font-medium text-sm">Will ETH outperform BTC this week?</span>
-                    <MoveRight className="text-white h-4 w-4 ml-2" />
-                  </div>
+                     <span className="text-white font-urbanist font-medium text-sm">Will ETH outperform BTC this week?</span>
+                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                   </div>
                   <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('When will ETH cross $5K this month?')}>
-                    <span className="text-white font-urbanist font-medium text-sm">When will ETH cross $5K this month?</span>
-                    <MoveRight className="text-white h-4 w-4 ml-2" />
-                  </div>
-                </div>
-
-                <div className="flex flex-row">
+                     <span className="text-white font-urbanist font-medium text-sm">When will ETH cross $5K this month?</span>
+                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                   </div>
+                 </div>
+                 
+                 <div className="flex flex-row">
                   <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('Why could ETH drop below $3K in the next 24 hours?')}>
-                    <span className="text-white font-urbanist font-medium text-sm">Why could ETH drop below $3K in the next 24 hours?</span>
-                    <MoveRight className="text-white h-4 w-4 ml-2" />
-                  </div>
-                </div>
-              </div>
-            </div>
+                     <span className="text-white font-urbanist font-medium text-sm">Why could ETH drop below $3K in the next 24 hours?</span>
+                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                   </div>
+                 </div>
+               </div>
+             </div>
           </div>
         ) : (
           <div className="flex-1 w-full max-w-5xl rounded-3xl bg-[#141414] p-6 flex flex-col min-h-0 overflow-hidden">
             <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-4 space-y-4">
               {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                   {message.chartType === 'btc' ? (
                     <div className="w-full rounded-2xl border border-[#1F1F1F] bg-[#121212] p-4">
                       <div className="mb-3 font-urbanist text-sm font-medium text-white">{message.content}</div>
@@ -251,28 +392,53 @@ const body = () => {
                         Displaying sample BTC closing prices for illustrative purposes.
                       </div>
                     </div>
-                  ) : (
-                    <div
-                      className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist ${
-                        message.role === 'user'
-                          ? 'bg-[#45FFAE]/15 text-[#45FFAE]'
-                          : 'bg-[#1F1F1F] text-[#FFFFFF]'
-                      }`}
-                    >
+                  ) : message.role === 'user' ? (
+                    <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist bg-[#45FFAE]/15 text-[#45FFAE]">
                       {message.content}
+                    </div>
+                  ) : (
+                    <div className="max-w-[85%] flex flex-col gap-3">
+                      {message.reasoning && (
+                        <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+                          <div 
+                            className="font-urbanist text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+                            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning) }}
+                          />
+                        </div>
+                      )}
+                      {message.answer && (
+                        <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+                          <div 
+                            className="font-urbanist text-sm leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
+                          />
+                        </div>
+                      )}
+                      {!message.reasoning && !message.answer && (
+                        <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
+                          {message.content}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+                    <div className="font-urbanist text-sm text-[#808080]">Processing your query...</div>
+                  </div>
+                </div>
+              )}
               <div ref={chatEndRef} />
             </div>
-          </div>
+             </div>
         )}
            </div>
- 
- 
- 
- 
+
+
+
+
            <div className="flex flex-col gap-3.5 w-5xl h-40 bg-[#141414] rounded-lg p-4 justify-between">
                
                <div className="flex flex-row items-center justify-between">
@@ -281,44 +447,43 @@ const body = () => {
                             <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
                             <MoveRight className="text-[#808080] text-center h-4 w-4"/>
                        </div>
- 
                </div>
- 
- 
- 
+
+
+
           <div className="h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 items-start justify-between" >
- 
-             <div className="flex flex-row items-center justify-between gap-2 flex-1">
-                 <img src={blackDot} alt="history" className="h-4 w-4"/>
-                 <div className="font-urbanist font-medium text-base  text-[#3E3E3E]">|</div>
-                 <input 
-                   ref={inputRef}
-                   type="text" 
-                   placeholder="Ask me anything" 
-                   value={inputValue}
-                   onChange={handleInputChange}
-                   onKeyPress={handleKeyPress}
-                   className="font-urbanist font-medium text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
-                 />
-             </div>
- 
-             <ArrowUp 
-               className={`h-4 w-4 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
-               onClick={handleSubmit}
-             />
- 
-          </div>
- 
-          <div className="flex flex-row items-center justify-start gap-4">
- 
-               <div className="relative" ref={dropdownRef}>
-                 <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsDropdownOpen(prev => !prev)}>
-                   <img src={cryptoTrade} alt="crypto" className="h-4 w-4"/>
-                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
+
+            <div className="flex flex-row items-center justify-between gap-2 flex-1">
+                <img src={blackDot} alt="history" className="h-4 w-4"/>
+                <div className="font-urbanist font-medium text-base  text-[#3E3E3E]">|</div>
+                <input 
+                  ref={inputRef}
+                  type="text" 
+                  placeholder="Ask me anything" 
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onKeyPress={handleKeyPress}
+                  className="font-urbanist font-medium text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
+                />
+            </div>
+
+            <ArrowUp 
+              className={`h-4 w-4 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
+              onClick={handleSubmit}
+            />
+
+         </div>
+
+         <div className="flex flex-row items-center justify-start gap-4">
+
+              <div className="relative" ref={dropdownRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsDropdownOpen(prev => !prev)}>
+                  <img src={cryptoTrade} alt="crypto" className="h-4 w-4"/>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
-                 </button>
- 
-                 {isDropdownOpen && (
+                </button>
+
+                {isDropdownOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                        <div className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm rounded-t-lg" onClick={() => { setIsDropdownOpen(false); navigate('/polymarket') }}>
@@ -327,71 +492,71 @@ const body = () => {
                        <div className="px-3 py-2 cursor-default bg-[#222] text-[#E0E0E0] font-urbanist text-sm rounded-b-lg">
                          Crypto
                        </div>
-                     </div>
-                   </div>
-                 )}
-               </div>
- 
-               {/* Timeframe Dropdown */}
-               <div className="relative" ref={tfRef}>
-                 <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsTfOpen(prev => !prev)}>
-                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Timeframe Dropdown */}
+              <div className="relative" ref={tfRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsTfOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
-                 </button>
-                 {isTfOpen && (
+                </button>
+                {isTfOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                       {['1m','5m','15m','1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
-                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedTimeframe(v); setIsTfOpen(false) }}>{v}</div>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-               </div>
- 
-               {/* Analysis Dropdown */}
-               <div className="relative" ref={analysisRef}>
-                 <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAnalysisOpen(prev => !prev)}>
-                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
+                      {['1m','5m','15m','1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedTimeframe(v); setIsTfOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Analysis Dropdown */}
+              <div className="relative" ref={analysisRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAnalysisOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
-                 </button>
-                 {isAnalysisOpen && (
+                </button>
+                {isAnalysisOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                       {['AI signals','On-chain','Macro','Sentiment','Technical','Fundamental','News','Community'].map(v => (
-                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-               </div>
- 
-               {/* Assets Dropdown */}
-               <div className="relative" ref={assetsRef}>
-                 <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAssetsOpen(prev => !prev)}>
-                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
+                      {['AI signals','On-chain','Macro','Sentiment','Technical','Fundamental','News','Community'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Assets Dropdown */}
+              <div className="relative" ref={assetsRef}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAssetsOpen(prev => !prev)}>
+                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
-                 </button>
-                 {isAssetsOpen && (
+                </button>
+                {isAssetsOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                       {['BTC','ETH','SOL','XRP'].map(v => (
-                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
-                       ))}
-                     </div>
-                   </div>
-                 )}
-               </div>
- 
-          </div>
- 
- 
- 
+                      {['BTC','ETH','SOL','XRP'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+         </div>
+
+
+
            </div>
     </div>
   )
 }
- 
+
 export default body
 
 const btcSampleData = [

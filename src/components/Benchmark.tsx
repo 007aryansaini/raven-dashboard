@@ -31,18 +31,18 @@ const Benchmark = () => {
         <div className="flex w-full flex-col gap-6 rounded-3xl bg-[#141414] p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <Trophy className="h-8 w-8 text-[#FFD700]" />
-            <h1 className="font-urbanist text-3xl font-bold leading-tight tracking-[0%] text-white sm:text-4xl">
+            <h1 className="font-urbanist text-2xl font-bold leading-tight tracking-[0%] text-white sm:text-3xl">
               Project Summary
             </h1>
           </div>
           
-          <p className="font-urbanist text-base leading-relaxed tracking-[0%] text-[#D1D1D1]">
+          <p className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#D1D1D1]">
             GPU-optimized fine-tuning of GPT-OSS-20B for cryptocurrency social media analysis using Adaptive LoRA (AdaLoRA). This project demonstrates state-of-the-art parameter-efficient fine-tuning achieving <span className="font-bold text-[#45FFAE]">98.6% price prediction accuracy</span> with only <span className="font-bold text-[#45FFAE]">0.1% trainable parameters</span>.
           </p>
 
           <div className="flex items-center gap-3">
             <Trophy className="h-6 w-6 text-[#FFD700]" />
-            <h2 className="font-urbanist text-xl font-bold leading-tight tracking-[0%] text-white">
+            <h2 className="font-urbanist text-lg font-bold leading-tight tracking-[0%] text-white">
               Key Achievements
             </h2>
           </div>
@@ -52,10 +52,10 @@ const Benchmark = () => {
             <div className="flex items-start gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
               <Target className="h-6 w-6 text-[#45FFAE] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
                   98.6% Price Prediction Accuracy
                 </div>
-                <div className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080]">
+                <div className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080]">
                   Industry-leading performance on Bitcoin market predictions.
                 </div>
               </div>
@@ -65,10 +65,10 @@ const Benchmark = () => {
             <div className="flex items-start gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
               <Zap className="h-6 w-6 text-[#45FFAE] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
                   99.9% Parameter Reduction
                 </div>
-                <div className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080]">
+                <div className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080]">
                   Only 21M trainable parameters vs 20B base model.
                 </div>
               </div>
@@ -78,10 +78,10 @@ const Benchmark = () => {
             <div className="flex items-start gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
               <Rocket className="h-6 w-6 text-[#45FFAE] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
                   Production Ready
                 </div>
-                <div className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080]">
+                <div className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080]">
                   OpenAI-compatible API server with live market integration.
                 </div>
               </div>
@@ -91,10 +91,10 @@ const Benchmark = () => {
             <div className="flex items-start gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
               <BarChart3 className="h-6 w-6 text-[#45FFAE] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
                   Comprehensive Benchmarks
                 </div>
-                <div className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080]">
+                <div className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080]">
                   BERT Score: 0.630, ROUGE-L evaluation framework.
                 </div>
               </div>
@@ -104,10 +104,10 @@ const Benchmark = () => {
             <div className="flex items-start gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
               <FileText className="h-6 w-6 text-[#45FFAE] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
                   Academic Documentation
                 </div>
-                <div className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080]">
+                <div className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080]">
                   Complete LaTeX report with 30+ pages of analysis.
                 </div>
               </div>
@@ -117,10 +117,10 @@ const Benchmark = () => {
             <div className="flex items-start gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
               <RefreshCw className="h-6 w-6 text-[#45FFAE] flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE] mb-1">
                   Real-time Processing
                 </div>
-                <div className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080]">
+                <div className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080]">
                   150+ post analysis with LunarCrush API integration.
                 </div>
               </div>
@@ -132,18 +132,18 @@ const Benchmark = () => {
         <div className="flex w-full flex-col gap-6 rounded-3xl bg-[#141414] p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <Info className="h-8 w-8 text-[#45FFAE]" />
-            <h2 className="font-urbanist text-2xl font-bold leading-tight tracking-[0%] text-white sm:text-3xl">
+            <h2 className="font-urbanist text-xl font-bold leading-tight tracking-[0%] text-white sm:text-2xl">
               Evaluation results
             </h2>
           </div>
 
           <div className="flex flex-col gap-3 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
             <div className="flex items-center justify-between py-3 border-b border-[#2A2A2A]">
-              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">
+              <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">
                 Price Direction Accuracy on Cryptocurrency Social Media Dataset
               </div>
               <div className="flex items-center gap-2">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE]">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">
                   98.600
                 </div>
                 <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] bg-[#2A2A2A] px-2 py-1 rounded">
@@ -152,11 +152,11 @@ const Benchmark = () => {
               </div>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[#2A2A2A]">
-              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">
+              <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">
                 Galaxy Score Accuracy on Cryptocurrency Social Media Dataset
               </div>
               <div className="flex items-center gap-2">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE]">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">
                   80.900
                 </div>
                 <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] bg-[#2A2A2A] px-2 py-1 rounded">
@@ -165,11 +165,11 @@ const Benchmark = () => {
               </div>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[#2A2A2A]">
-              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">
+              <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">
                 BERT F1 Score on Cryptocurrency Social Media Dataset
               </div>
               <div className="flex items-center gap-2">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE]">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">
                   0.630
                 </div>
                 <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] bg-[#2A2A2A] px-2 py-1 rounded">
@@ -178,11 +178,11 @@ const Benchmark = () => {
               </div>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[#2A2A2A]">
-              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">
+              <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">
                 BERT F1 Score on Crypto Reasoning Benchmark
               </div>
               <div className="flex items-center gap-2">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE]">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">
                   0.630
                 </div>
                 <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] bg-[#2A2A2A] px-2 py-1 rounded">
@@ -191,11 +191,11 @@ const Benchmark = () => {
               </div>
             </div>
             <div className="flex items-center justify-between py-3">
-              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">
+              <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">
                 ROUGE-L F1 Score on Crypto Reasoning Benchmark
               </div>
               <div className="flex items-center gap-2">
-                <div className="font-urbanist text-base font-bold leading-none tracking-[0%] text-[#45FFAE]">
+                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">
                   0.115
                 </div>
                 <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] bg-[#2A2A2A] px-2 py-1 rounded">
@@ -210,7 +210,7 @@ const Benchmark = () => {
         <div className="flex w-full flex-col gap-6 rounded-3xl bg-[#141414] p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <BarChart3 className="h-8 w-8 text-[#45FFAE]" />
-            <h2 className="font-urbanist text-2xl font-bold leading-tight tracking-[0%] text-white sm:text-3xl">
+            <h2 className="font-urbanist text-xl font-bold leading-tight tracking-[0%] text-white sm:text-2xl">
               Performance Metrics
             </h2>
           </div>
@@ -219,7 +219,7 @@ const Benchmark = () => {
           <div className="flex flex-col gap-4 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
             <div className="flex items-center gap-3">
               <Target className="h-6 w-6 text-[#45FFAE]" />
-              <h3 className="font-urbanist text-lg font-semibold leading-none tracking-[0%] text-white">
+              <h3 className="font-urbanist text-base font-semibold leading-none tracking-[0%] text-white">
                 Market Prediction Accuracy
               </h3>
             </div>
@@ -228,43 +228,43 @@ const Benchmark = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[#2A2A2A]">
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Metric</th>
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Result</th>
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Sample Size</th>
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Performance</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Metric</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Result</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Sample Size</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Performance</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-[#2A2A2A]">
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Price Direction</td>
-                    <td className="py-3 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">98.6%</td>
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">150 posts</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Price Direction</td>
+                    <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">98.6%</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">150 posts</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-[#45FFAE]"></div>
-                        <span className="font-urbanist text-sm leading-none tracking-[0%] text-[#45FFAE]">Excellent</span>
+                        <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#45FFAE]">Excellent</span>
                       </div>
                     </td>
                   </tr>
                   <tr className="border-b border-[#2A2A2A]">
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Galaxy Score</td>
-                    <td className="py-3 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">80.9%</td>
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">150 posts</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Galaxy Score</td>
+                    <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">80.9%</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">150 posts</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-[#FFD700]"></div>
-                        <span className="font-urbanist text-sm leading-none tracking-[0%] text-[#FFD700]">Good</span>
+                        <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#FFD700]">Good</span>
                       </div>
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Price Magnitude</td>
-                    <td className="py-3 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">94.7%</td>
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">Within ±1%</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Price Magnitude</td>
+                    <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">94.7%</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">Within ±1%</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-[#45FFAE]"></div>
-                        <span className="font-urbanist text-sm leading-none tracking-[0%] text-[#45FFAE]">Excellent</span>
+                        <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#45FFAE]">Excellent</span>
                       </div>
                     </td>
                   </tr>
@@ -277,7 +277,7 @@ const Benchmark = () => {
           <div className="flex flex-col gap-4 rounded-2xl bg-[#1A1A1A] p-4 border border-[#2A2A2A]">
             <div className="flex items-center gap-3">
               <Brain className="h-6 w-6 text-[#FF69B4]" />
-              <h3 className="font-urbanist text-lg font-semibold leading-none tracking-[0%] text-white">
+              <h3 className="font-urbanist text-base font-semibold leading-none tracking-[0%] text-white">
                 Semantic Quality (BERT Score)
               </h3>
             </div>
@@ -286,39 +286,39 @@ const Benchmark = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-[#2A2A2A]">
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Metric</th>
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Score</th>
-                    <th className="text-left py-3 px-4 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#808080]">Quality Level</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Metric</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Score</th>
+                    <th className="text-left py-3 px-4 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Quality Level</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b border-[#2A2A2A]">
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">F1 Score</td>
-                    <td className="py-3 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">0.630</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">F1 Score</td>
+                    <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">0.630</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-[#FFD700]"></div>
-                        <span className="font-urbanist text-sm leading-none tracking-[0%] text-[#FFD700]">Good</span>
+                        <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#FFD700]">Good</span>
                       </div>
                     </td>
                   </tr>
                   <tr className="border-b border-[#2A2A2A]">
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Precision</td>
-                    <td className="py-3 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">0.585</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Precision</td>
+                    <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">0.585</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-[#FFD700]"></div>
-                        <span className="font-urbanist text-sm leading-none tracking-[0%] text-[#FFD700]">Good</span>
+                        <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#FFD700]">Good</span>
                       </div>
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-3 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Recall</td>
-                    <td className="py-3 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">0.681</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Recall</td>
+                    <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">0.681</td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <div className="h-3 w-3 rounded-full bg-[#FFD700]"></div>
-                        <span className="font-urbanist text-sm leading-none tracking-[0%] text-[#FFD700]">Good</span>
+                        <span className="font-urbanist text-xs leading-none tracking-[0%] text-[#FFD700]">Good</span>
                       </div>
                     </td>
                   </tr>
@@ -332,7 +332,7 @@ const Benchmark = () => {
         <div className="flex w-full flex-col gap-6 rounded-3xl bg-[#141414] p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <Trophy className="h-8 w-8 text-[#FFD700]" />
-            <h2 className="font-urbanist text-2xl font-bold leading-tight tracking-[0%] text-white sm:text-3xl">
+            <h2 className="font-urbanist text-xl font-bold leading-tight tracking-[0%] text-white sm:text-2xl">
               Performance Benchmarks
             </h2>
           </div>
@@ -341,36 +341,36 @@ const Benchmark = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-[#2A2A2A] bg-[#1F1F1F]">
-                  <th className="text-left py-4 px-4 font-urbanist text-sm font-semibold leading-none tracking-[0%] text-white">Test Category</th>
-                  <th className="text-left py-4 px-4 font-urbanist text-sm font-semibold leading-none tracking-[0%] text-white">Our Model</th>
-                  <th className="text-left py-4 px-4 font-urbanist text-sm font-semibold leading-none tracking-[0%] text-white">GPT-4 Baseline</th>
-                  <th className="text-left py-4 px-4 font-urbanist text-sm font-semibold leading-none tracking-[0%] text-white">Improvement</th>
+                  <th className="text-left py-4 px-4 font-urbanist text-xs font-semibold leading-none tracking-[0%] text-white">Test Category</th>
+                  <th className="text-left py-4 px-4 font-urbanist text-xs font-semibold leading-none tracking-[0%] text-white">Our Model</th>
+                  <th className="text-left py-4 px-4 font-urbanist text-xs font-semibold leading-none tracking-[0%] text-white">GPT-4 Baseline</th>
+                  <th className="text-left py-4 px-4 font-urbanist text-xs font-semibold leading-none tracking-[0%] text-white">Improvement</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-[#2A2A2A]">
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Price Direction</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">98.6%</td>
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">78.4%</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+20.2%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Price Direction</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">98.6%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">78.4%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">+20.2%</td>
                 </tr>
                 <tr className="border-b border-[#2A2A2A]">
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Galaxy Score</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">80.9%</td>
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">65.3%</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+15.6%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Galaxy Score</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">80.9%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">65.3%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">+15.6%</td>
                 </tr>
                 <tr className="border-b border-[#2A2A2A]">
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Reasoning Quality</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">0.630 F1</td>
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">0.580 F1</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+8.6%</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Reasoning Quality</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">0.630 F1</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">0.580 F1</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">+8.6%</td>
                 </tr>
                 <tr>
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-white">Processing Speed</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">&lt;1s</td>
-                  <td className="py-4 px-4 font-urbanist text-sm leading-none tracking-[0%] text-[#808080]">~3s</td>
-                  <td className="py-4 px-4 font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">3x faster</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Processing Speed</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">&lt;1s</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">~3s</td>
+                  <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">3x faster</td>
                 </tr>
               </tbody>
             </table>
@@ -381,19 +381,19 @@ const Benchmark = () => {
         <div className="flex w-full flex-col gap-6 rounded-3xl bg-[#141414] p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-[#45FFAE]" />
-            <h2 className="font-urbanist text-2xl font-bold leading-tight tracking-[0%] text-white sm:text-3xl">
+            <h2 className="font-urbanist text-xl font-bold leading-tight tracking-[0%] text-white sm:text-2xl">
               Live Results & Validation
             </h2>
           </div>
 
           <div className="flex items-center gap-3 mb-2">
             <Target className="h-5 w-5 text-[#45FFAE]" />
-            <h3 className="font-urbanist text-lg font-semibold leading-none tracking-[0%] text-white">
+            <h3 className="font-urbanist text-base font-semibold leading-none tracking-[0%] text-white">
               Real Market Performance
             </h3>
           </div>
 
-          <p className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#808080] mb-4">
+          <p className="font-urbanist text-xs leading-relaxed tracking-[0%] text-[#808080] mb-4">
             Tested on 150 live cryptocurrency posts via LunarCrush API:
           </p>
 
@@ -402,7 +402,7 @@ const Benchmark = () => {
               <div className="h-5 w-5 rounded-full bg-[#45FFAE]/20 flex items-center justify-center">
                 <div className="h-2 w-2 rounded-full bg-[#45FFAE]"></div>
               </div>
-              <h4 className="font-urbanist text-base font-semibold leading-none tracking-[0%] text-white">
+              <h4 className="font-urbanist text-sm font-semibold leading-none tracking-[0%] text-white">
                 Analysis Results:
               </h4>
             </div>
@@ -411,7 +411,7 @@ const Benchmark = () => {
               <div className="flex items-center gap-3 py-2 border-l-2 border-[#45FFAE] pl-4">
                 <BarChart3 className="h-5 w-5 text-[#45FFAE]" />
                 <div className="flex-1">
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">Posts Processed</div>
+                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Posts Processed</div>
                   <div className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] mt-1">150/150 (100%)</div>
                 </div>
               </div>
@@ -421,7 +421,7 @@ const Benchmark = () => {
                   <div className="h-2 w-2 rounded-full bg-[#FFD700]"></div>
                 </div>
                 <div className="flex-1">
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">Price Predictions</div>
+                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Price Predictions</div>
                   <div className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] mt-1">98.6% accuracy</div>
                 </div>
               </div>
@@ -431,7 +431,7 @@ const Benchmark = () => {
                   <div className="h-2 w-2 rounded-full bg-[#FFD700]"></div>
                 </div>
                 <div className="flex-1">
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">Galaxy Scores</div>
+                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Galaxy Scores</div>
                   <div className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] mt-1">80.9% accuracy</div>
                 </div>
               </div>
@@ -439,7 +439,7 @@ const Benchmark = () => {
               <div className="flex items-center gap-3 py-2 border-l-2 border-[#45FFAE] pl-4">
                 <TrendingUp className="h-5 w-5 text-[#45FFAE]" />
                 <div className="flex-1">
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">Direction Accuracy</div>
+                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Direction Accuracy</div>
                   <div className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] mt-1">94.7% within ±1%</div>
                 </div>
               </div>
@@ -447,7 +447,7 @@ const Benchmark = () => {
               <div className="flex items-center gap-3 py-2 border-l-2 border-[#45FFAE] pl-4">
                 <Zap className="h-5 w-5 text-[#45FFAE]" />
                 <div className="flex-1">
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-white">Processing Speed</div>
+                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Processing Speed</div>
                   <div className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] mt-1">&lt;1s per prediction</div>
                 </div>
               </div>

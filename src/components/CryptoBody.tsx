@@ -10,6 +10,7 @@ import blackDot from "../assets/blackDot.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import { useTab } from "../contexts/TabContext"
 import { createChart, ColorType } from "lightweight-charts"
+import { CHAT_API_BASE } from "../utils/constants"
 type ChatMessage = {
   id: number
   role: "user" | "assistant"
@@ -20,7 +21,7 @@ type ChatMessage = {
 }
 
 const body = () => {
-  const { isConnected } = useAccount()
+  const { isConnected, address } = useAccount()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -177,10 +178,17 @@ const body = () => {
     return formattedLines.join('\n')
   }
 
+  const buildChatUrl = () => {
+    const base = `${CHAT_API_BASE}query`
+    return address
+      ? `${base}?wallet_address=${encodeURIComponent(address)}`
+      : base
+  }
+
   const callAPI = async (query: string) => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://a898805l1laff6ulgpvbsc4rqo.ingress.h100.ams2.val.akash.pub/query', {
+      const response = await fetch(buildChatUrl(), {
         method: 'POST',
         headers: {
           'accept': 'application/json',

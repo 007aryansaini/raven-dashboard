@@ -16,6 +16,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { SubscriptionProvider } from './contexts/SubscriptionContext.tsx';
+import { UserMetricsProvider } from './contexts/UserMetricsContext.tsx';
 
 
 const config = getDefaultConfig({
@@ -33,9 +34,11 @@ createRoot(document.getElementById('root')!).render(
         <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-        <SubscriptionProvider>
-          <App />
-        </SubscriptionProvider>
+          <SubscriptionProvider>
+            <UserMetricsProvider>
+              <App />
+            </UserMetricsProvider>
+          </SubscriptionProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

@@ -8,6 +8,7 @@ import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
+import { CHAT_API_BASE } from "../utils/constants"
 type ChatMessage = {
   id: number
   role: "user" | "assistant"
@@ -17,7 +18,7 @@ type ChatMessage = {
 }
 
 const Home = () => {
-  const { isConnected } = useAccount()
+  const { isConnected, address } = useAccount()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -154,10 +155,17 @@ const Home = () => {
     return formattedLines.join('\n')
   }
 
+  const buildChatUrl = () => {
+    const base = `${CHAT_API_BASE}query`
+    return address
+      ? `${base}?wallet_address=${encodeURIComponent(address)}`
+      : base
+  }
+
   const callAPI = async (query: string) => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://a898805l1laff6ulgpvbsc4rqo.ingress.h100.ams2.val.akash.pub/query', {
+      const response = await fetch(buildChatUrl(), {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -299,13 +307,6 @@ const Home = () => {
            {messages.length > 0 && (
              /* Chat Interface */
              <div className="flex-1 w-full max-w-4xl flex flex-col gap-4 min-h-0">
-               <div className="flex flex-row items-center justify-between">
-                 <div className="flex flex-row gap-2 items-center">
-                   <img src={bolt} alt="bolt"  className="h-3 w-3"/>
-                   <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
-                   <MoveRight className="text-[#808080] text-center"/>
-                 </div>
-               </div>
                <div className="flex-1 rounded-3xl bg-[#141414] p-6 flex flex-col min-h-0 overflow-hidden">
                  <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-4 space-y-4">
                    {messages.map((message) => (

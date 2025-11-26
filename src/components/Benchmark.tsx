@@ -37,7 +37,7 @@ const Benchmark = () => {
           </div>
           
           <p className="font-urbanist text-sm leading-relaxed tracking-[0%] text-[#D1D1D1]">
-            GPU-optimized fine-tuning of GPT-OSS-20B for cryptocurrency social media analysis using Adaptive LoRA (AdaLoRA). This project demonstrates state-of-the-art parameter-efficient fine-tuning achieving <span className="font-bold text-[#45FFAE]">98.6% price prediction accuracy</span> with only <span className="font-bold text-[#45FFAE]">0.1% trainable parameters</span>.
+            GPU-optimized fine-tuning of Sota-Gpt-oss-20b for cryptocurrency social media analysis using Adaptive LoRA (AdaLoRA). This project demonstrates state-of-the-art parameter-efficient fine-tuning achieving <span className="font-bold text-[#45FFAE]">98.6% price prediction accuracy</span> with only <span className="font-bold text-[#45FFAE]">0.1% trainable parameters</span>.
           </p>
 
           <div className="flex items-center gap-3">

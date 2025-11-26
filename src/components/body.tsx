@@ -7,6 +7,7 @@ import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
+import { CHAT_API_BASE } from "../utils/constants"
 import polymarketLogo from "../assets/polymarketLogo.svg"
 import card1 from "../assets/card1.svg"
 import card2 from "../assets/card2.svg"
@@ -35,7 +36,7 @@ const cardMapping: Record<string, string> = {
 }
 
 const body = () => {
-  const { isConnected } = useAccount()
+  const { isConnected, address } = useAccount()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -176,10 +177,17 @@ const body = () => {
     return formattedLines.join('\n')
   }
 
+  const buildChatUrl = () => {
+    const base = `${CHAT_API_BASE}query`
+    return address
+      ? `${base}?wallet_address=${encodeURIComponent(address)}`
+      : base
+  }
+
   const callAPI = async (query: string) => {
     try {
       setIsLoading(true)
-      const response = await fetch('http://a898805l1laff6ulgpvbsc4rqo.ingress.h100.ams2.val.akash.pub/query', {
+      const response = await fetch(buildChatUrl(), {
         method: 'POST',
         headers: {
           'accept': 'application/json',

@@ -20,6 +20,7 @@ import { useSubscription } from '../contexts/SubscriptionContext'
 import contractABI from '../utils/contractABI.json'
 import { BACKEND_URL, CHAIN_ID_TO_CONTRACT_ADDRESSES } from '../utils/constants'
 import { erc20Abi } from 'viem'
+import { useUserMetrics } from '../contexts/UserMetricsContext'
 
 const SideBar = () => {
   const { setActiveTab } = useTab()
@@ -36,6 +37,7 @@ const SideBar = () => {
   const [subcribeButtonText, setSubcribeButtonText] = useState("Subscribe")
   const [isSubscribing, setIsSubscribing] = useState(false)
   const { isUserSubscribed, setIsUserSubscribed, showSubscriptionModal, setShowSubscriptionModal } = useSubscription()
+  const { refreshMetrics } = useUserMetrics()
 
   // Helper function to extract Twitter username
   const getTwitterUsername = (user: User | null): string => {
@@ -195,6 +197,7 @@ const SideBar = () => {
       })
 
       setIsUserSubscribed(true)
+      await refreshMetrics()
 
     } catch (error: any) {
       console.error('Subscription error:', error)
@@ -359,7 +362,7 @@ const SideBar = () => {
 </div>
 
       <div className="flex flex-col w-full items-center p-2 gap-4">
-        {twitterUser && !isUserSubscribed && (
+        {twitterUser && (
           <div 
             className="flex flex-row items-center cursor-pointer gap-2 w-56 h-14 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-2 hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out"
             onClick={handleBuySubscription}

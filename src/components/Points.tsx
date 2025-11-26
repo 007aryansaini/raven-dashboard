@@ -1,9 +1,72 @@
 
 import { Share2, Copy, X, Twitter, MessageCircle, Check } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useAccount } from "wagmi"
+import { BACKEND_URL } from "../utils/constants"
 
 const Points = () => {
   const [activeTab, setActiveTab] = useState("Quests")
+  const [xp, setXp] = useState<number | null>(null)
+  const [isXpLoading, setIsXpLoading] = useState(false)
+  const [xpError, setXpError] = useState<string | null>(null)
+  const { address, isConnected } = useAccount()
+
+  useEffect(() => {
+    if (!address || !isConnected) {
+      setXp(null)
+      setXpError(null)
+      setIsXpLoading(false)
+      return
+    }
+
+    const controller = new AbortController()
+
+    const loadXp = async () => {
+      setIsXpLoading(true)
+      setXpError(null)
+
+      try {
+        const response = await fetch(`${BACKEND_URL}users/${address}/xp`, {
+          signal: controller.signal
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to load XP: ${response.status}`)
+        }
+
+        const data = await response.json()
+        const xpValue = Number(
+          data?.xp ??
+            data?.points ??
+            data?.xpPoints ??
+            data?.xpTotal ??
+            data?.xp_total ??
+            0
+        )
+
+        setXp(Number.isFinite(xpValue) ? xpValue : 0)
+      } catch (error: any) {
+        if (controller.signal.aborted) return
+        console.error("Error fetching XP:", error)
+        setXp(0)
+        setXpError("Unable to load XP")
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsXpLoading(false)
+        }
+      }
+    }
+
+    loadXp()
+
+    return () => {
+      controller.abort()
+    }
+  }, [address, isConnected])
+
+  const xpDisplayValue = xp !== null ? xp.toLocaleString("en-US") : "00"
+  const xpDisplayText = isXpLoading ? "Loading..." : `${xpDisplayValue} XP`
+
   return (
     <div className="relative flex min-h-full flex-col items-center gap-8 overflow-hidden px-4 py-10 text-white sm:px-6 lg:px-10"  
          style={{
@@ -30,26 +93,31 @@ const Points = () => {
                        <div className="flex w-full flex-col gap-4 md:flex-row">
                          {/* Achievement Card */}
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                             <div className="flex flex-1 flex-row items-center gap-4">
-                               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2A2A2A]">
-                                 <div className="h-8 w-8 rounded-full bg-[#3A3A3A]"></div>
-                               </div>
-                               <div className="flex flex-1 flex-col gap-2">
-                                 <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">Title here</div>
-                                 <div className="flex flex-row items-center gap-2">
-                                   <div className="flex items-center gap-1 rounded-full bg-[#45FFAE] px-2 py-1 text-black">
-                                     <div className="h-2 w-2 rounded-full bg-white"></div>
-                                     <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">Level-0</span>
-                                   </div>
-                                 </div>
-                                 <div className="h-1 w-full rounded-full bg-[#2A2A2A]">
-                                   <div className="h-full w-0 rounded-full bg-[#45FFAE]"></div>
-                                 </div>
-                               </div>
-                             </div>
-                             <div className="font-urbanist text-2xl font-bold leading-none tracking-[0%] text-[#45FFAE]">00 RP</div>
-                           </div>
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-1 flex-row items-center gap-4">
+                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2A2A2A]">
+                                <div className="h-8 w-8 rounded-full bg-[#3A3A3A]"></div>
+                              </div>
+                              <div className="flex flex-1 flex-col gap-2">
+                                <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">Title here</div>
+                                <div className="flex flex-row items-center gap-2">
+                                  <div className="flex items-center gap-1 rounded-full bg-[#45FFAE] px-2 py-1 text-black">
+                                    <div className="h-2 w-2 rounded-full bg-white"></div>
+                                    <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">Level-0</span>
+                                  </div>
+                                </div>
+                                <div className="h-1 w-full rounded-full bg-[#2A2A2A]">
+                                  <div className="h-full w-0 rounded-full bg-[#45FFAE]"></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="font-urbanist text-2xl font-bold leading-none tracking-[0%] text-[#45FFAE]">{xpDisplayText}</div>
+                              {xpError && (
+                                <div className="text-right text-xs font-urbanist text-[#FF7D7D]">{xpError}</div>
+                              )}
+                            </div>
+                          </div>
                            <button className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A]">
                              <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share it to your achievement</span>
                              <Share2 className="h-4 w-4 text-white" />
@@ -132,7 +200,7 @@ const Points = () => {
                                    <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on twitter</div>
                                    <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Share to one of your friends on twitter.</div>
                                  </div>
-                                 <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 RP</div>
+                                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 XP</div>
                                </div>
 
                                {/* Share on Discord Quest */}
@@ -144,7 +212,7 @@ const Points = () => {
                                    <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on Discord</div>
                                    <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Share to one of your friends on Discord.</div>
                                  </div>
-                                 <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 RP</div>
+                                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 XP</div>
                                </div>
 
                                {/* Share to 5 friends Quest */}
@@ -160,11 +228,11 @@ const Points = () => {
                                    <div className="mt-2 h-1 w-full rounded-full bg-[#2A2A2A]">
                                      <div className="h-full w-2/5 rounded-full bg-[#45FFAE]"></div>
                                    </div>
-                                   <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">3 shares away from +250RP</div>
+                                  <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">3 shares away from +250 XP</div>
                                    <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Resets in 13 hours</div>
                                    <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">$110 / $250</div>
                                  </div>
-                                 <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+250 RP</div>
+                                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+250 XP</div>
                                </div>
                              </div>
                            </div>
@@ -187,7 +255,7 @@ const Points = () => {
                                     <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on twitter</div>
                                     <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Refreshes daily</div>
                                    </div>
-                                  <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 RP</div>
+                                  <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 XP</div>
                                  </div>
                                ))}
                              </div>
@@ -206,9 +274,9 @@ const Points = () => {
                             <div className="flex flex-col gap-3 rounded-2xl bg-[#121212]/20 p-2">
                                {/* Points History Items */}
                                {[
-                                 { action: "Share on twitter", points: "+25 RP", status: "Received" },
-                                 { action: "Share on twitter", points: "+25 RP", status: "Received" },
-                                 { action: "Share on twitter", points: "+25 RP", status: "Received" }
+                                { action: "Share on twitter", points: "+25 XP", status: "Received" },
+                                { action: "Share on twitter", points: "+25 XP", status: "Received" },
+                                { action: "Share on twitter", points: "+25 XP", status: "Received" }
                                ].map((item, index) => (
                                 <div key={index} className="flex w-full flex-row items-center gap-4 rounded-2xl bg-[#1A1A1A] p-3">
                                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2A2A2A]">

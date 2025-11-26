@@ -15,14 +15,17 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { useAccount  } from 'wagmi';
+import { BACKEND_URL } from "../utils/constants";
 
 const NavBar = () => {
 
-   const { openConnectModal } = useConnectModal();
-   const { openAccountModal } = useAccountModal();
-   const { address , isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
+  const { openAccountModal } = useAccountModal();
+  const { address , isConnected } = useAccount();
    const [twitterUser, setTwitterUser] = useState<User | null>(null);
    const [isCheckingAuth, setIsCheckingAuth] = useState(false);
+   const [creditsPending, setCreditsPending] = useState<number | null>(null);
+   const [inferenceRemaining, setInferenceRemaining] = useState<number | null>(null);
 
    // Helper function to extract Twitter username
    const getTwitterUsername = (user: User | null): string => {
@@ -56,6 +59,94 @@ const NavBar = () => {
 
     return () => unsubscribe();
    }, []);
+
+  const formatMetricValue = (value: number | null) => {
+    return value !== null ? value.toLocaleString("en-US") : "..."
+  };
+
+  useEffect(() => {
+    if (!address || !isConnected) {
+      setCreditsPending(null);
+      setInferenceRemaining(null);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const numericValue = (value: unknown): number => {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : 0;
+    };
+
+    const fetchCredits = async () => {
+      setCreditsPending(null);
+      try {
+        const creditsResponse = await fetch(`${BACKEND_URL}users/${address}/credits/pending`, {
+          signal: controller.signal
+        });
+
+        if (!creditsResponse.ok) {
+          throw new Error(`Failed to fetch credits: ${creditsResponse.status}`);
+        }
+
+        const data = await creditsResponse.json();
+        const creditsValue = numericValue(
+          data?.pendingCredits ??
+            data?.creditsPending ??
+            data?.credits ??
+            data?.pending ??
+            data?.pending_credits ??
+            0
+        );
+
+        setCreditsPending(creditsValue);
+      } catch (error: any) {
+        if (controller.signal.aborted) return;
+        console.error("Error fetching credits:", error);
+        setCreditsPending(0);
+      }
+    };
+
+    const fetchInferenceRemaining = async () => {
+      setInferenceRemaining(null);
+      try {
+        const mode = "full";
+        const inferenceResponse = await fetch(
+          `${BACKEND_URL}users/${address}/inference/remaining?mode=${encodeURIComponent(mode)}`,
+          {
+            signal: controller.signal
+          }
+        );
+
+        if (!inferenceResponse.ok) {
+          throw new Error(`Failed to fetch inference remaining: ${inferenceResponse.status}`);
+        }
+
+        const data = await inferenceResponse.json();
+        const inferenceValue = numericValue(
+          data?.remaining ??
+            data?.inferenceRemaining ??
+            data?.inference_remaining ??
+            data?.inference ??
+            data?.result ??
+            0
+        );
+
+        setInferenceRemaining(inferenceValue);
+      } catch (error: any) {
+        if (controller.signal.aborted) return;
+        console.error("Error fetching inference remaining:", error);
+        setInferenceRemaining(0);
+      }
+    };
+
+    fetchCredits();
+    fetchInferenceRemaining();
+
+    return () => {
+      controller.abort();
+    };
+  }, [address, isConnected]);
 
 
    const handleConnectWallet = () => {
@@ -179,12 +270,12 @@ const NavBar = () => {
             <div className="flex flex-row items-center gap-3">
               <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
                 <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                  Credits: <span className="font-semibold">100</span>
+                  Credit Left: <span className="font-semibold">{formatMetricValue(creditsPending)}</span>
                 </div>
               </div>
               <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
                 <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                  Inferences: <span className="font-semibold">10</span>
+                  Inference Left: <span className="font-semibold">{formatMetricValue(inferenceRemaining)}</span>
                 </div>
               </div>
             </div>

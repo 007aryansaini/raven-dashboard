@@ -16,6 +16,7 @@ function App() {
           <Route path="/crypto" element={<Dashboard />} />
           <Route path="/points" element={<Dashboard />} />
           <Route path="/score" element={<Dashboard />} />
+          <Route path="/mathematical-accuracy" element={<Dashboard />} />
         </Routes>
         <ToastContainer
           position="top-right"

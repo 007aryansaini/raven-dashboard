@@ -72,7 +72,11 @@ const Setting = ({ onClose }: SettingProps) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-600">
         <div className="flex items-center gap-3">
-          <img src={userProfile} alt="user profile" className="w-8 h-8 rounded" />
+          <img 
+            src={twitterUser?.photoURL || userProfile} 
+            alt="user profile" 
+            className="w-8 h-8 rounded-full object-cover" 
+          />
           <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#808080]">
             {username}
           </div>

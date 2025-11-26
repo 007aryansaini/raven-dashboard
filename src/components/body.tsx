@@ -582,7 +582,7 @@ const body = () => {
                  {isLoading && (
                    <div className="flex justify-start">
                      <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-[#121212] text-[#FFFFFF]">
-                       <div className="font-urbanist text-sm text-[#808080]">Processing your query...</div>
+                       <div className="font-urbanist text-sm text-[#808080]">Raven is predicting...</div>
                      </div>
                    </div>
                  )}

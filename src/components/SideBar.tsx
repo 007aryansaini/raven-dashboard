@@ -26,6 +26,7 @@ const SideBar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isScoreDropdownOpen, setIsScoreDropdownOpen] = useState(false)
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const { address, isConnected } = useAccount()
   const { writeContractAsync } = useWriteContract()
@@ -215,16 +216,20 @@ const SideBar = () => {
       if (!target.closest('[data-settings-modal]') && !target.closest('[data-settings-button]')) {
         setIsSettingsOpen(false)
       }
+      // Close score dropdown if clicking outside
+      if (!target.closest('[data-score-dropdown]') && !target.closest('[data-score-button]')) {
+        setIsScoreDropdownOpen(false)
+      }
     }
 
-    if (isSettingsOpen) {
+    if (isSettingsOpen || isScoreDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isSettingsOpen])
+  }, [isSettingsOpen, isScoreDropdownOpen])
 
   const handleSettingsClick = () => {
     setIsSettingsOpen(!isSettingsOpen)
@@ -286,21 +291,6 @@ const SideBar = () => {
 </div>
 </div>
 
-
-<div className="group flex flex-row items-center justify-between ml-3 gap-2 w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out">
-{/* <div className="flex flex-row items-center gap-2">
-<img className="w-8 h-8 group-hover:fill-[#45FFAE] transition-all duration-200" src={vaults} alt="vaults" />
-<div className="font-urbanist font-normal text-sm leading-none tracking-[0%] group-hover:text-[#45FFAE] text-[#808080] transition-colors duration-200">Vaults</div>
-</div> */}
-
-
-<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#45FFAE]">
-<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-<path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-</svg>
-</div>
-</div>
-
 <div className="group flex flex-row items-center justify-between gap-2 ml-3 w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out" onClick={() => navigate('/points')}>
 <div className="flex flex-row items-center gap-2">
 <img className="w-8 h-8 group-hover:fill-[#45FFAE] transition-all duration-200" src={points} alt="points" />
@@ -313,24 +303,58 @@ const SideBar = () => {
 </div>
 </div>
 
+<div className="relative" data-score-dropdown>
 <div className={`group flex flex-row items-center justify-between gap-2 ml-3 w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out ${
-  location.pathname === '/score' ? 'bg-[#1a1a1a]' : ''
-}`} onClick={() => navigate('/score')}>
+  location.pathname === '/score' || location.pathname === '/mathematical-accuracy' ? 'bg-[#1a1a1a]' : ''
+}`} onClick={() => setIsScoreDropdownOpen(!isScoreDropdownOpen)} data-score-button>
 <div className="flex flex-row items-center gap-2">
 <svg className={`w-8 h-8 transition-all duration-200 ${
-  location.pathname === '/score' ? 'text-[#45FFAE]' : 'text-[#808080] group-hover:text-[#45FFAE]'
+  location.pathname === '/score' || location.pathname === '/mathematical-accuracy' ? 'text-[#45FFAE]' : 'text-[#808080] group-hover:text-[#45FFAE]'
 }`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
 </svg>
 <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] group-hover:text-[#45FFAE] transition-colors duration-200 ${
-  location.pathname === '/score' ? 'text-[#45FFAE]' : 'text-[#808080]'
-}`}>Score</div>
+  location.pathname === '/score' || location.pathname === '/mathematical-accuracy' ? 'text-[#45FFAE]' : 'text-[#808080]'
+}`}>Benchmark</div>
 </div>
-<div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#45FFAE]">
-<svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+<div className={`transition-transform duration-200 ${isScoreDropdownOpen ? 'rotate-90' : ''}`}>
+<svg className="w-4 h-4 text-[#45FFAE]" fill="currentColor" viewBox="0 0 20 20">
 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
 </svg>
 </div>
+</div>
+
+{/* Dropdown Menu */}
+{isScoreDropdownOpen && (
+  <div className="absolute left-3 top-16 w-56 bg-[#1a1a1a] border border-[#45FFAE]/30 rounded-lg shadow-lg z-50 overflow-hidden">
+    <div 
+      className={`flex flex-row items-center gap-2 px-4 py-3 cursor-pointer hover:bg-[#292929] transition-colors duration-200 ${
+        location.pathname === '/score' ? 'bg-[#292929]' : ''
+      }`}
+      onClick={() => {
+        navigate('/score')
+        setIsScoreDropdownOpen(false)
+      }}
+    >
+      <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
+        location.pathname === '/score' ? 'text-[#45FFAE]' : 'text-[#808080]'
+      }`}>FT Reasoning Model</div>
+    </div>
+    <div 
+      className={`flex flex-row items-center gap-2 px-4 py-3 cursor-pointer hover:bg-[#292929] transition-colors duration-200 border-t border-[#45FFAE]/10 ${
+        location.pathname === '/mathematical-accuracy' ? 'bg-[#292929]' : ''
+      }`}
+      onClick={() => {
+        navigate('/mathematical-accuracy')
+        setIsScoreDropdownOpen(false)
+      }}
+    >
+      <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
+        location.pathname === '/mathematical-accuracy' ? 'text-[#45FFAE]' : 'text-[#808080]'
+      }`}>Mathematical accuracy</div>
+    </div>
+  </div>
+)}
 </div>
 </div>
 

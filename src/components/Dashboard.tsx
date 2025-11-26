@@ -6,6 +6,7 @@ import CryptoBody from "./CryptoBody"
 import Points from "./Points"
 import Home from "./Home"
 import Benchmark from "./Benchmark"
+import MathematicalAccuracy from "./MathematicalAccuracy"
 
 const Dashboard = () => {
   const location = useLocation()
@@ -28,6 +29,8 @@ const Dashboard = () => {
             <CryptoBody />
           ) : location.pathname === '/score' ? (
             <Benchmark />
+          ) : location.pathname === '/mathematical-accuracy' ? (
+            <MathematicalAccuracy />
           ) : (
             <Home />
           )}

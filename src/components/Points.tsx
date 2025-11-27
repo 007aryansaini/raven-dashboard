@@ -1,8 +1,12 @@
 
 import { Share2, Copy, X, Twitter, MessageCircle, Check } from "lucide-react"
-import { useEffect, useState } from "react"
+import { customAlphabet } from "nanoid"
+import { useEffect, useMemo, useState } from "react"
 import { useAccount } from "wagmi"
-import { BACKEND_URL } from "../utils/constants"
+import { getBackendBaseUrl, getReferralBaseUrl } from "../utils/constants"
+
+const REFERRAL_CODE_KEY = "raven-referral-code"
+const referralCodeGenerator = customAlphabet("ABCDEFGHJKMNPQRSTUVWXYZ23456789", 8)
 
 const Points = () => {
   const [activeTab, setActiveTab] = useState("Quests")
@@ -10,6 +14,8 @@ const Points = () => {
   const [isXpLoading, setIsXpLoading] = useState(false)
   const [xpError, setXpError] = useState<string | null>(null)
   const { address, isConnected } = useAccount()
+  const [referralCode, setReferralCode] = useState<string>("")
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle")
 
   useEffect(() => {
     if (!address || !isConnected) {
@@ -26,7 +32,7 @@ const Points = () => {
       setXpError(null)
 
       try {
-        const response = await fetch(`${BACKEND_URL}users/${address}/xp`, {
+        const response = await fetch(`${getBackendBaseUrl()}users/${address}/xp`, {
           signal: controller.signal
         })
 
@@ -63,6 +69,51 @@ const Points = () => {
       controller.abort()
     }
   }, [address, isConnected])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const storageKey = address
+      ? `${REFERRAL_CODE_KEY}-${address.toLowerCase()}`
+      : REFERRAL_CODE_KEY
+
+    const storedCode = window.localStorage.getItem(storageKey)
+    if (storedCode) {
+      setReferralCode(storedCode)
+      return
+    }
+
+    const generatedCode = referralCodeGenerator()
+    window.localStorage.setItem(storageKey, generatedCode)
+    setReferralCode(generatedCode)
+  }, [address])
+
+  const referralUrl = useMemo(
+    () =>
+      referralCode
+        ? `${getReferralBaseUrl()}${referralCode}`
+        : "Generating referral link…",
+    [referralCode]
+  )
+
+  const referralHandle = useMemo(
+    () => (referralCode ? `@${referralCode.toLowerCase()}` : "@user"),
+    [referralCode]
+  )
+
+  const handleCopyReferralLink = async () => {
+    if (!referralCode || typeof navigator === "undefined") return
+
+    try {
+      await navigator.clipboard.writeText(referralUrl)
+      setCopyStatus("copied")
+      setTimeout(() => setCopyStatus("idle"), 2200)
+    } catch (error) {
+      console.error("Failed to copy referral link", error)
+      setCopyStatus("error")
+      setTimeout(() => setCopyStatus("idle"), 2200)
+    }
+  }
 
   const xpDisplayValue = xp !== null ? xp.toLocaleString("en-US") : "00"
   const xpDisplayText = isXpLoading ? "Loading..." : `${xpDisplayValue} XP`
@@ -126,17 +177,29 @@ const Points = () => {
 
                          {/* Invite Friends Card */}
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                             <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Invite your friends</div>
-                             <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">@username</div>
-                           </div>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Invite your friends</div>
+                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{referralHandle}</div>
+                            </div>
                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                             <div className="flex-1 rounded-xl bg-[#2A2A2A] px-3 py-2">
-                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1]">https://example.com/referral/username</span>
+                             <div className="flex flex-1 items-center rounded-xl bg-[#2A2A2A] px-3 py-2">
+                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1]">
+                                 {referralUrl}
+                               </span>
                              </div>
-                             <button className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A]">
+                             <button
+                               onClick={handleCopyReferralLink}
+                               className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A]"
+                             >
                                <Copy className="h-4 w-4 text-white" />
                              </button>
+                           </div>
+                           <div className="text-xs font-urbanist text-[#45FFAE]">
+                             {copyStatus === "copied"
+                               ? "Link copied!"
+                               : copyStatus === "error"
+                                 ? "Copy failed"
+                                 : null}
                            </div>
                            <button className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A]">
                              <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on</span>

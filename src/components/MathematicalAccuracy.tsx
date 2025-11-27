@@ -74,10 +74,9 @@ const parseMetricResponse = (payload: unknown): MetricRow[] => {
         let latestTimestamp: number | null = null
 
         Object.entries(modelData).forEach(([modelKey, timestampData]) => {
-          if (!Object.prototype.hasOwnProperty.call(MODEL_NAME_MAP, modelKey)) return
+          const typedModelKey = (modelKey.split("_")[0] as ModelKey)
+          if (!Object.prototype.hasOwnProperty.call(MODEL_NAME_MAP, typedModelKey)) return
           if (!timestampData || typeof timestampData !== "object") return
-
-          const typedModelKey = modelKey as ModelKey
 
           Object.entries(timestampData).forEach(([timestampKey, rawValue]) => {
             const numericTimestamp = Number(timestampKey)

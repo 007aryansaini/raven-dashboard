@@ -7,11 +7,13 @@ import {
   type ReactNode,
 } from "react";
 import { useAccount } from "wagmi";
-import { BACKEND_URL } from "../utils/constants";
+import { getBackendBaseUrl } from "../utils/constants";
 
 interface UserMetricsContextValue {
   creditsPending: number | null;
   inferenceRemaining: number | null;
+  hasActiveSubscription: boolean;
+  subscriptionPlanId: number | null;
   refreshMetrics: () => Promise<void>;
 }
 
@@ -19,126 +21,130 @@ const UserMetricsContext = createContext<UserMetricsContextValue | undefined>(
   undefined
 );
 
+const parseNumericField = (value: unknown): number | null => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const num = Number(value);
+  return Number.isFinite(num) && num > 0 ? num : null;
+};
+
+const parseBooleanField = (value: unknown): boolean => {
+  if (typeof value === "string") {
+    return value.toLowerCase() === "true";
+  }
+
+  return Boolean(value);
+};
+
 export const UserMetricsProvider = ({ children }: { children: ReactNode }) => {
   const { address, isConnected } = useAccount();
   const [creditsPending, setCreditsPending] = useState<number | null>(null);
-  const [inferenceRemaining, setInferenceRemaining] = useState<number | null>(null);
+  const [inferenceRemaining, setInferenceRemaining] = useState<number | null>(
+    null
+  );
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [subscriptionPlanId, setSubscriptionPlanId] = useState<number | null>(
+    null
+  );
 
   const numericValue = useCallback((value: unknown): number => {
     const num = Number(value);
     return Number.isFinite(num) ? num : 0;
   }, []);
 
-  const fetchCreditsPending = useCallback(
+  const fetchUserSummary = useCallback(
     async (signal?: AbortSignal) => {
       if (!address || !isConnected) {
         setCreditsPending(null);
+        setInferenceRemaining(null);
+        setHasActiveSubscription(false);
+        setSubscriptionPlanId(null);
         return;
       }
 
       setCreditsPending(null);
+      setInferenceRemaining(null);
 
       try {
-        const response = await fetch(`${BACKEND_URL}users/${address}/credits/pending`, {
+        const response = await fetch(`${getBackendBaseUrl()}users/${address}/summary`, {
           signal,
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch credits: ${response.status}`);
+          throw new Error(`Failed to fetch user summary: ${response.status}`);
         }
 
         const data = await response.json();
         const creditsValue = numericValue(
-          data?.pendingCredits ??
+          data?.credits ??
+            data?.pendingCredits ??
             data?.creditsPending ??
-            data?.credits ??
             data?.pending ??
             data?.pending_credits ??
             0
         );
-
-        setCreditsPending(creditsValue);
-      } catch (error: any) {
-        if (signal?.aborted) return;
-        console.error("Error fetching credits:", error);
-        setCreditsPending(0);
-      }
-    },
-    [address, isConnected, numericValue]
-  );
-
-  const fetchInferenceRemaining = useCallback(
-    async (signal?: AbortSignal) => {
-      if (!address || !isConnected) {
-        setInferenceRemaining(null);
-        return;
-      }
-
-      setInferenceRemaining(null);
-
-      try {
-        const mode = "full";
-        const response = await fetch(
-          `${BACKEND_URL}users/${address}/inference/remaining?mode=${encodeURIComponent(
-            mode
-          )}`,
-          {
-            signal,
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch inference remaining: ${response.status}`);
-        }
-
-        const data = await response.json();
         const inferenceValue = numericValue(
-          data?.remaining ??
+          data?.inference?.remaining ??
             data?.inferenceRemaining ??
             data?.inference_remaining ??
             data?.inference ??
+            data?.remaining ??
             data?.result ??
             0
         );
 
+        const planId = parseNumericField(
+          data?.subscription?.planId ??
+            data?.subscription?.plan?.planId ??
+            data?.subscription?.plan?.id ??
+            null
+        );
+
+        const activeFlag = parseBooleanField(
+          data?.activeSubscription ??
+            data?.subscription?.plan?.active ??
+            data?.subscription?.active ??
+            false
+        );
+
+        setCreditsPending(creditsValue);
         setInferenceRemaining(inferenceValue);
+        setSubscriptionPlanId(planId);
+        setHasActiveSubscription(activeFlag || Boolean(planId));
       } catch (error: any) {
         if (signal?.aborted) return;
-        console.error("Error fetching inference remaining:", error);
+        console.error("Error fetching user summary:", error);
+        setCreditsPending(0);
         setInferenceRemaining(0);
+        setHasActiveSubscription(false);
+        setSubscriptionPlanId(null);
       }
     },
     [address, isConnected, numericValue]
-  );
-
-  const fetchMetrics = useCallback(
-    async (signal?: AbortSignal) => {
-      await Promise.all([
-        fetchCreditsPending(signal),
-        fetchInferenceRemaining(signal),
-      ]);
-    },
-    [fetchCreditsPending, fetchInferenceRemaining]
   );
 
   const refreshMetrics = useCallback(async () => {
     const controller = new AbortController();
     try {
-      await fetchMetrics(controller.signal);
+      await fetchUserSummary(controller.signal);
     } finally {
       controller.abort();
     }
-  }, [fetchMetrics]);
+  }, [fetchUserSummary]);
 
   useEffect(() => {
     const controller = new AbortController();
-    void fetchMetrics(controller.signal);
+    void fetchUserSummary(controller.signal);
     return () => controller.abort();
-  }, [fetchMetrics]);
+  }, [fetchUserSummary]);
 
   const value = {
     creditsPending,
     inferenceRemaining,
+    hasActiveSubscription,
+    subscriptionPlanId,
     refreshMetrics,
   };
 

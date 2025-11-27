@@ -18,7 +18,7 @@ import { useAccount, useWriteContract, usePublicClient, useWalletClient } from '
 import { toast } from 'react-toastify'
 import { useSubscription } from '../contexts/SubscriptionContext'
 import contractABI from '../utils/contractABI.json'
-import { BACKEND_URL, CHAIN_ID_TO_CONTRACT_ADDRESSES } from '../utils/constants'
+import { CHAIN_ID_TO_CONTRACT_ADDRESSES } from '../utils/constants'
 import { erc20Abi } from 'viem'
 import { useUserMetrics } from '../contexts/UserMetricsContext'
 
@@ -37,7 +37,7 @@ const SideBar = () => {
   const [subcribeButtonText, setSubcribeButtonText] = useState("Subscribe")
   const [isSubscribing, setIsSubscribing] = useState(false)
   const { isUserSubscribed, setIsUserSubscribed, showSubscriptionModal, setShowSubscriptionModal } = useSubscription()
-  const { refreshMetrics } = useUserMetrics()
+  const { refreshMetrics, hasActiveSubscription, subscriptionPlanId, inferenceRemaining } = useUserMetrics()
 
   // Helper function to extract Twitter username
   const getTwitterUsername = (user: User | null): string => {
@@ -70,30 +70,13 @@ const SideBar = () => {
   }, [])
 
   useEffect(() => {
-    const checkIfUserIsSubscribed = async () => {
-      if (!address) {
-        return
-      }
-      try {
-        const response = await fetch(`${BACKEND_URL}users/${address}/has-active-subscription`)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const data = await response.json()
-        setIsUserSubscribed(data.hasActiveSubscription)
-      } catch (error: any) {
-        console.error('Error checking if user is subscribed:', error)
-        // Silently fail - don't show toast for this error as it's not critical
-      }
+    if (!isConnected) {
+      setIsUserSubscribed(false)
+      return
     }
 
-    if (isConnected && address) {
-      checkIfUserIsSubscribed()
-    } else {
-      // Reset subscription status when wallet is disconnected
-      setIsUserSubscribed(false)
-    }
-  }, [isConnected, address, setIsUserSubscribed])
+    setIsUserSubscribed(hasActiveSubscription)
+  }, [isConnected, hasActiveSubscription, setIsUserSubscribed])
 
   const handleBuySubscription = () => {
     setShowSubscriptionModal(true)
@@ -131,6 +114,55 @@ const SideBar = () => {
     }
   ]
 
+  const currentPlanId = subscriptionPlanId ?? 0
+  const inferenceLeft = inferenceRemaining ?? 0
+  const hasCurrentPlan = hasActiveSubscription && currentPlanId > 0
+
+  const getPlanStatus = (
+    planId: number
+  ): { disabled: boolean; note: string | null } => {
+    if (!hasCurrentPlan) {
+      return { disabled: false, note: null }
+    }
+
+    if (planId < currentPlanId) {
+      return {
+        disabled: true,
+        note: `Already on Plan ${currentPlanId}`,
+      }
+    }
+
+    if (planId === currentPlanId) {
+      if (inferenceLeft > 0) {
+        return {
+          disabled: true,
+          note: `Already on Plan ${currentPlanId}`,
+        }
+      }
+
+      return {
+        disabled: false,
+        note: "Inference depleted — ready to renew",
+      }
+    }
+
+    return {
+      disabled: false,
+      note: "Upgrade available",
+    }
+  }
+
+  useEffect(() => {
+    if (!selectedPlan) {
+      return
+    }
+
+    const status = getPlanStatus(selectedPlan)
+    if (status.disabled) {
+      setSelectedPlan(null)
+    }
+  }, [selectedPlan, hasActiveSubscription, subscriptionPlanId, inferenceRemaining])
+
   const handleSubscribe = async () => {
     if (!selectedPlan) {
       toast.warning('Please select a plan', {
@@ -147,6 +179,21 @@ const SideBar = () => {
     }
 
     const selectedPlanData = plans.find(p => p.id === selectedPlan)
+
+    if (!selectedPlanData) {
+      toast.error('Selected plan not found', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    const planStatus = getPlanStatus(selectedPlan)
+    if (planStatus.disabled) {
+      toast.warning('Selected plan is not available right now', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
     const chainId = walletClient?.chain?.id
     if (chainId !== 11155111) {
       toast.warning('Please connect to the correct network', {
@@ -469,92 +516,107 @@ const SideBar = () => {
             >
               {/* Plan Options */}
               <div className="flex flex-col gap-4">
-                {plans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className={`relative flex flex-col p-4 rounded-lg border transition-all duration-200 ease-in-out cursor-pointer ${
-                      selectedPlan === plan.id
-                        ? 'bg-[#45FFAE]/20 border-[#45FFAE]'
-                        : 'bg-[#45FFAE]/5 border-[#45FFAE]/30 hover:bg-[#45FFAE]/10 hover:border-[#45FFAE]/50'
-                    }`}
-                    onClick={() => setSelectedPlan(plan.id)}
-                  >
-                    {/* Plan Header */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            selectedPlan === plan.id
-                              ? 'border-[#45FFAE] bg-[#45FFAE]'
-                              : 'border-[#45FFAE]/50'
-                          }`}
-                        >
-                          {selectedPlan === plan.id && (
-                            <div className="w-2 h-2 rounded-full bg-black"></div>
-                          )}
-                        </div>
-                        <h3 
-                          style={{
-                            fontFamily: 'Inter, sans-serif',
-                            fontWeight: 600,
-                            fontSize: '18px',
-                            color: '#45FFAE',
-                            margin: 0
-                          }}
-                        >
-                          {plan.name}
-                        </h3>
-                      </div>
-                      <div 
-                        style={{
-                          fontFamily: 'Inter, sans-serif',
-                          fontWeight: 700,
-                          fontSize: '20px',
-                          color: '#45FFAE',
-                        }}
-                      >
-                        {plan.price}
-                        <span 
-                          style={{
-                            fontSize: '14px',
-                            fontWeight: 400,
-                            color: '#45FFAE',
-                            opacity: 0.8
-                          }}
-                        >
-                          /month
-                        </span>
-                      </div>
-                    </div>
+                {plans.map((plan) => {
+                  const { disabled: planDisabled, note: planNote } = getPlanStatus(plan.id)
+                  const isSelected = selectedPlan === plan.id
+                  const selectionClasses = isSelected
+                    ? "bg-[#45FFAE]/20 border-[#45FFAE]"
+                    : "bg-[#45FFAE]/5 border-[#45FFAE]/30"
+                  const interactivityClasses = planDisabled
+                    ? "cursor-not-allowed opacity-60 border-[#2b2b2b]"
+                    : "cursor-pointer hover:bg-[#45FFAE]/10 hover:border-[#45FFAE]/50"
 
-                    {/* Plan Details Tooltip */}
-                    <div className="ml-8 mt-2">
-                      <div 
-                        style={{
-                          fontFamily: 'Inter, sans-serif',
-                          fontWeight: 500,
-                          fontSize: '14px',
-                          color: '#45FFAE',
-                          opacity: 0.9,
-                          marginBottom: '4px'
-                        }}
-                      >
-                        {plan.description}
+                  return (
+                    <div
+                      key={plan.id}
+                      className={`relative flex flex-col p-4 rounded-lg border transition-all duration-200 ease-in-out ${selectionClasses} ${interactivityClasses}`}
+                      onClick={() => {
+                        if (planDisabled) return
+                        setSelectedPlan(plan.id)
+                      }}
+                    >
+                      {/* Plan Header */}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                              isSelected
+                                ? "border-[#45FFAE] bg-[#45FFAE]"
+                                : "border-[#45FFAE]/50"
+                            }`}
+                          >
+                            {isSelected && (
+                              <div className="w-2 h-2 rounded-full bg-black"></div>
+                            )}
+                          </div>
+                          <h3 
+                            style={{
+                              fontFamily: "Inter, sans-serif",
+                              fontWeight: 600,
+                              fontSize: "18px",
+                              color: "#45FFAE",
+                              margin: 0
+                            }}
+                          >
+                            {plan.name}
+                          </h3>
+                        </div>
+                        <div 
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 700,
+                            fontSize: "20px",
+                            color: "#45FFAE",
+                          }}
+                        >
+                          {plan.price}
+                          <span 
+                            style={{
+                              fontSize: "14px",
+                              fontWeight: 400,
+                              color: "#45FFAE",
+                              opacity: 0.8
+                            }}
+                          >
+                            /month
+                          </span>
+                        </div>
                       </div>
-                      <div 
-                        style={{
-                          fontFamily: 'Inter, sans-serif',
-                          fontWeight: 400,
-                          fontSize: '12px',
-                          color: '#45FFAE',
-                          opacity: 0.7
-                        }}
-                      >
-                        {plan.requests}
+
+                      {/* Plan Details Tooltip */}
+                      <div className="ml-8 mt-2">
+                        <div 
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 500,
+                            fontSize: "14px",
+                            color: "#45FFAE",
+                            opacity: 0.9,
+                            marginBottom: "4px"
+                          }}
+                        >
+                          {plan.description}
+                        </div>
+                        <div 
+                          style={{
+                            fontFamily: "Inter, sans-serif",
+                            fontWeight: 400,
+                            fontSize: "12px",
+                            color: "#45FFAE",
+                            opacity: 0.7
+                          }}
+                        >
+                          {plan.requests}
+                        </div>
+                        {planNote && (
+                          <div className="text-xs text-[#A4FFB3] mt-2">
+                            {planNote}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               {/* Subscribe Button */}

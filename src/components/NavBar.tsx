@@ -181,15 +181,15 @@ const NavBar = () => {
         {/* User Credits and Inferences - Left Side - Only show when logged in and wallet connected */}
         <div className="flex flex-row items-center">
           {twitterUser && isConnected && (
-            <div className="flex flex-row items-center gap-3">
+              <div className="flex flex-row items-center gap-3">
               <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
                 <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                  Credit Left: <span className="font-semibold">{formatMetricValue(creditsPending)}</span>
+                  Credits Remaining: <span className="font-semibold">{formatMetricValue(creditsPending)}</span>
                 </div>
               </div>
               <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
                 <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                  Inference Left: <span className="font-semibold">{formatMetricValue(inferenceRemaining)}</span>
+                  Inference Remaining: <span className="font-semibold">{formatMetricValue(inferenceRemaining)}</span>
                 </div>
               </div>
             </div>

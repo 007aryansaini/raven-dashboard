@@ -8,6 +8,8 @@ import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
 import { CHAT_API_BASE } from "../utils/constants"
+import { authorizeInference } from "../utils/inference"
+import { useUserMetrics } from "../contexts/UserMetricsContext"
 import polymarketLogo from "../assets/polymarketLogo.svg"
 import card1 from "../assets/card1.svg"
 import card2 from "../assets/card2.svg"
@@ -37,6 +39,7 @@ const cardMapping: Record<string, string> = {
 
 const body = () => {
   const { isConnected, address } = useAccount()
+  const { refreshMetrics } = useUserMetrics()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -185,19 +188,41 @@ const body = () => {
   }
 
   const callAPI = async (query: string) => {
+
     try {
       setIsLoading(true)
+
+      if (!address) {
+        throw new Error("Wallet not connected")
+      }
+
+      const authorization = await authorizeInference(address, {
+        reason: "chat query",
+      })
+
+      if (!authorization.allowed) {
+        toast.warning(
+          `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
+          {
+            style: { fontSize: "12px" },
+          }
+        )
+        return
+      }
+
+      shouldRefreshMetrics = true
+
       const response = await fetch(buildChatUrl(), {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'accept': 'application/json',
-          'x-api-key': 'mcp-secret-key-xyz123abc456',
-          'Content-Type': 'application/json',
+          accept: "application/json",
+          "x-api-key": "mcp-secret-key-xyz123abc456",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           query: query,
-          queries: [query]
-        })
+          queries: [query],
+        }),
       })
 
       if (!response.ok) {
@@ -205,17 +230,17 @@ const body = () => {
       }
 
       const data = await response.json()
-      
+
       // Extract reasoning and answer from response
-      let reasoning = ''
-      let answer = ''
-      
+      let reasoning = ""
+      let answer = ""
+
       if (data.success && data.results && data.results.length > 0) {
         const firstResult = data.results[0]
         if (firstResult.results && firstResult.results.length > 0) {
           const resultData = firstResult.results[0]
-          reasoning = resultData.reasoning || ''
-          answer = resultData.answer || ''
+          reasoning = resultData.reasoning || ""
+          answer = resultData.answer || ""
         }
       }
 
@@ -226,17 +251,19 @@ const body = () => {
           {
             id: Date.now() + 1,
             role: "assistant" as const,
-            content: answer || 'No answer available',
+            content: answer || "No answer available",
             reasoning: reasoning || undefined,
             answer: answer || undefined,
           },
         ]
         return newMessages
       })
+
+      void refreshMetrics()
     } catch (error: any) {
-      console.error('API Error:', error)
+      console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
-        style: { fontSize: '12px' }
+        style: { fontSize: "12px" },
       })
       // Add error message
       setMessages((prev) => {
@@ -245,7 +272,7 @@ const body = () => {
           {
             id: Date.now() + 1,
             role: "assistant" as const,
-            content: 'Sorry, I encountered an error while processing your request. Please try again.',
+            content: "Sorry, I encountered an error while processing your request. Please try again.",
           },
         ]
         return newMessages

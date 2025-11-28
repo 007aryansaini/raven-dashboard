@@ -13,7 +13,7 @@ const MODEL_NAME_MAP: Record<ModelKey, string> = {
 const METRIC_CONFIGS: Record<MetricKey, { label: string; endpoint: string }> = {
   pdds: {
     label: "PDDS score",
-    endpoint: `${SCORE_API_BASE}all_predictions`
+    endpoint: `${SCORE_API_BASE}all_pdds`
   },
   directional: {
     label: "Directional accuracy",
@@ -52,6 +52,7 @@ const parseMetricResponse = (payload: unknown): MetricRow[] => {
 
   const rows: MetricRow[] = []
 
+  // Preserve the exact order from the API by iterating in order
   Object.entries(payload).forEach(([exchange, pairData]) => {
     if (!pairData || typeof pairData !== "object") return
 
@@ -66,57 +67,50 @@ const parseMetricResponse = (payload: unknown): MetricRow[] => {
           LSTM: null,
           GRU: null
         }
-        const modelLatestTimestamps: Record<ModelKey, number | null> = {
-          RNN: null,
-          LSTM: null,
-          GRU: null
-        }
-        let latestTimestamp: number | null = null
+        let timestamp: number | null = null
 
+        // Extract values from each model, preserving order
         Object.entries(modelData).forEach(([modelKey, timestampData]) => {
           const typedModelKey = (modelKey.split("_")[0] as ModelKey)
           if (!Object.prototype.hasOwnProperty.call(MODEL_NAME_MAP, typedModelKey)) return
           if (!timestampData || typeof timestampData !== "object") return
 
-          Object.entries(timestampData).forEach(([timestampKey, rawValue]) => {
+          // Get the first (and typically only) timestamp-value pair
+          const timestampEntries = Object.entries(timestampData)
+          if (timestampEntries.length > 0) {
+            const [timestampKey, rawValue] = timestampEntries[0]
             const numericTimestamp = Number(timestampKey)
-            if (!Number.isFinite(numericTimestamp)) return
-
-            if (latestTimestamp === null || numericTimestamp > latestTimestamp) {
-              latestTimestamp = numericTimestamp
+            
+            if (Number.isFinite(numericTimestamp)) {
+              // Use the first valid timestamp we encounter (all models typically have the same timestamp for a resolution)
+              if (timestamp === null) {
+                timestamp = numericTimestamp
+              }
+              
+              // Handle null values explicitly, but allow 0 as a valid value
+              if (rawValue === null) {
+                modelValues[typedModelKey] = null
+              } else {
+                const numericValue = Number(rawValue)
+                // 0 is a valid finite number, so we check for null separately above
+                modelValues[typedModelKey] = Number.isFinite(numericValue) ? numericValue : null
+              }
             }
-
-            if (
-              modelLatestTimestamps[typedModelKey] === null ||
-              numericTimestamp > modelLatestTimestamps[typedModelKey]!
-            ) {
-              modelLatestTimestamps[typedModelKey] = numericTimestamp
-              const numericValue = rawValue === null ? null : Number(rawValue)
-              modelValues[typedModelKey] =
-                numericValue !== null && Number.isFinite(numericValue) ? numericValue : null
-            }
-          })
+          }
         })
 
         rows.push({
           exchange,
           pair,
           resolution,
-          timestamp: latestTimestamp,
+          timestamp,
           modelValues
         })
       })
     })
   })
 
-  rows.sort((a, b) => {
-    const pairCompare = a.pair.localeCompare(b.pair)
-    if (pairCompare !== 0) return pairCompare
-    const resolutionCompare = a.resolution.localeCompare(b.resolution)
-    if (resolutionCompare !== 0) return resolutionCompare
-    return (b.timestamp ?? 0) - (a.timestamp ?? 0)
-  })
-
+  // Return rows in the exact order from the API (no sorting)
   return rows
 }
 
@@ -199,6 +193,7 @@ const MathematicalAccuracy = () => {
           method: "POST",
           signal: controller.signal,
           headers: {
+            "accept": "application/json",
             "Content-Type": "application/json"
           },
           body: JSON.stringify({

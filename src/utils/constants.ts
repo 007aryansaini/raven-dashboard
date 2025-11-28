@@ -22,7 +22,7 @@ export const getReferralBaseUrl = () => {
 
   return `${baseHost.replace(/\/+$/, "")}/referral/`
 }
-const SCORE_API_HOST = "http://provider.h100.ams2.val.akash.pub:32762/"
+export const SCORE_API_HOST = "http://provider.h100.ams2.val.akash.pub:32762/"
 export const SCORE_API_BASE = import.meta.env.DEV
   ? "/score-api/"
   : SCORE_API_HOST

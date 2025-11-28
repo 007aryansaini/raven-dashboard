@@ -210,8 +210,6 @@ const body = () => {
         return
       }
 
-      shouldRefreshMetrics = true
-
       const response = await fetch(buildChatUrl(), {
         method: "POST",
         headers: {
@@ -221,7 +219,7 @@ const body = () => {
         },
         body: JSON.stringify({
           query: query,
-          queries: [query],
+          queries: ["string"],
         }),
       })
 

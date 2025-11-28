@@ -196,7 +196,7 @@ const Home = () => {
         },
         body: JSON.stringify({
           query: query,
-          queries: [query],
+          queries: ["string"],
         }),
       })
 
@@ -310,27 +310,29 @@ const Home = () => {
            backgroundSize: '100% 100%, 60px 60px, 60px 60px',
            backgroundColor: '#000000'
          }}>
-           <div className={`flex flex-col gap-3 text-center transition-all duration-700 ease-out ${
-             isVisible 
-               ? 'opacity-100 translate-y-0' 
-               : 'opacity-0 translate-y-8'
-           }`}>
-                 <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Artificial Prediction Intelligence</div>
-                <div className="flex w-full flex-row items-center justify-center">
+           {messages.length === 0 && (
+             <div className={`flex flex-col gap-3 text-center transition-all duration-700 ease-out ${
+               isVisible 
+                 ? 'opacity-100 translate-y-0' 
+                 : 'opacity-0 translate-y-8'
+             }`}>
+               <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Artificial Prediction Intelligence</div>
+               <div className="flex w-full flex-row items-center justify-center">
                  <div className={`mt-2 flex h-10 w-auto items-center gap-4 rounded-full border border-gray-500 px-4 transition-all duration-500 ease-out ${
                    isVisible 
                      ? 'opacity-100 translate-y-0' 
                      : 'opacity-0 translate-y-4'
                  }`} style={{ transitionDelay: isVisible ? '200ms' : '0ms' }}>
-                    <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                    <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                   <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                   <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
-                 </div>
-           </div>
+               </div>
+             </div>
+           )}
 
            {messages.length > 0 && (
              /* Chat Interface */
-             <div className="flex-1 w-full max-w-4xl flex flex-col gap-4 min-h-0">
+             <div className="flex w-full max-w-4xl flex-1 flex-col gap-4 min-h-0">
                <div className="flex-1 rounded-3xl bg-[#141414] p-6 flex flex-col min-h-0 overflow-hidden">
                  <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-4 space-y-4">
                    {messages.map((message) => (

@@ -5,6 +5,7 @@ export interface AuthorizeInferenceOptions {
   settle?: boolean;
   contextHash?: string;
   reason?: string;
+  tags?: boolean;
 }
 
 export type AuthorizeInferenceResponse = {
@@ -14,10 +15,7 @@ export type AuthorizeInferenceResponse = {
   cost: number;
 };
 
-const defaultOptions: Required<AuthorizeInferenceOptions> = {
-  quantity: 1,
-  settle: false,
-  contextHash: "",
+const defaultOptions: Required<Pick<AuthorizeInferenceOptions, 'reason'>> = {
   reason: "",
 };
 
@@ -31,9 +29,7 @@ export async function authorizeInference(
 
   const payload = {
     user: account,
-    quantity: options.quantity ?? defaultOptions.quantity,
-    settle: Boolean(options.settle ?? defaultOptions.settle),
-    contextHash: options.contextHash ?? defaultOptions.contextHash,
+    tags: Boolean(options.tags ?? false),
     reason: options.reason ?? defaultOptions.reason,
   };
 

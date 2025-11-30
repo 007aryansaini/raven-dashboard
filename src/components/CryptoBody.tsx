@@ -211,6 +211,33 @@ const body = () => {
       : base
   }
 
+  // Build query from selected tags
+  const buildQueryFromTags = (): string | null => {
+    const tags: string[] = []
+    
+    // Add asset if selected
+    if (selectedAsset) {
+      tags.push(selectedAsset)
+    }
+    
+    // Add analysis type if selected
+    if (selectedAnalysis) {
+      tags.push(selectedAnalysis.toLowerCase())
+    }
+    
+    // Add timeframe if selected
+    if (selectedTimeframe) {
+      tags.push(`around ${selectedTimeframe}`)
+    }
+    
+    // If we have tags, build a query
+    if (tags.length > 0) {
+      return tags.join(' ')
+    }
+    
+    return null
+  }
+
   const callAPI = async (query: string) => {
     try {
       setIsLoading(true)
@@ -219,8 +246,14 @@ const body = () => {
         throw new Error("Wallet not connected")
       }
 
+      // Check if query was built from tags
+      const hasTags = selectedAsset || selectedAnalysis || selectedTimeframe
+      const tagQuery = buildQueryFromTags()
+      const isTagQuery = tagQuery && query === tagQuery
+
       const authorization = await authorizeInference(address, {
-        reason: "chat query",
+        tags: hasTags,
+        reason: query,
       })
 
       if (!authorization.allowed) {
@@ -281,6 +314,11 @@ const body = () => {
       })
 
       void refreshMetrics()
+      
+      // Reset tags after successful query
+      setSelectedTimeframe(null)
+      setSelectedAnalysis(null)
+      setSelectedAsset(null)
     } catch (error: any) {
       console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
@@ -304,11 +342,6 @@ const body = () => {
   }
 
   const handleSubmit = async () => {
-    const trimmed = inputValue.trim()
-    if (!trimmed) {
-      return
-    }
-
     // Validate user is logged in with Twitter
     if (!twitterUser) {
       toast.warning('Please login with X (Twitter) to send messages', {
@@ -325,13 +358,26 @@ const body = () => {
       return
     }
 
+    // Check if tags are selected and build query from them
+    const tagQuery = buildQueryFromTags()
+    const trimmed = inputValue.trim()
+    
+    // Use tag query if available and no manual input, otherwise use manual input
+    let finalQuery = trimmed
+    if (!trimmed && tagQuery) {
+      finalQuery = tagQuery
+    } else if (!trimmed && !tagQuery) {
+      // No input and no tags selected
+      return
+    }
+
     const userMessage: ChatMessage = {
       id: Date.now(),
       role: "user",
-      content: trimmed,
+      content: finalQuery,
     }
 
-    const isChartRequest = /price chart/i.test(trimmed)
+    const isChartRequest = /price chart/i.test(finalQuery)
 
     if (isChartRequest) {
       const assistantMessages: ChatMessage[] = [
@@ -348,6 +394,11 @@ const body = () => {
         return newMessages
       })
       setInputValue("")
+      
+      // Reset tags after chart request
+      setSelectedTimeframe(null)
+      setSelectedAnalysis(null)
+      setSelectedAsset(null)
       return
     }
 
@@ -358,7 +409,7 @@ const body = () => {
     // Call API (wallet connection is already validated above)
     // Only call API if it's not a chart request
     if (!isChartRequest) {
-      await callAPI(trimmed)
+      await callAPI(finalQuery)
     }
   }
 
@@ -524,7 +575,7 @@ const body = () => {
             </div>
 
             <ArrowUp 
-              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
+              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 cursor-pointer transition-all duration-200 ${(inputValue.trim() || buildQueryFromTags()) ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
               onClick={handleSubmit}
             />
 

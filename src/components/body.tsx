@@ -228,6 +228,43 @@ const body = () => {
       : base
   }
 
+  // Build query from selected tags
+  const buildQueryFromTags = (): string | null => {
+    const tags: string[] = []
+    
+    // Add liquidity if selected
+    if (selectedLiquidity) {
+      tags.push(selectedLiquidity.toLowerCase())
+    }
+    
+    // Add volume if selected
+    if (selectedVolume) {
+      tags.push(selectedVolume.toLowerCase())
+    }
+    
+    // Add timeframe if selected
+    if (selectedTimeframe) {
+      tags.push(selectedTimeframe.toLowerCase())
+    }
+    
+    // Add newest if selected
+    if (selectedNewest) {
+      tags.push(selectedNewest.toLowerCase())
+    }
+    
+    // Add ending soon if selected
+    if (selectedEndingSoon) {
+      tags.push(selectedEndingSoon.toLowerCase())
+    }
+    
+    // If we have tags, build a query
+    if (tags.length > 0) {
+      return tags.join(' ')
+    }
+    
+    return null
+  }
+
   const callAPI = async (query: string) => {
 
     try {
@@ -237,8 +274,12 @@ const body = () => {
         throw new Error("Wallet not connected")
       }
 
+      // Check if query was built from tags
+      const hasTags = selectedLiquidity || selectedVolume || selectedTimeframe || selectedNewest || selectedEndingSoon
+
       const authorization = await authorizeInference(address, {
-        reason: "chat query",
+        tags: hasTags,
+        reason: query,
       })
 
       if (!authorization.allowed) {
@@ -299,6 +340,13 @@ const body = () => {
       })
 
       void refreshMetrics()
+      
+      // Reset tags after successful query
+      setSelectedLiquidity(null)
+      setSelectedVolume(null)
+      setSelectedTimeframe(null)
+      setSelectedNewest(null)
+      setSelectedEndingSoon(null)
     } catch (error: any) {
       console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
@@ -322,11 +370,6 @@ const body = () => {
   }
 
   const handleSubmit = async () => {
-    const trimmed = inputValue.trim()
-    if (!trimmed) {
-      return
-    }
-
     // Validate user is logged in with Twitter
     if (!twitterUser) {
       toast.warning('Please login with X (Twitter) to send messages', {
@@ -343,6 +386,19 @@ const body = () => {
       return
     }
 
+    // Check if tags are selected and build query from them
+    const tagQuery = buildQueryFromTags()
+    const trimmed = inputValue.trim()
+    
+    // Use tag query if available and no manual input, otherwise use manual input
+    let finalQuery = trimmed
+    if (!trimmed && tagQuery) {
+      finalQuery = tagQuery
+    } else if (!trimmed && !tagQuery) {
+      // No input and no tags selected
+      return
+    }
+
     // Store the selected card image before clearing - ensure it's a string
     const cardImageToUse = selectedCardImage ? String(selectedCardImage) : null
     console.log("Submitting - Selected card image:", cardImageToUse, "Type:", typeof cardImageToUse)
@@ -350,7 +406,7 @@ const body = () => {
     const userMessage: ChatMessage = {
       id: Date.now(),
       role: "user",
-      content: trimmed,
+      content: finalQuery,
       imageSrc: cardImageToUse || undefined
     }
 
@@ -366,7 +422,7 @@ const body = () => {
     setSelectedCardImage(null) // Clear selected card after sending
 
     // Call API (wallet connection is already validated above)
-    await callAPI(trimmed)
+    await callAPI(finalQuery)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -691,11 +747,11 @@ const body = () => {
               type="button"
               onClick={handleSubmit}
               className={`flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full border transition-all duration-200 ${
-                inputValue.trim()
+                (inputValue.trim() || buildQueryFromTags())
                   ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
                   : 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed'}`}
               aria-label="Submit query"
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() && !buildQueryFromTags()}
             >
               <ArrowUp className="h-4 w-4 lg:h-5 lg:w-5" />
             </button>

@@ -173,7 +173,8 @@ const Home = () => {
       }
 
       const authorization = await authorizeInference(address, {
-        reason: "chat query",
+        tags: false,
+        reason: query,
       })
 
       if (!authorization.allowed) {

@@ -22,7 +22,11 @@ import { CHAIN_ID_TO_CONTRACT_ADDRESSES } from '../utils/constants'
 import { erc20Abi } from 'viem'
 import { useUserMetrics } from '../contexts/UserMetricsContext'
 
-const SideBar = () => {
+interface SideBarProps {
+  onClose?: () => void
+}
+
+const SideBar = ({ onClose }: SideBarProps) => {
   const { setActiveTab } = useTab()
   const navigate = useNavigate()
   const location = useLocation()
@@ -289,21 +293,43 @@ const SideBar = () => {
     setIsSettingsOpen(false)
   }
 
+  const handleNavigation = (path: string, tab: string | null) => {
+    navigate(path)
+    setActiveTab(tab)
+    onClose?.() // Close sidebar on mobile after navigation
+  }
+
   return (
     <>
-      <div className="bg-black h-screen w-3xs flex flex-col justify-between border-r border-gray-800">
+      <div className="bg-black h-screen w-64 lg:w-3xs flex flex-col justify-between border-r border-gray-800">
+        {/* Mobile Close Button */}
+        <button
+          onClick={onClose}
+          className="lg:hidden absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#1a1a1a] border border-[#45FFAE]/30 hover:border-[#45FFAE]/50 transition-colors z-10"
+        >
+          <svg 
+            className="w-5 h-5 text-[#45FFAE]" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M6 18L18 6M6 6l12 12" 
+            />
+          </svg>
+        </button>
       <img 
         className="w-30 h-10 mt-6 ml-3 cursor-pointer hover:scale-105 transition-transform duration-200 ease-in-out" 
         src={logo} 
         alt="logo" 
-        onClick={() => {
-          navigate('/')
-          setActiveTab(null)
-        }}
+        onClick={() => handleNavigation('/', null)}
       />
 
       <div className="flex flex-col gap-2 mb-40">
-      <div className="flex flex-row items-center  gap-2 bg-[#141414] rounded-lg p-2 w-56 h-12 ml-3">
+      <div className="flex flex-row items-center gap-2 bg-[#141414] rounded-lg p-2 w-52 lg:w-56 h-12 ml-3">
 
 <div 
   className={`flex flex-row items-center gap-1 rounded-lg p-2 cursor-pointer transition-all duration-200 ${
@@ -311,10 +337,7 @@ const SideBar = () => {
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
-  onClick={() => {
-    navigate('/polymarket')
-    setActiveTab('polymarket')
-  }}
+  onClick={() => handleNavigation('/polymarket', 'polymarket')}
 >
   <img src={polymarketMarket} alt="polymarket"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
@@ -329,10 +352,7 @@ const SideBar = () => {
       ? 'bg-[#292929]' 
       : 'hover:bg-[#1a1a1a]'
   }`}
-  onClick={() => {
-    navigate('/crypto')
-    setActiveTab('crypto')
-  }}
+  onClick={() => handleNavigation('/crypto', 'crypto')}
 >
   <img src={cryptoTrade} alt="crypto"  className="h-4 w-4"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
@@ -341,7 +361,7 @@ const SideBar = () => {
 </div>
 </div>
 
-<div className="group flex flex-row items-center justify-between gap-2 ml-3 w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out" onClick={() => navigate('/points')}>
+<div className="group flex flex-row items-center justify-between gap-2 ml-3 w-52 lg:w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out" onClick={() => handleNavigation('/points', null)}>
 <div className="flex flex-row items-center gap-2">
 <img className="w-8 h-8 group-hover:fill-[#45FFAE] transition-all duration-200" src={points} alt="points" />
 <div className="font-urbanist font-normal text-sm leading-none tracking-[0%] group-hover:text-[#45FFAE] text-[#808080] transition-colors duration-200">Points</div>
@@ -382,7 +402,7 @@ const SideBar = () => {
         location.pathname === '/score' ? 'bg-[#292929]' : ''
       }`}
       onClick={() => {
-        navigate('/score')
+        handleNavigation('/score', null)
         setIsScoreDropdownOpen(false)
       }}
     >
@@ -395,7 +415,7 @@ const SideBar = () => {
         location.pathname === '/mathematical-accuracy' ? 'bg-[#292929]' : ''
       }`}
       onClick={() => {
-        navigate('/mathematical-accuracy')
+        handleNavigation('/mathematical-accuracy', null)
         setIsScoreDropdownOpen(false)
       }}
     >
@@ -411,26 +431,26 @@ const SideBar = () => {
       <div className="flex flex-col w-full items-center p-2 gap-4">
         {twitterUser && (
           <div 
-            className="flex flex-row items-center cursor-pointer gap-2 w-56 h-14 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-2 hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out"
+            className="flex flex-row items-center cursor-pointer gap-2 w-52 lg:w-56 h-14 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-2 hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out"
             onClick={handleBuySubscription}
           >
             <img className="w-6 h-6" src={upgradePlan} alt="points" />
-            <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">Upgrade plan</div>
+            <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">Upgrade plan</div>
           </div>
         )}
 
         {twitterUser && (
-          <div className="relative flex flex-row items-center justify-between w-56 h-14 p-1 gap-2.5">
+          <div className="relative flex flex-row items-center justify-between w-52 lg:w-56 h-14 p-1 gap-2">
             <img 
               className="w-8 h-8 rounded-full object-cover" 
               src={twitterUser.photoURL || userProfile} 
               alt="user profile" 
             />
-            <div className="font-urbanist font-medium text-base leading-none tracking-[0%] text-[#808080]">
+            <div className="font-urbanist font-medium text-sm lg:text-base leading-none tracking-[0%] text-[#808080] truncate flex-1">
               {getTwitterUsername(twitterUser)}
             </div>
             <img 
-              className="w-12  h-12 cursor-pointer hover:scale-110 transition-transform duration-200 ease-in-out" 
+              className="w-10 lg:w-12 h-10 lg:h-12 cursor-pointer hover:scale-110 transition-transform duration-200 ease-in-out flex-shrink-0" 
               src={settings} 
               alt="settings" 
               onClick={handleSettingsClick}
@@ -444,10 +464,10 @@ const SideBar = () => {
           </div>
         )}
 
-        <div className="flex flex-row items-center justify-center w-64 gap-6">
-          <img className="w-10  h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={telegram} alt="logout" />
-          <img className="w-10  h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={twitter} alt="logout" />
-          <img className="w-10  h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={discord} alt="logout" />
+        <div className="flex flex-row items-center justify-center w-52 lg:w-64 gap-4 lg:gap-6">
+          <img className="w-8 lg:w-10 h-8 lg:h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={telegram} alt="logout" />
+          <img className="w-8 lg:w-10 h-8 lg:h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={twitter} alt="logout" />
+          <img className="w-8 lg:w-10 h-8 lg:h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={discord} alt="logout" />
         </div>
       </div>
 

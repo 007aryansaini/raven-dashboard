@@ -18,7 +18,11 @@ import { useAccount  } from 'wagmi';
 import { useUserMetrics } from "../contexts/UserMetricsContext";
 import { BACKEND_URL } from "../utils/constants";
 
-const NavBar = () => {
+interface NavBarProps {
+  onMenuClick?: () => void
+}
+
+const NavBar = ({ onMenuClick }: NavBarProps) => {
 
   const { openConnectModal } = useConnectModal();
   const { openAccountModal } = useAccountModal();
@@ -221,23 +225,43 @@ const NavBar = () => {
    }
 
   return (
-    <div className="flex flex-row items-center justify-between bg-black h-16 w-full px-4 border-b border-gray-800 py-2">
-          {/* <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] bg-[#141414] rounded-lg p-2 ml-2 text-center" >
-             Polymarket
-          </div> */}
+    <div className="flex flex-row items-center justify-between bg-black h-14 lg:h-16 w-full px-2 lg:px-4 border-b border-gray-800 py-2">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#1a1a1a] transition-colors"
+          >
+            <svg 
+              className="w-6 h-6 text-[#45FFAE]" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M4 6h16M4 12h16M4 18h16" 
+              />
+            </svg>
+          </button>
 
         {/* User Credits and Inferences - Left Side - Only show when logged in and wallet connected */}
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center gap-2 lg:gap-3 flex-1 lg:flex-none">
           {twitterUser && isConnected && (
-              <div className="flex flex-row items-center gap-3">
-              <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
-                <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                  Credits Remaining: <span className="font-semibold">{formatMetricValue(creditsPending)}</span>
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-3">
+              <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-2 lg:px-3 py-1.5 lg:py-2">
+                <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#45FFAE]">
+                  <span className="hidden lg:inline">Credits Remaining: </span>
+                  <span className="lg:hidden">Credits: </span>
+                  <span className="font-semibold">{formatMetricValue(creditsPending)}</span>
                 </div>
               </div>
-              <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-3 py-2">
-                <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE]">
-                  Inference Remaining: <span className="font-semibold">{formatMetricValue(inferenceRemaining)}</span>
+              <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-2 lg:px-3 py-1.5 lg:py-2">
+                <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#45FFAE]">
+                  <span className="hidden lg:inline">Inference Remaining: </span>
+                  <span className="lg:hidden">Inference: </span>
+                  <span className="font-semibold">{formatMetricValue(inferenceRemaining)}</span>
                 </div>
               </div>
             </div>
@@ -245,16 +269,17 @@ const NavBar = () => {
         </div>
 
         {/* Right Side Buttons */}
-        <div className="flex flex-row items-center gap-4">
+        <div className="flex flex-row items-center gap-2 lg:gap-4">
           {/* Login with X Button - Only show when user is NOT logged in */}
           {!twitterUser && !isCheckingAuth && (
             <div 
-              className="flex flex-row items-center gap-2 border-t border-l rounded-lg p-2 transition-all duration-200 ease-in-out bg-[#45FFAE]/10 border-[#45FFAE] cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105"
+              className="flex flex-row items-center gap-1 lg:gap-2 border-t border-l rounded-lg p-1.5 lg:p-2 transition-all duration-200 ease-in-out bg-[#45FFAE]/10 border-[#45FFAE] cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105"
               onClick={handleLoginWithX}
             >
-              <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
-              <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
-                Login with X
+              <img src={walletLogo} alt="logo"  className="h-5 w-5 lg:h-6 lg:w-6"/>
+              <div className="font-urbanist font-medium text-sm lg:text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
+                <span className="hidden sm:inline">Login with X</span>
+                <span className="sm:hidden">Login</span>
               </div>
             </div>
           )}
@@ -262,10 +287,10 @@ const NavBar = () => {
           {/* Loading state - Only show when checking auth */}
           {isCheckingAuth && (
             <div 
-              className="flex flex-row items-center gap-2 border-t border-l rounded-lg p-2 bg-[#45FFAE]/5 border-[#45FFAE]/50 cursor-not-allowed opacity-60"
+              className="flex flex-row items-center gap-1 lg:gap-2 border-t border-l rounded-lg p-1.5 lg:p-2 bg-[#45FFAE]/5 border-[#45FFAE]/50 cursor-not-allowed opacity-60"
             >
-              <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
-              <div className="font-urbanist font-medium text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
+              <img src={walletLogo} alt="logo"  className="h-5 w-5 lg:h-6 lg:w-6"/>
+              <div className="font-urbanist font-medium text-sm lg:text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
                 Loading...
               </div>
             </div>
@@ -273,12 +298,17 @@ const NavBar = () => {
           
           {/* Connect Wallet Button - Only show when user is logged in */}
           {twitterUser && (
-            <div className="flex flex-row items-center gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-2 cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out"
+            <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-1.5 lg:p-2 cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out"
             onClick={handleConnectWallet}
             >
-               <img src={walletLogo} alt="logo"  className="h-6 w-6"/>
-               <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#45FFAE] text-center">
-               {isConnected ? truncateEthAddress(address as string) : 'Connect Wallet'}
+               <img src={walletLogo} alt="logo"  className="h-5 w-5 lg:h-6 lg:w-6"/>
+               <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#45FFAE] text-center">
+               {isConnected ? (
+                 <span className="hidden sm:inline">{truncateEthAddress(address as string)}</span>
+               ) : (
+                 <span className="hidden sm:inline">Connect Wallet</span>
+               )}
+               <span className="sm:hidden">{isConnected ? 'Wallet' : 'Connect'}</span>
                </div>
             </div>
           )}

@@ -369,7 +369,7 @@ const body = () => {
   }
 
   return (
-    <div className={`relative flex h-full flex-col items-center ${messages.length === 0 ? 'justify-between' : 'justify-start'} gap-10 px-4 py-8 sm:px-6 lg:px-10 overflow-hidden`}
+    <div className="relative flex h-full flex-col items-center gap-4 lg:gap-10 px-3 py-4 sm:px-4 sm:py-6 lg:px-10 lg:py-8 overflow-hidden"
          style={{
            background: `
              radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),
@@ -379,16 +379,18 @@ const body = () => {
            backgroundSize: '100% 100%, 60px 60px, 60px 60px',
            backgroundColor: '#000000'
          }}>
-           <div className="flex flex-col items-center gap-3 text-center">
+           {/* Content Area - Takes flex-1 to push input to bottom */}
+           <div className="flex-1 w-full flex flex-col items-center min-h-0 overflow-hidden">
+           <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2">
                 {messages.length === 0 && (
                   <>
-                 <div className="font-urbanist font-medium text-3xl leading-none tracking-[0%] text-[#FFFFFF] text-center">
+                 <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">
                    {activeTab === 'polymarket' ? 'Polymarket Predictions' : 'Crypto Market Predictions'}
                  </div>
-                <div className="w-full flex flex-row justify-center items-center">
-                 <div className="flex flex-row border border-gray-500 w-fit h-9 rounded-full mt-2 gap-3 items-center px-3 py-1.5">
-                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                <div className="w-full flex flex-row justify-center items-center px-2">
+                 <div className="flex flex-row border border-gray-500 w-full sm:w-fit h-auto sm:h-9 rounded-full mt-2 gap-2 sm:gap-3 items-center px-2 sm:px-3 py-1.5">
+                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
                   </>
@@ -396,81 +398,81 @@ const body = () => {
 
            </div>
 
-      <div className="flex w-full max-w-5xl flex-1 flex-col gap-6 min-h-0">
+      <div className="flex w-full max-w-5xl flex-1 flex-col gap-3 lg:gap-6 min-h-0">
         {messages.length === 0 ? (
-           <div className="w-5xl">
-             <div className="flex flex-col gap-5 w-full h-96 p-4 items-center justify-center">
-               <div className="flex flex-col gap-3.5 items-center">
-                 <div className="flex flex-row gap-2">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('What will the BTC price be in the next 5 mins?')}>
-                     <span className="text-white font-urbanist font-medium text-sm">What will the BTC price be in the next 5 mins?</span>
-                     <MoveRight className="text-white h-4 w-4 ml-2" />
+           <div className="w-full">
+             <div className="flex flex-col gap-3 lg:gap-5 w-full min-h-0 lg:h-96 p-2 sm:p-4 items-center justify-center">
+               <div className="flex flex-col gap-2.5 lg:gap-3.5 items-center justify-center w-full">
+                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('What will the BTC price be in the next 5 mins?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What will the BTC price be in the next 5 mins?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('Where will BTC close by the end of this month?')}>
-                     <span className="text-white font-urbanist font-medium text-sm">Where will BTC close by the end of this month?</span>
-                     <MoveRight className="text-white h-4 w-4 ml-2" />
-                   </div>
-                 </div>
-                 
-                 <div className="flex flex-row gap-2">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('Will ETH outperform BTC this week?')}>
-                     <span className="text-white font-urbanist font-medium text-sm">Will ETH outperform BTC this week?</span>
-                     <MoveRight className="text-white h-4 w-4 ml-2" />
-                   </div>
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('When will ETH cross $5K this month?')}>
-                     <span className="text-white font-urbanist font-medium text-sm">When will ETH cross $5K this month?</span>
-                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Where will BTC close by the end of this month?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Where will BTC close by the end of this month?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
                  
-                 <div className="flex flex-row">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-fit" onClick={() => handleSuggestedQuestion('Why could ETH drop below $3K in the next 24 hours?')}>
-                     <span className="text-white font-urbanist font-medium text-sm">Why could ETH drop below $3K in the next 24 hours?</span>
-                     <MoveRight className="text-white h-4 w-4 ml-2" />
+                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Will ETH outperform BTC this week?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Will ETH outperform BTC this week?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
+                   </div>
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('When will ETH cross $5K this month?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">When will ETH cross $5K this month?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
+                   </div>
+                 </div>
+                 
+                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Why could ETH drop below $3K in the next 24 hours?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Why could ETH drop below $3K in the next 24 hours?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
                </div>
              </div>
           </div>
         ) : (
-          <div className="flex-1 w-full max-w-5xl rounded-3xl bg-[#141414] p-6 flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-4 space-y-4">
+          <div className="flex-1 w-full max-w-5xl rounded-2xl lg:rounded-3xl bg-[#141414] p-3 sm:p-4 lg:p-6 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-y-auto rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-3 lg:p-4 space-y-3 lg:space-y-4">
               {messages.map((message) => (
                 <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                   {message.chartType === 'btc' ? (
-                    <div className="w-full rounded-2xl border border-[#1F1F1F] bg-[#121212] p-4">
-                      <div className="mb-3 font-urbanist text-sm font-medium text-white">{message.content}</div>
-                      <div className="rounded-xl bg-[#0B0B0B] p-3">
+                    <div className="w-full rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#121212] p-3 lg:p-4">
+                      <div className="mb-2 lg:mb-3 font-urbanist text-xs lg:text-sm font-medium text-white">{message.content}</div>
+                      <div className="rounded-lg lg:rounded-xl bg-[#0B0B0B] p-2 lg:p-3">
                         <BTCPriceChart />
                       </div>
-                      <div className="mt-3 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">
+                      <div className="mt-2 lg:mt-3 font-urbanist text-[10px] lg:text-xs leading-none tracking-[0%] text-[#808080]">
                         Displaying sample BTC closing prices for illustrative purposes.
                       </div>
                     </div>
                   ) : message.role === 'user' ? (
-                    <div className="max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist bg-[#45FFAE]/15 text-[#45FFAE]">
+                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#45FFAE]/15 text-[#45FFAE]">
                       {message.content}
                     </div>
                   ) : (
-                    <div className="max-w-[85%] flex flex-col gap-3">
+                    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
                       {message.reasoning && (
-                        <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+                        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
                           <div 
-                            className="font-urbanist text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+                            className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
                             dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning) }}
                           />
                         </div>
                       )}
                       {message.answer && (
-                        <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+                        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
                           <div 
-                            className="font-urbanist text-sm leading-relaxed"
+                            className="font-urbanist text-xs lg:text-sm leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
                           />
                         </div>
                       )}
                       {!message.reasoning && !message.answer && (
-                        <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
+                        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
                           {message.content}
                         </div>
                       )}
@@ -480,8 +482,8 @@ const body = () => {
               ))}
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-[#1F1F1F] text-[#FFFFFF]">
-                    <div className="font-urbanist text-sm text-[#808080]">Raven is predicting...</div>
+                  <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+                    <div className="font-urbanist text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
                   </div>
                 </div>
               )}
@@ -490,27 +492,26 @@ const body = () => {
              </div>
         )}
            </div>
+           </div>
 
-
-
-
-           <div className="flex flex-col gap-3.5 w-5xl h-40 bg-[#141414] rounded-lg p-4 justify-between">
+           {/* Input Area - Always at bottom */}
+           <div className="flex flex-col gap-2.5 lg:gap-3.5 w-full max-w-5xl lg:h-40 bg-[#141414] rounded-lg p-3 lg:p-4 justify-between flex-shrink-0">
                
                <div className="flex flex-row items-center justify-between">
-                       <div className="flex flex-row gap-2 items-center">
-                            <img src={bolt} alt="bolt"  className="h-3 w-3"/>
-                            <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
-                            <MoveRight className="text-[#808080] text-center h-4 w-4"/>
+                       <div className="flex flex-row gap-1 lg:gap-2 items-center">
+                            <img src={bolt} alt="bolt"  className="h-2.5 w-2.5 lg:h-3 lg:w-3"/>
+                            <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
+                            <MoveRight className="text-[#808080] text-center h-3 w-3 lg:h-4 lg:w-4"/>
                        </div>
                </div>
 
 
 
-          <div className="h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 items-start justify-between" >
+          <div className="h-auto lg:h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 lg:p-2 items-start justify-between" >
 
-            <div className="flex flex-row items-center justify-between gap-2 flex-1">
-                <img src={blackDot} alt="history" className="h-4 w-4"/>
-                <div className="font-urbanist font-medium text-base  text-[#3E3E3E]">|</div>
+            <div className="flex flex-row items-center justify-between gap-1.5 lg:gap-2 flex-1">
+                <img src={blackDot} alt="history" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
+                <div className="font-urbanist font-medium text-sm lg:text-base text-[#3E3E3E]">|</div>
                 <input 
                   ref={inputRef}
                   type="text" 
@@ -518,23 +519,23 @@ const body = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="font-urbanist font-medium text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
+                  className="font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
                 />
             </div>
 
             <ArrowUp 
-              className={`h-4 w-4 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
+              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 cursor-pointer transition-all duration-200 ${inputValue.trim() ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
               onClick={handleSubmit}
             />
 
          </div>
 
-         <div className="flex flex-row items-center justify-start gap-4">
+         <div className="flex flex-row items-center justify-start gap-2 lg:gap-4 flex-wrap">
 
               <div className="relative" ref={dropdownRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
-                  <img src={cryptoTrade} alt="crypto" className="h-4 w-4"/>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
+                <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
+                  <img src={cryptoTrade} alt="crypto" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
+                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
@@ -554,8 +555,8 @@ const body = () => {
 
               {/* Timeframe Dropdown */}
               <div className="relative" ref={tfRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isTfOpen ? closeAllModals() : openTf()}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isTfOpen ? closeAllModals() : openTf()}>
+                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTfOpen && (
@@ -571,8 +572,8 @@ const body = () => {
 
               {/* Analysis Dropdown */}
               <div className="relative" ref={analysisRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isAnalysisOpen ? closeAllModals() : openAnalysis()}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
+                <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isAnalysisOpen ? closeAllModals() : openAnalysis()}>
+                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAnalysisOpen && (
@@ -588,8 +589,8 @@ const body = () => {
 
               {/* Assets Dropdown */}
               <div className="relative" ref={assetsRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isAssetsOpen ? closeAllModals() : openAssets()}>
-                  <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
+                <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isAssetsOpen ? closeAllModals() : openAssets()}>
+                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAssetsOpen && (

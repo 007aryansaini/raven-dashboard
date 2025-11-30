@@ -1,12 +1,8 @@
 
 import { Share2, Copy, X, Twitter, MessageCircle, Check } from "lucide-react"
-import { customAlphabet } from "nanoid"
 import { useEffect, useMemo, useState } from "react"
 import { useAccount } from "wagmi"
-import { getBackendBaseUrl, getReferralBaseUrl } from "../utils/constants"
-
-const REFERRAL_CODE_KEY = "raven-referral-code"
-const referralCodeGenerator = customAlphabet("ABCDEFGHJKMNPQRSTUVWXYZ23456789", 8)
+import { getBackendBaseUrl } from "../utils/constants"
 
 const Points = () => {
   const [activeTab, setActiveTab] = useState("Quests")
@@ -15,6 +11,8 @@ const Points = () => {
   const [xpError, setXpError] = useState<string | null>(null)
   const { address, isConnected } = useAccount()
   const [referralCode, setReferralCode] = useState<string>("")
+  const [isReferralCodeLoading, setIsReferralCodeLoading] = useState(false)
+  const [referralCodeError, setReferralCodeError] = useState<string | null>(null)
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle")
 
   useEffect(() => {
@@ -70,36 +68,76 @@ const Points = () => {
     }
   }, [address, isConnected])
 
+  // Fetch referral code from API
   useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const storageKey = address
-      ? `${REFERRAL_CODE_KEY}-${address.toLowerCase()}`
-      : REFERRAL_CODE_KEY
-
-    const storedCode = window.localStorage.getItem(storageKey)
-    if (storedCode) {
-      setReferralCode(storedCode)
+    if (!address || !isConnected) {
+      setReferralCode("")
+      setReferralCodeError(null)
+      setIsReferralCodeLoading(false)
       return
     }
 
-    const generatedCode = referralCodeGenerator()
-    window.localStorage.setItem(storageKey, generatedCode)
-    setReferralCode(generatedCode)
-  }, [address])
+    const controller = new AbortController()
 
-  const referralUrl = useMemo(
-    () =>
-      referralCode
-        ? `${getReferralBaseUrl()}${referralCode}`
-        : "Generating referral link…",
-    [referralCode]
-  )
+    const fetchReferralCode = async () => {
+      setIsReferralCodeLoading(true)
+      setReferralCodeError(null)
 
-  const referralHandle = useMemo(
-    () => (referralCode ? `@${referralCode.toLowerCase()}` : "@user"),
-    [referralCode]
-  )
+      try {
+        const response = await fetch(`${getBackendBaseUrl()}referral/code`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            address: address,
+          }),
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch referral code: ${response.status}`)
+        }
+
+        const data = await response.json()
+        const code = data?.code || ""
+        
+        if (code) {
+          setReferralCode(code)
+        } else {
+          throw new Error("No referral code in response")
+        }
+      } catch (error: any) {
+        if (controller.signal.aborted) return
+        console.error("Error fetching referral code:", error)
+        setReferralCode("")
+        setReferralCodeError("Unable to load referral code")
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsReferralCodeLoading(false)
+        }
+      }
+    }
+
+    fetchReferralCode()
+
+    return () => {
+      controller.abort()
+    }
+  }, [address, isConnected])
+
+  const referralUrl = useMemo(() => {
+    if (!referralCode) {
+      return isReferralCodeLoading ? "Loading referral link…" : "Unable to load referral link"
+    }
+    
+    // Build referral link with ?rc=<code> format
+    const baseUrl = typeof window !== "undefined" 
+      ? window.location.origin 
+      : ""
+    return `${baseUrl}/?rc=${referralCode}`
+  }, [referralCode, isReferralCodeLoading])
+
 
   const handleCopyReferralLink = async () => {
     if (!referralCode || typeof navigator === "undefined") return
@@ -113,6 +151,19 @@ const Points = () => {
       setCopyStatus("error")
       setTimeout(() => setCopyStatus("idle"), 2200)
     }
+  }
+
+  const handleShareOnTwitter = () => {
+    if (!referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")) {
+      return
+    }
+
+    // Create Twitter share URL with pre-filled text and URL
+    const tweetText = `Check out Raven - AI-powered market predictions! Join me using my referral link: ${referralUrl}`
+    const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
+    
+    // Open Twitter in a new window
+    window.open(twitterShareUrl, '_blank', 'width=550,height=420')
   }
 
   const xpDisplayValue = xp !== null ? xp.toLocaleString("en-US") : "00"
@@ -179,29 +230,43 @@ const Points = () => {
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                               <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Invite your friends</div>
-                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{referralHandle}</div>
+                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                                {referralCode ? referralCode : isReferralCodeLoading ? "Loading..." : "—"}
+                              </div>
                             </div>
                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                              <div className="flex flex-1 items-center rounded-xl bg-[#2A2A2A] px-3 py-2">
-                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1]">
+                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1] truncate">
                                  {referralUrl}
                                </span>
                              </div>
                              <button
                                onClick={handleCopyReferralLink}
-                               className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A]"
+                               disabled={!referralCode || isReferralCodeLoading}
+                               className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
                              >
                                <Copy className="h-4 w-4 text-white" />
                              </button>
                            </div>
-                           <div className="text-xs font-urbanist text-[#45FFAE]">
-                             {copyStatus === "copied"
-                               ? "Link copied!"
-                               : copyStatus === "error"
-                                 ? "Copy failed"
-                                 : null}
+                           <div className="text-xs font-urbanist">
+                             {copyStatus === "copied" && (
+                               <span className="text-[#45FFAE] cursor-pointer">Link copied!</span>
+                             )}
+                             {copyStatus === "error" && (
+                               <span className="text-[#FF7D7D]">Copy failed</span>
+                             )}
+                             {referralCodeError && (
+                               <span className="text-[#FF7D7D]">{referralCodeError}</span>
+                             )}
+                             {isReferralCodeLoading && !referralCodeError && (
+                               <span className="text-[#808080]">Loading referral code...</span>
+                             )}
                            </div>
-                           <button className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A]">
+                           <button 
+                             onClick={handleShareOnTwitter}
+                             disabled={!referralCode || isReferralCodeLoading || !referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")}
+                             className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                           >
                              <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on</span>
                              <X className="h-4 w-4 text-white" />
                            </button>

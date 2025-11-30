@@ -482,7 +482,7 @@ const body = () => {
   }
 
   return (
-    <div className={`relative flex h-full flex-col items-center ${messages.length === 0 ? 'justify-between' : 'justify-start'} gap-10 px-4 py-8 sm:px-6 lg:px-10 overflow-hidden`}
+    <div className="relative flex h-full flex-col items-center gap-4 lg:gap-10 px-3 py-4 sm:px-4 sm:py-6 lg:px-10 lg:py-8 overflow-hidden"
          style={{
            background: `
              radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),
@@ -492,6 +492,8 @@ const body = () => {
            backgroundSize: '100% 100%, 60px 60px, 60px 60px',
            backgroundColor: '#000000'
          }}>
+           {/* Content Area - Takes flex-1 to push input to bottom */}
+           <div className="flex-1 w-full flex flex-col items-center min-h-0 overflow-hidden">
            {messages.length === 0 && (
              <div className="flex flex-col items-center gap-3 text-center">
                <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Polymarket Predictions</div>
@@ -588,18 +590,18 @@ const body = () => {
            </div>
            ) : (
              /* Chat Interface */
-             <div className="flex-1 w-full max-w-5xl rounded-3xl bg-[#141414] p-6 flex flex-col min-h-0 overflow-hidden">
-               <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-4 space-y-4">
+             <div className="flex-1 w-full max-w-5xl rounded-2xl lg:rounded-3xl bg-[#141414] p-3 sm:p-4 lg:p-6 flex flex-col min-h-0 overflow-hidden">
+               <div className="flex-1 min-h-0 overflow-y-auto rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-3 lg:p-4 space-y-3 lg:space-y-4">
                  {messages.map((message) => (
                    <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                      {message.role === 'user' ? (
-                       <div className={`flex flex-row gap-3 max-w-[80%] rounded-2xl border border-[#1F1F1F] p-4 bg-[#45FFAE]/10 border-[#45FFAE]/30`}>
+                       <div className={`flex flex-row gap-2 lg:gap-3 max-w-[90%] lg:max-w-[80%] rounded-xl lg:rounded-2xl border border-[#1F1F1F] p-3 lg:p-4 bg-[#45FFAE]/10 border-[#45FFAE]/30`}>
                          {message.imageSrc && message.imageSrc !== '' && (
                            <div className="flex-shrink-0">
                              <img 
                                src={message.imageSrc} 
                                alt="Selected card" 
-                               className="w-40 h-40 rounded-xl border-2 border-[#45FFAE]/50 object-contain bg-[#1A1A1A] p-1"
+                               className="w-24 h-24 lg:w-40 lg:h-40 rounded-lg lg:rounded-xl border-2 border-[#45FFAE]/50 object-contain bg-[#1A1A1A] p-1"
                                style={{ display: 'block', minWidth: '160px', minHeight: '160px' }}
                               onError={() => {
                                 console.error("Failed to load image:", message.imageSrc)
@@ -611,31 +613,31 @@ const body = () => {
                            </div>
                          )}
                          <div className="flex flex-col gap-1 flex-1 min-w-0">
-                           <div className="font-urbanist text-sm leading-relaxed tracking-[0%] break-words text-[#45FFAE]">
+                           <div className="font-urbanist text-xs lg:text-sm leading-relaxed tracking-[0%] break-words text-[#45FFAE]">
                              {message.content}
                            </div>
                          </div>
                        </div>
                      ) : (
-                       <div className="max-w-[85%] flex flex-col gap-3">
+                       <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
                          {message.reasoning && (
-                           <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
                              <div 
-                               className="font-urbanist text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+                               className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
                                dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning) }}
                              />
                            </div>
                          )}
                          {message.answer && (
-                           <div className="rounded-2xl px-4 py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
                              <div 
-                               className="font-urbanist text-sm leading-relaxed"
+                               className="font-urbanist text-xs lg:text-sm leading-relaxed"
                                dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
                              />
                            </div>
                          )}
                          {!message.reasoning && !message.answer && (
-                           <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed font-urbanist bg-[#121212] text-[#FFFFFF]">
+                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#121212] text-[#FFFFFF]">
                              {message.content}
                            </div>
                          )}
@@ -645,8 +647,8 @@ const body = () => {
                  ))}
                  {isLoading && (
                    <div className="flex justify-start">
-                     <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-[#121212] text-[#FFFFFF]">
-                       <div className="font-urbanist text-sm text-[#808080]">Raven is predicting...</div>
+                     <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#121212] text-[#FFFFFF]">
+                       <div className="font-urbanist text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
                      </div>
                    </div>
                  )}
@@ -654,27 +656,26 @@ const body = () => {
                </div>
              </div>
            )}
+           </div>
 
-
-
-
-           <div className="flex w-full max-w-5xl flex-col gap-4 rounded-3xl bg-[#141414] p-6">
+           {/* Input Area - Always at bottom */}
+           <div className="flex w-full max-w-5xl flex-col gap-3 lg:gap-4 rounded-2xl lg:rounded-3xl bg-[#141414] p-4 lg:p-6 flex-shrink-0">
                
                <div className="flex flex-row items-center justify-between">
-                       <div className="flex flex-row gap-2 items-center">
-                            <img src={bolt} alt="bolt"  className="h-3 w-3"/>
-                            <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
-                            <MoveRight className="text-[#808080] text-center h-4 w-4"/>
+                       <div className="flex flex-row gap-1 lg:gap-2 items-center">
+                            <img src={bolt} alt="bolt"  className="h-2.5 w-2.5 lg:h-3 lg:w-3"/>
+                            <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
+                            <MoveRight className="text-[#808080] text-center h-3 w-3 lg:h-4 lg:w-4"/>
                        </div>
                </div>
 
 
 
-         <div className="flex w-full flex-col items-start justify-between gap-4 rounded-2xl bg-[#1A1A1A] p-4 sm:flex-row sm:items-center sm:p-6">
+         <div className="flex w-full flex-col items-start justify-between gap-2 lg:gap-4 rounded-xl lg:rounded-2xl bg-[#1A1A1A] p-3 lg:p-4 sm:flex-row sm:items-center sm:p-6">
 
-            <div className="flex flex-1 items-center gap-3">
-                <img src={blackDot} alt="history" className="h-4 w-4 flex-shrink-0"/>
-                <div className="font-urbanist font-medium text-base text-[#3E3E3E]">|</div>
+            <div className="flex flex-1 items-center gap-2 lg:gap-3">
+                <img src={blackDot} alt="history" className="h-3.5 w-3.5 lg:h-4 lg:w-4 flex-shrink-0"/>
+                <div className="font-urbanist font-medium text-sm lg:text-base text-[#3E3E3E]">|</div>
                 <input 
                   ref={inputRef}
                   type="text" 
@@ -682,32 +683,32 @@ const body = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 bg-transparent font-urbanist text-base font-medium text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none"
+                  className="flex-1 bg-transparent font-urbanist text-sm lg:text-base font-medium text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none"
                 />
             </div>
 
             <button
               type="button"
               onClick={handleSubmit}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-200 ${
+              className={`flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full border transition-all duration-200 ${
                 inputValue.trim()
                   ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
                   : 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed'}`}
               aria-label="Submit query"
               disabled={!inputValue.trim()}
             >
-              <ArrowUp className="h-5 w-5" />
+              <ArrowUp className="h-4 w-4 lg:h-5 lg:w-5" />
             </button>
 
          </div>
 
-         <div className="flex flex-wrap items-center justify-start gap-3">
+         <div className="flex flex-wrap items-center justify-start gap-2 lg:gap-3">
 
               <div className="relative" ref={dropdownRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
-                  <img src={polymarketLogo} alt="polymarket" className="h-4 w-4"/>
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
-                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
+                  <img src={polymarketLogo} alt="polymarket" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
@@ -722,9 +723,9 @@ const body = () => {
 
               {/* Liquidity Dropdown */}
               <div className="relative" ref={liquidityRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isLiquidityOpen ? closeAllModals() : openLiquidity()}>
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
-                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isLiquidityOpen ? closeAllModals() : openLiquidity()}>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isLiquidityOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
@@ -739,9 +740,9 @@ const body = () => {
 
               {/* Volume Dropdown */}
               <div className="relative" ref={volumeRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isVolumeOpen ? closeAllModals() : openVolume()}>
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
-                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isVolumeOpen ? closeAllModals() : openVolume()}>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isVolumeOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
@@ -756,9 +757,9 @@ const body = () => {
 
               {/* Timeframe Dropdown */}
               <div className="relative" ref={timeframeRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isTimeframeOpen ? closeAllModals() : openTimeframe()}>
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
-                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isTimeframeOpen ? closeAllModals() : openTimeframe()}>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTimeframeOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
@@ -773,9 +774,9 @@ const body = () => {
 
               {/* Newest Dropdown */}
               <div className="relative" ref={newestRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isNewestOpen ? closeAllModals() : openNewest()}>
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
-                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isNewestOpen ? closeAllModals() : openNewest()}>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isNewestOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
@@ -790,9 +791,9 @@ const body = () => {
 
               {/* Ending Soon Dropdown */}
               <div className="relative" ref={endingSoonRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isEndingSoonOpen ? closeAllModals() : openEndingSoon()}>
-                  <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
-                  <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isEndingSoonOpen ? closeAllModals() : openEndingSoon()}>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isEndingSoonOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">

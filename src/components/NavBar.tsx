@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import walletLogo from "../assets/walletLogo.svg"
 import {
    useConnectModal,
@@ -16,7 +16,8 @@ import {
 import { toast } from 'react-toastify';
 import { useAccount  } from 'wagmi';
 import { useUserMetrics } from "../contexts/UserMetricsContext";
-import { BACKEND_URL } from "../utils/constants";
+import { BACKEND_URL, getBackendBaseUrl } from "../utils/constants";
+import { useLocation } from "react-router-dom";
 
 interface NavBarProps {
   onMenuClick?: () => void
@@ -27,9 +28,13 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
   const { openConnectModal } = useConnectModal();
   const { openAccountModal } = useAccountModal();
   const { address , isConnected } = useAccount();
+  const location = useLocation();
    const [twitterUser, setTwitterUser] = useState<User | null>(null);
    const [isCheckingAuth, setIsCheckingAuth] = useState(false);
    const { creditsPending, inferenceRemaining, refreshMetrics } = useUserMetrics();
+   const [referralCode, setReferralCode] = useState<string | null>(null);
+   const hasRedeemedRef = useRef<boolean>(false);
+   const isRedeemingRef = useRef<boolean>(false);
 
    // Helper function to extract Twitter username
    const getTwitterUsername = (user: User | null): string => {
@@ -49,6 +54,27 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
     return screenName.startsWith('@') ? screenName : `@${screenName}`;
    };
 
+   // Extract referral code from URL on mount and when location changes
+   useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const rc = urlParams.get('rc');
+    if (rc) {
+      setReferralCode(rc);
+      // Store in localStorage to persist across navigation
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('pending-referral-code', rc);
+      }
+    } else {
+      // Check localStorage for pending referral code
+      if (typeof window !== 'undefined') {
+        const storedCode = window.localStorage.getItem('pending-referral-code');
+        if (storedCode) {
+          setReferralCode(storedCode);
+        }
+      }
+    }
+   }, [location.search]);
+
    // Monitor auth state changes
    useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -56,6 +82,8 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
         setTwitterUser(user);
       } else {
         setTwitterUser(null);
+        // Reset redemption state when user logs out
+        hasRedeemedRef.current = false;
       }
       // Reset loading state when auth state changes (handles successful login)
       setIsCheckingAuth(false);
@@ -99,16 +127,84 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
     }
   }, [address, refreshMetrics]);
 
+   // Redeem referral code when both Twitter and wallet are connected
+   const redeemReferralCode = useCallback(async () => {
+    if (!referralCode || !address || hasRedeemedRef.current || isRedeemingRef.current) {
+      return;
+    }
+
+    isRedeemingRef.current = true;
+
+    try {
+      const response = await fetch(`${getBackendBaseUrl()}referral/redeem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: referralCode,
+          newUser: address,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Referral redemption failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Referral redemption successful:", data);
+
+      // Mark as redeemed
+      hasRedeemedRef.current = true;
+      
+      // Clear the referral code from localStorage
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('pending-referral-code');
+      }
+      setReferralCode(null);
+
+      // Refresh metrics to get updated credits/XP
+      await refreshMetrics();
+
+      // Show success message
+      const referrerCredits = data?.referrer?.credits || 0;
+      const referrerXp = data?.referrer?.xp || 0;
+      const referredCredits = data?.referred?.credits || 0;
+      const referredXp = data?.referred?.xp || 0;
+
+      toast.success(
+        `Referral code redeemed! You earned ${referredCredits} credits and ${referredXp} XP.`,
+        {
+          style: { fontSize: '12px' },
+          autoClose: 5000,
+        }
+      );
+    } catch (error: any) {
+      console.error("Error redeeming referral code:", error);
+      // Don't show error to user if it's a duplicate redemption or invalid code
+      // Only show for unexpected errors
+      if (!error.message?.includes('already') && !error.message?.includes('invalid')) {
+        toast.warning("Unable to redeem referral code. Please try again.", {
+          style: { fontSize: '12px' },
+        });
+      }
+    } finally {
+      isRedeemingRef.current = false;
+    }
+   }, [referralCode, address, refreshMetrics]);
+
    // Request initial grant when user is logged in with Twitter and wallet gets connected
    useEffect(() => {
     if (twitterUser && isConnected && address) {
       // Small delay to ensure everything is initialized
       const timer = setTimeout(() => {
         requestInitialGrant();
-      }, 1000);
+        // Also try to redeem referral code if available
+        redeemReferralCode();
+      }, 1500);
       return () => clearTimeout(timer);
     }
-   }, [twitterUser, isConnected, address, requestInitialGrant]);
+   }, [twitterUser, isConnected, address, requestInitialGrant, redeemReferralCode]);
 
    const handleConnectWallet = () => {
     if (isConnected) {

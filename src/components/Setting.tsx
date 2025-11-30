@@ -4,6 +4,7 @@ import { signOut, onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface SettingProps {
   onClose: () => void
@@ -59,13 +60,14 @@ const Setting = ({ onClose }: SettingProps) => {
   }
 
   const username = getTwitterUsername(twitterUser)
-  return (
+  
+  const modalContent = (
     <div 
-      className="absolute z-50 bg-[#1f1f1f] rounded-lg p-4 w-65 shadow-2xl border border-gray-700" 
+      className="fixed bg-[#1f1f1f] rounded-lg p-4 w-65 shadow-2xl border border-gray-700" 
       style={{ 
-        position: 'absolute', 
         bottom: '45px', 
-        left: '202px' 
+        left: '202px',
+        zIndex: 99999
       }}
       data-settings-modal
     >
@@ -150,6 +152,13 @@ const Setting = ({ onClose }: SettingProps) => {
       </div>
     </div>
   )
+
+  // Render modal using portal to ensure it's above all content
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return createPortal(modalContent, document.body)
 }
 
 export default Setting

@@ -1,8 +1,12 @@
 
-import { Share2, Copy, X, Twitter, MessageCircle, Check } from "lucide-react"
+import { Share2, Copy, X, Twitter, Check } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useAccount } from "wagmi"
 import { getBackendBaseUrl } from "../utils/constants"
+import { onAuthStateChanged, type User } from "firebase/auth"
+import { auth } from '../firebase'
+import { toast } from 'react-toastify'
+import { useUserMetrics } from "../contexts/UserMetricsContext"
 
 const Points = () => {
   const [activeTab, setActiveTab] = useState("Quests")
@@ -10,10 +14,33 @@ const Points = () => {
   const [isXpLoading, setIsXpLoading] = useState(false)
   const [xpError, setXpError] = useState<string | null>(null)
   const { address, isConnected } = useAccount()
+  const { refreshMetrics } = useUserMetrics()
+  const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const [referralCode, setReferralCode] = useState<string>("")
   const [isReferralCodeLoading, setIsReferralCodeLoading] = useState(false)
   const [referralCodeError, setReferralCodeError] = useState<string | null>(null)
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle")
+  const [questResponse, setQuestResponse] = useState<{
+    address: string
+    reason: string
+    parameter: number
+    credits: number
+    totalCalculatedCredits: number
+  } | null>(null)
+  const [isQuestLoading, setIsQuestLoading] = useState(false)
+  const [questError, setQuestError] = useState<string | null>(null)
+
+  // Monitor auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setTwitterUser(user)
+      } else {
+        setTwitterUser(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     if (!address || !isConnected) {
@@ -126,6 +153,15 @@ const Points = () => {
     }
   }, [address, isConnected])
 
+  // Auto-fetch social quest API response when wallet is connected and user is logged in
+  useEffect(() => {
+    if (address && isConnected && twitterUser && !questResponse && !isQuestLoading) {
+      // Auto-fetch with default parameter 3 (social_quest)
+      handleSocialQuest('social_quest', 3)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, isConnected, twitterUser])
+
   const referralUrl = useMemo(() => {
     if (!referralCode) {
       return isReferralCodeLoading ? "Loading referral link…" : "Unable to load referral link"
@@ -166,8 +202,103 @@ const Points = () => {
     window.open(twitterShareUrl, '_blank', 'width=550,height=420')
   }
 
+  const handleSocialQuest = async (reason: string, parameter: number) => {
+    if (!address || !isConnected) {
+      toast.warning('Please connect your wallet to complete quests', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    setIsQuestLoading(true)
+    setQuestError(null)
+    setQuestResponse(null)
+
+    try {
+      const response = await fetch(`${getBackendBaseUrl()}credits/calculate-and-store`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: address,
+          reason: reason,
+          parameter: parameter
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to calculate credits: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Quest API Response:", data)
+      setQuestResponse(data)
+      
+      toast.success(`Quest completed! You earned ${data.credits} credits.`, {
+        style: { fontSize: '12px' },
+        autoClose: 3000,
+      })
+
+      // Refresh metrics to show updated credits and XP
+      await refreshMetrics()
+      
+      // Refresh XP to show updated values
+      if (address && isConnected) {
+        const xpResponse = await fetch(`${getBackendBaseUrl()}users/${address}/xp`)
+        if (xpResponse.ok) {
+          const xpData = await xpResponse.json()
+          const xpValue = Number(
+            xpData?.xp ??
+              xpData?.points ??
+              xpData?.xpPoints ??
+              xpData?.xpTotal ??
+              xpData?.xp_total ??
+              0
+          )
+          setXp(Number.isFinite(xpValue) ? xpValue : 0)
+        }
+      }
+    } catch (error: any) {
+      console.error("Error calculating credits:", error)
+      setQuestError(error.message || "Failed to complete quest")
+      toast.error(`Quest failed: ${error.message}`, {
+        style: { fontSize: '12px' }
+      })
+    } finally {
+      setIsQuestLoading(false)
+    }
+  }
+
   const xpDisplayValue = xp !== null ? xp.toLocaleString("en-US") : "00"
   const xpDisplayText = isXpLoading ? "Loading..." : `${xpDisplayValue} XP`
+
+  // Show content only when both wallet is connected and Twitter is logged in
+  const isAuthorized = isConnected && twitterUser && address
+
+  if (!isAuthorized) {
+    return (
+      <div className="relative flex min-h-full flex-col items-center justify-center gap-6 overflow-hidden px-4 py-10 text-white sm:px-6 lg:px-10"  
+           style={{
+             background: `
+               radial-gradient(circle at center, rgba(69, 255, 174, 0.1) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 1) 100%),
+               linear-gradient(90deg, rgba(69, 255, 174, 0.05) 1px, transparent 1px),
+               linear-gradient(rgba(69, 255, 174, 0.05) 1px, transparent 1px)
+             `,
+             backgroundSize: '100% 100%, 60px 60px, 60px 60px',
+             backgroundColor: '#000000'
+           }}>
+        <div className="flex flex-col items-center gap-4 text-center max-w-md">
+          <div className="font-urbanist text-2xl sm:text-3xl font-medium leading-tight tracking-[0%] text-[#FFFFFF]">
+            Connect to View Points
+          </div>
+          <div className="font-urbanist text-sm sm:text-base font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+            Please connect your wallet and login with Twitter to view your points and rewards.
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative flex min-h-full flex-col items-center gap-8 overflow-hidden px-4 py-10 text-white sm:px-6 lg:px-10"  
@@ -316,53 +447,60 @@ const Points = () => {
                                <h3 className="font-urbanist text-lg font-medium leading-none tracking-[0%] text-[#FFFFFF]">Social Quests</h3>
                                <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Refreshes daily 00:00 UTC</span>
                              </div>
-                             
-                             {/* Quest Cards */}
-                             <div className="flex max-h-60 flex-col gap-3 overflow-y-auto rounded-2xl bg-[#121212]/20 p-2">
-                               {/* Share on Twitter Quest */}
-                               <div className="flex w-full flex-row items-center gap-3 rounded-2xl bg-[#1A1A1A] p-3">
-                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2A2A2A]">
-                                   <Twitter className="h-5 w-5 text-[#808080]" />
-                                 </div>
-                                 <div className="flex-1">
-                                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on twitter</div>
-                                   <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Share to one of your friends on twitter.</div>
-                                 </div>
-                                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 XP</div>
-                               </div>
 
-                               {/* Share on Discord Quest */}
-                               <div className="flex w-full flex-row items-center gap-3 rounded-2xl bg-[#1A1A1A] p-3">
-                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2A2A2A]">
-                                   <MessageCircle className="h-5 w-5 text-[#808080]" />
-                                 </div>
-                                 <div className="flex-1">
-                                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on Discord</div>
-                                   <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Share to one of your friends on Discord.</div>
-                                 </div>
-                                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+25 XP</div>
-                               </div>
+                             {/* Trigger Button */}
+                             {!questResponse && !isQuestLoading && (
+                               <button
+                                 onClick={() => handleSocialQuest('social_quest', 3)}
+                                 disabled={!address || !isConnected || isQuestLoading}
+                                 className={`w-full sm:w-auto px-6 py-3 rounded-lg font-urbanist text-sm font-medium transition-colors ${
+                                   !address || !isConnected || isQuestLoading
+                                     ? 'bg-[#2A2A2A] text-[#808080] cursor-not-allowed'
+                                     : 'bg-[#45FFAE] text-[#000000] hover:bg-[#3FE89E] cursor-pointer'
+                                 }`}
+                               >
+                                 Fetch API Response
+                               </button>
+                             )}
 
-                               {/* Share to 5 friends Quest */}
-                               <div className="flex w-full flex-row items-center gap-3 rounded-2xl bg-[#1A1A1A] p-3">
-                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#2A2A2A]">
-                                   <Share2 className="h-5 w-5 text-[#808080]" />
-                                 </div>
-                                 <div className="flex-1">
-                                   <div className="flex flex-row items-center gap-2">
-                                     <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share to 5 friends</div>
-                                     <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">2/5</div>
-                                   </div>
-                                   <div className="mt-2 h-1 w-full rounded-full bg-[#2A2A2A]">
-                                     <div className="h-full w-2/5 rounded-full bg-[#45FFAE]"></div>
-                                   </div>
-                                  <div className="mt-1 font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">3 shares away from +250 XP</div>
-                                   <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">Resets in 13 hours</div>
-                                   <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#808080]">$110 / $250</div>
-                                 </div>
-                                <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">+250 XP</div>
+                             {/* Loading State */}
+                             {isQuestLoading && (
+                               <div className="text-center font-urbanist text-sm text-[#808080] py-4">Processing quest...</div>
+                             )}
+
+                             {/* Error State */}
+                             {questError && (
+                               <div className="rounded-2xl bg-[#1A1A1A] border border-red-500/30 p-4">
+                                 <div className="text-center font-urbanist text-sm text-[#FF7D7D]">{questError}</div>
                                </div>
-                             </div>
+                             )}
+
+                             {/* API Response Display */}
+                             {questResponse && (
+                               <div className="w-full rounded-2xl bg-[#1A1A1A] border border-[#45FFAE]/30 p-6">
+                                 <div className="flex flex-col gap-8 font-urbanist">
+                                   <div className="flex flex-col gap-2">
+                                     <span className="text-sm font-medium text-[#808080]">parameter:</span>
+                                     <span className="text-lg font-semibold text-[#FFFFFF]">{questResponse.parameter}</span>
+                                   </div>
+                                   
+                                   <div className="flex flex-col gap-2">
+                                     <span className="text-sm font-medium text-[#808080]">credits:</span>
+                                     <span className="text-lg font-semibold text-[#45FFAE]">{questResponse.credits}</span>
+                                   </div>
+                                   
+                                   <div className="flex flex-col gap-2">
+                                     <span className="text-sm font-medium text-[#808080]">total Calculated Credits:</span>
+                                     <span className="text-lg font-semibold text-[#45FFAE]">{questResponse.totalCalculatedCredits}</span>
+                                   </div>
+                                   
+                                   <div className="flex flex-col gap-2">
+                                     <span className="text-sm font-medium text-[#808080]">address:</span>
+                                     <span className="text-base font-mono text-[#FFFFFF] break-all">{questResponse.address}</span>
+                                   </div>
+                                 </div>
+                               </div>
+                             )}
                            </div>
 
                            {/* Product Quests Section */}

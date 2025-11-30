@@ -34,6 +34,35 @@ const body = () => {
   const [isTfOpen, setIsTfOpen] = useState(false)
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false)
   const [isAssetsOpen, setIsAssetsOpen] = useState(false)
+
+  // Helper function to close all modals
+  const closeAllModals = () => {
+    setIsDropdownOpen(false)
+    setIsTfOpen(false)
+    setIsAnalysisOpen(false)
+    setIsAssetsOpen(false)
+  }
+
+  // Helper functions to open specific modal and close others
+  const openDropdown = () => {
+    closeAllModals()
+    setIsDropdownOpen(true)
+  }
+
+  const openTf = () => {
+    closeAllModals()
+    setIsTfOpen(true)
+  }
+
+  const openAnalysis = () => {
+    closeAllModals()
+    setIsAnalysisOpen(true)
+  }
+
+  const openAssets = () => {
+    closeAllModals()
+    setIsAssetsOpen(true)
+  }
   const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null)
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
@@ -71,18 +100,12 @@ const body = () => {
       ) {
         return
       }
-      setIsDropdownOpen(false)
-      setIsTfOpen(false)
-      setIsAnalysisOpen(false)
-      setIsAssetsOpen(false)
+      closeAllModals()
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsDropdownOpen(false)
-        setIsTfOpen(false)
-        setIsAnalysisOpen(false)
-        setIsAssetsOpen(false)
+        closeAllModals()
       }
     }
 
@@ -509,7 +532,7 @@ const body = () => {
          <div className="flex flex-row items-center justify-start gap-4">
 
               <div className="relative" ref={dropdownRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsDropdownOpen(prev => !prev)}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
                   <img src={cryptoTrade} alt="crypto" className="h-4 w-4"/>
                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
@@ -531,7 +554,7 @@ const body = () => {
 
               {/* Timeframe Dropdown */}
               <div className="relative" ref={tfRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsTfOpen(prev => !prev)}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isTfOpen ? closeAllModals() : openTf()}>
                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
                 </button>
@@ -548,7 +571,7 @@ const body = () => {
 
               {/* Analysis Dropdown */}
               <div className="relative" ref={analysisRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAnalysisOpen(prev => !prev)}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isAnalysisOpen ? closeAllModals() : openAnalysis()}>
                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
                 </button>
@@ -565,7 +588,7 @@ const body = () => {
 
               {/* Assets Dropdown */}
               <div className="relative" ref={assetsRef}>
-                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => setIsAssetsOpen(prev => !prev)}>
+                <button className="flex flex-row items-center justify-center gap-2 bg-black bg-opacity-70 rounded-lg px-3 py-2 cursor-pointer w-fit h-10 hover:bg-opacity-80" onClick={() => isAssetsOpen ? closeAllModals() : openAssets()}>
                   <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
                 </button>

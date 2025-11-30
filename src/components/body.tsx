@@ -53,6 +53,47 @@ const body = () => {
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
   const [isNewestOpen, setIsNewestOpen] = useState(false)
   const [isEndingSoonOpen, setIsEndingSoonOpen] = useState(false)
+
+  // Helper function to close all modals
+  const closeAllModals = () => {
+    setIsDropdownOpen(false)
+    setIsLiquidityOpen(false)
+    setIsVolumeOpen(false)
+    setIsTimeframeOpen(false)
+    setIsNewestOpen(false)
+    setIsEndingSoonOpen(false)
+  }
+
+  // Helper functions to open specific modal and close others
+  const openDropdown = () => {
+    closeAllModals()
+    setIsDropdownOpen(true)
+  }
+
+  const openLiquidity = () => {
+    closeAllModals()
+    setIsLiquidityOpen(true)
+  }
+
+  const openVolume = () => {
+    closeAllModals()
+    setIsVolumeOpen(true)
+  }
+
+  const openTimeframe = () => {
+    closeAllModals()
+    setIsTimeframeOpen(true)
+  }
+
+  const openNewest = () => {
+    closeAllModals()
+    setIsNewestOpen(true)
+  }
+
+  const openEndingSoon = () => {
+    closeAllModals()
+    setIsEndingSoonOpen(true)
+  }
   const [selectedLiquidity, setSelectedLiquidity] = useState<string | null>(null)
   const [selectedVolume, setSelectedVolume] = useState<string | null>(null)
   const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null)
@@ -351,22 +392,12 @@ const body = () => {
       ) {
         return
       }
-      setIsDropdownOpen(false)
-      setIsLiquidityOpen(false)
-      setIsVolumeOpen(false)
-      setIsTimeframeOpen(false)
-      setIsNewestOpen(false)
-      setIsEndingSoonOpen(false)
+      closeAllModals()
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsDropdownOpen(false)
-        setIsLiquidityOpen(false)
-        setIsVolumeOpen(false)
-        setIsTimeframeOpen(false)
-        setIsNewestOpen(false)
-        setIsEndingSoonOpen(false)
+        closeAllModals()
       }
     }
 
@@ -673,7 +704,7 @@ const body = () => {
          <div className="flex flex-wrap items-center justify-start gap-3">
 
               <div className="relative" ref={dropdownRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsDropdownOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
                   <img src={polymarketLogo} alt="polymarket" className="h-4 w-4"/>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
                   <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
@@ -691,7 +722,7 @@ const body = () => {
 
               {/* Liquidity Dropdown */}
               <div className="relative" ref={liquidityRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsLiquidityOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isLiquidityOpen ? closeAllModals() : openLiquidity()}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
                   <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
                 </button>
@@ -708,7 +739,7 @@ const body = () => {
 
               {/* Volume Dropdown */}
               <div className="relative" ref={volumeRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsVolumeOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isVolumeOpen ? closeAllModals() : openVolume()}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
                   <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
                 </button>
@@ -725,7 +756,7 @@ const body = () => {
 
               {/* Timeframe Dropdown */}
               <div className="relative" ref={timeframeRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsTimeframeOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isTimeframeOpen ? closeAllModals() : openTimeframe()}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                   <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
                 </button>
@@ -742,7 +773,7 @@ const body = () => {
 
               {/* Newest Dropdown */}
               <div className="relative" ref={newestRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsNewestOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isNewestOpen ? closeAllModals() : openNewest()}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
                   <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
                 </button>
@@ -759,7 +790,7 @@ const body = () => {
 
               {/* Ending Soon Dropdown */}
               <div className="relative" ref={endingSoonRef}>
-                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => setIsEndingSoonOpen(prev => !prev)}>
+                <button className="flex h-10 items-center justify-center gap-2 rounded-lg bg-black/70 px-4 py-2 transition-all hover:bg-black/80" onClick={() => isEndingSoonOpen ? closeAllModals() : openEndingSoon()}>
                   <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
                   <ArrowUp className={`h-4 w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
                 </button>

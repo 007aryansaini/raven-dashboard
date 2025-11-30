@@ -167,8 +167,6 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
       await refreshMetrics();
 
       // Show success message
-      const referrerCredits = data?.referrer?.credits || 0;
-      const referrerXp = data?.referrer?.xp || 0;
       const referredCredits = data?.referred?.credits || 0;
       const referredXp = data?.referred?.xp || 0;
 

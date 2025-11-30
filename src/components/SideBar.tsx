@@ -8,7 +8,7 @@ import twitter from "../assets/twitter.svg"
 import discord from "../assets/discord.svg"
 import cryptoTrade from "../assets/cryptoTrade.svg"
 import polymarketMarket from "../assets/polymarketLogo.svg"
-import { useTab } from "../contexts/TabContext"
+import { useTab, type TabType } from "../contexts/TabContext"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
 import Setting from "./Setting"
@@ -293,7 +293,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
     setIsSettingsOpen(false)
   }
 
-  const handleNavigation = (path: string, tab: string | null) => {
+  const handleNavigation = (path: string, tab: TabType) => {
     navigate(path)
     setActiveTab(tab)
     onClose?.() // Close sidebar on mobile after navigation

@@ -275,7 +275,7 @@ const body = () => {
       }
 
       // Check if query was built from tags
-      const hasTags = selectedLiquidity || selectedVolume || selectedTimeframe || selectedNewest || selectedEndingSoon
+      const hasTags = Boolean(selectedLiquidity || selectedVolume || selectedTimeframe || selectedNewest || selectedEndingSoon)
 
       const authorization = await authorizeInference(address, {
         tags: hasTags,

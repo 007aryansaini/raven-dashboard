@@ -247,9 +247,7 @@ const body = () => {
       }
 
       // Check if query was built from tags
-      const hasTags = selectedAsset || selectedAnalysis || selectedTimeframe
-      const tagQuery = buildQueryFromTags()
-      const isTagQuery = tagQuery && query === tagQuery
+      const hasTags = Boolean(selectedAsset || selectedAnalysis || selectedTimeframe)
 
       const authorization = await authorizeInference(address, {
         tags: hasTags,

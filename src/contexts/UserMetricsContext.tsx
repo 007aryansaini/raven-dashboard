@@ -78,7 +78,8 @@ export const UserMetricsProvider = ({ children }: { children: ReactNode }) => {
 
         const data = await response.json();
         const creditsValue = numericValue(
-          data?.credits ??
+          data?.effectiveCredits ??
+            data?.credits ??
             data?.pendingCredits ??
             data?.creditsPending ??
             data?.pending ??

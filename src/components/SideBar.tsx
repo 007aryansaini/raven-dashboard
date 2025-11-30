@@ -29,14 +29,14 @@ const SideBar = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isScoreDropdownOpen, setIsScoreDropdownOpen] = useState(false)
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
-  const { address, isConnected } = useAccount()
+  const { isConnected } = useAccount()
   const { writeContractAsync } = useWriteContract()
   const publicClient = usePublicClient()
   const { data: walletClient } = useWalletClient()
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null)
   const [subcribeButtonText, setSubcribeButtonText] = useState("Subscribe")
   const [isSubscribing, setIsSubscribing] = useState(false)
-  const { isUserSubscribed, setIsUserSubscribed, showSubscriptionModal, setShowSubscriptionModal } = useSubscription()
+  const { setIsUserSubscribed, showSubscriptionModal, setShowSubscriptionModal } = useSubscription()
   const { refreshMetrics, hasActiveSubscription, subscriptionPlanId, inferenceRemaining } = useUserMetrics()
 
   // Helper function to extract Twitter username

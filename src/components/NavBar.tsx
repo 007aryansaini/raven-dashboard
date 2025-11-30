@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import walletLogo from "../assets/walletLogo.svg"
 import {
    useConnectModal,
@@ -16,6 +16,7 @@ import {
 import { toast } from 'react-toastify';
 import { useAccount  } from 'wagmi';
 import { useUserMetrics } from "../contexts/UserMetricsContext";
+import { BACKEND_URL } from "../utils/constants";
 
 const NavBar = () => {
 
@@ -24,7 +25,7 @@ const NavBar = () => {
   const { address , isConnected } = useAccount();
    const [twitterUser, setTwitterUser] = useState<User | null>(null);
    const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-   const { creditsPending, inferenceRemaining } = useUserMetrics();
+   const { creditsPending, inferenceRemaining, refreshMetrics } = useUserMetrics();
 
    // Helper function to extract Twitter username
    const getTwitterUsername = (user: User | null): string => {
@@ -63,6 +64,48 @@ const NavBar = () => {
     return value !== null ? value.toLocaleString("en-US") : "..."
   };
 
+  const requestInitialGrant = useCallback(async () => {
+    if (!address) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BACKEND_URL}credits/initial-grant`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user: address,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Initial grant request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Initial grant response:", data);
+      
+      // Refresh metrics to get updated credits
+      await refreshMetrics();
+    } catch (error: any) {
+      console.error("Error requesting initial grant:", error);
+      // Silently fail - don't show error to user as this is a background operation
+    }
+  }, [address, refreshMetrics]);
+
+   // Request initial grant when user is logged in with Twitter and wallet gets connected
+   useEffect(() => {
+    if (twitterUser && isConnected && address) {
+      // Small delay to ensure everything is initialized
+      const timer = setTimeout(() => {
+        requestInitialGrant();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+   }, [twitterUser, isConnected, address, requestInitialGrant]);
+
    const handleConnectWallet = () => {
     if (isConnected) {
       openAccountModal?.();
@@ -90,6 +133,11 @@ const NavBar = () => {
       // Reset loading state immediately after successful login
       // The onAuthStateChanged will set twitterUser, which will update the UI
       setIsCheckingAuth(false);
+
+      // Request initial grant after successful Twitter login (if wallet is connected)
+      if (isConnected && address) {
+        await requestInitialGrant();
+      }
       
       // Check if Twitter user is already registered
       try {

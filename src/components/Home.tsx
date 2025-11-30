@@ -1,12 +1,11 @@
 
-import { ArrowUp, MoveRight } from "lucide-react"
+import { ArrowUp } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAccount } from 'wagmi'
 import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
 import { toast } from 'react-toastify'
-import bolt from "../assets/bolt.svg"
 import blackDot from "../assets/blackDot.svg"
 import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference } from "../utils/inference"

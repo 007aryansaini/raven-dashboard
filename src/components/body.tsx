@@ -575,7 +575,7 @@ const body = () => {
            {messages.length === 0 ? (
              /* Carousel Container */
            <div 
-               className="relative w-full max-w-5xl"
+               className="relative w-full max-w-5xl mt-6 sm:mt-8 lg:mt-25"
              onMouseEnter={() => setIsAutoPlay(false)}
              onMouseLeave={() => setIsAutoPlay(true)}
            >

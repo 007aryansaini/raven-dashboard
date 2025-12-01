@@ -11,6 +11,7 @@ import polymarketMarket from "../assets/polymarketLogo.svg"
 import { useTab, type TabType } from "../contexts/TabContext"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import Setting from "./Setting"
 import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
@@ -471,19 +472,26 @@ const SideBar = ({ onClose }: SideBarProps) => {
         </div>
       </div>
 
-      {/* Subscription Modal */}
-      {showSubscriptionModal && (
-        <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50">
+      {/* Subscription Modal - Rendered via Portal */}
+      {showSubscriptionModal && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex lg:items-center lg:justify-center"
+          style={{ 
+            height: '100vh', 
+            width: '100vw',
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)'
+          }}
+          onClick={handleCloseModal}
+        >
+          {/* Modal - Left Sidebar on Mobile, Centered on Desktop */}
           <div 
-            className="backdrop-blur-lg border border-[#45FFAE]/30 h-auto w-full p-8 m-2 relative"
+            className="border-r lg:border border-[#45FFAE]/30 lg:rounded-xl w-full max-w-md h-full lg:h-auto lg:max-h-[90vh] p-6 sm:p-8 flex flex-col gap-6 overflow-y-auto relative z-[10000]"
             style={{
-              width: 'min(600px, 100%)',
-              borderRadius: '30px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-              background: 'rgba(0, 0, 0, 0.9)'
+              background: '#000000',
+              position: 'relative'
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between">
@@ -504,7 +512,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="w-8 h-8 flex items-center justify-center rounded-full backdrop-blur-sm border border-[#45FFAE]/30 hover:border-[#45FFAE]/50 transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-full border border-[#45FFAE]/30 hover:border-[#45FFAE]/50 transition-colors cursor-pointer bg-[#0A0A0A]"
               >
                 <svg 
                   className="w-5 h-5 text-[#45FFAE]" 
@@ -524,18 +532,15 @@ const SideBar = ({ onClose }: SideBarProps) => {
 
             {/* Plans Container */}
             <div 
-              className="backdrop-blur-sm border border-[#45FFAE]/20 h-full w-full"
+              className="border border-[#45FFAE]/20 flex-1 w-full flex flex-col rounded-xl p-6"
               style={{
-                borderRadius: '20px',
-                padding: '24px',
-                display: 'flex',
-                flexDirection: 'column',
                 gap: '16px',
-                width: '100%'
+                background: '#0A0A0A',
+                minHeight: 0
               }}
             >
               {/* Plan Options */}
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 flex-1 overflow-y-auto">
                 {plans.map((plan) => {
                   const { disabled: planDisabled, note: planNote } = getPlanStatus(plan.id)
                   const isSelected = selectedPlan === plan.id
@@ -643,7 +648,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
               <button
                 onClick={handleSubscribe}
                 disabled={!selectedPlan || isSubscribing}
-                className={`w-full py-3 rounded-lg font-medium transition-all ${
+                className={`w-full py-3 rounded-lg font-medium transition-all flex-shrink-0 ${
                   selectedPlan && !isSubscribing
                     ? 'bg-[#45FFAE]/10 border border-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
                     : 'bg-[#45FFAE]/5 border border-[#45FFAE]/30 cursor-not-allowed opacity-50'
@@ -652,15 +657,15 @@ const SideBar = ({ onClose }: SideBarProps) => {
                   color: '#45FFAE',
                   fontFamily: 'Inter, sans-serif',
                   fontSize: '16px',
-                  fontWeight: 500,
-                  marginTop: '8px'
+                  fontWeight: 500
                 }}
               >
                 {subcribeButtonText}
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
     </>

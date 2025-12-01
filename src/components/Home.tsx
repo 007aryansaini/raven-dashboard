@@ -172,6 +172,7 @@ const Home = () => {
       const authorization = await authorizeInference(address, {
         tags: false,
         reason: query,
+        mode: "",
       })
 
       if (!authorization.allowed) {

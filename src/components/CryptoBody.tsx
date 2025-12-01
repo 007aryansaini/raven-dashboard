@@ -261,9 +261,18 @@ const body = () => {
       // Check if query was built from tags
       const hasTags = Boolean(selectedAsset || selectedAnalysis || selectedTimeframe || selectedScore)
 
+      // Map selectedScore to mode
+      let mode = ""
+      if (selectedScore === "Logical") {
+        mode = "scores.logic"
+      } else if (selectedScore === "Sentiment") {
+        mode = "scores.sentiment"
+      }
+
       const authorization = await authorizeInference(address, {
         tags: hasTags,
         reason: query,
+        mode: mode,
       })
 
       if (!authorization.allowed) {

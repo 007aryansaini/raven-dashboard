@@ -6,6 +6,7 @@ export interface AuthorizeInferenceOptions {
   contextHash?: string;
   reason?: string;
   tags?: boolean;
+  mode?: string;
 }
 
 export type AuthorizeInferenceResponse = {
@@ -31,6 +32,7 @@ export async function authorizeInference(
     user: account,
     tags: Boolean(options.tags ?? false),
     reason: options.reason ?? defaultOptions.reason,
+    mode: options.mode ?? "",
   };
 
   const response = await fetch(`${getBackendBaseUrl()}inference/authorize`, {

@@ -37,7 +37,7 @@ const Dashboard = () => {
             <Points />
           ) : location.pathname === '/polymarket' ? (
             <Body />
-          ) : location.pathname === '/crypto' ? (
+          ) : location.pathname === '/crypto' || location.pathname === '/' ? (
             <CryptoBody />
           ) : location.pathname === '/score' ? (
             <Benchmark />

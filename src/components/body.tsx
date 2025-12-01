@@ -53,6 +53,7 @@ const body = () => {
   const [isTimeframeOpen, setIsTimeframeOpen] = useState(false)
   const [isNewestOpen, setIsNewestOpen] = useState(false)
   const [isEndingSoonOpen, setIsEndingSoonOpen] = useState(false)
+  const [isScoreOpen, setIsScoreOpen] = useState(false)
 
   // Helper function to close all modals
   const closeAllModals = () => {
@@ -62,6 +63,7 @@ const body = () => {
     setIsTimeframeOpen(false)
     setIsNewestOpen(false)
     setIsEndingSoonOpen(false)
+    setIsScoreOpen(false)
   }
 
   // Helper functions to open specific modal and close others
@@ -94,11 +96,17 @@ const body = () => {
     closeAllModals()
     setIsEndingSoonOpen(true)
   }
+
+  const openScore = () => {
+    closeAllModals()
+    setIsScoreOpen(true)
+  }
   const [selectedLiquidity, setSelectedLiquidity] = useState<string | null>(null)
   const [selectedVolume, setSelectedVolume] = useState<string | null>(null)
   const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null)
   const [selectedNewest, setSelectedNewest] = useState<string | null>(null)
   const [selectedEndingSoon, setSelectedEndingSoon] = useState<string | null>(null)
+  const [selectedScore, setSelectedScore] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCardImage, setSelectedCardImage] = useState<string | null>(null)
@@ -108,6 +116,7 @@ const body = () => {
   const timeframeRef = useRef<HTMLDivElement>(null)
   const newestRef = useRef<HTMLDivElement>(null)
   const endingSoonRef = useRef<HTMLDivElement>(null)
+  const scoreRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const totalSlides = 3 // 9 cards / 3 cards per slide = 3 slides
   const autoPlayInterval = 4000 // 4 seconds between slides
@@ -222,10 +231,7 @@ const body = () => {
   }
 
   const buildChatUrl = () => {
-    const base = `${CHAT_API_BASE}query`
-    return address
-      ? `${base}?wallet_address=${encodeURIComponent(address)}`
-      : base
+    return `${CHAT_API_BASE}query`
   }
 
   // Build query from selected tags
@@ -257,6 +263,11 @@ const body = () => {
       tags.push(selectedEndingSoon.toLowerCase())
     }
     
+    // Add score if selected
+    if (selectedScore) {
+      tags.push(selectedScore.toLowerCase())
+    }
+    
     // If we have tags, build a query
     if (tags.length > 0) {
       return tags.join(' ')
@@ -275,7 +286,7 @@ const body = () => {
       }
 
       // Check if query was built from tags
-      const hasTags = Boolean(selectedLiquidity || selectedVolume || selectedTimeframe || selectedNewest || selectedEndingSoon)
+      const hasTags = Boolean(selectedLiquidity || selectedVolume || selectedTimeframe || selectedNewest || selectedEndingSoon || selectedScore)
 
       const authorization = await authorizeInference(address, {
         tags: hasTags,
@@ -292,6 +303,8 @@ const body = () => {
         return
       }
 
+      console.log("Building chat URL:", buildChatUrl())
+
       const response = await fetch(buildChatUrl(), {
         method: "POST",
         headers: {
@@ -302,6 +315,7 @@ const body = () => {
         body: JSON.stringify({
           query: query,
           queries: ["string"],
+          wallet_address: address || "string",
         }),
       })
 
@@ -347,6 +361,7 @@ const body = () => {
       setSelectedTimeframe(null)
       setSelectedNewest(null)
       setSelectedEndingSoon(null)
+      setSelectedScore(null)
     } catch (error: any) {
       console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
@@ -443,7 +458,7 @@ const body = () => {
 
   // Close dropdowns on outside click or Escape
   useEffect(() => {
-    const anyOpen = isDropdownOpen || isLiquidityOpen || isVolumeOpen || isTimeframeOpen || isNewestOpen || isEndingSoonOpen
+    const anyOpen = isDropdownOpen || isLiquidityOpen || isVolumeOpen || isTimeframeOpen || isNewestOpen || isEndingSoonOpen || isScoreOpen
     if (!anyOpen) return
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -454,7 +469,8 @@ const body = () => {
         (volumeRef.current && volumeRef.current.contains(target)) ||
         (timeframeRef.current && timeframeRef.current.contains(target)) ||
         (newestRef.current && newestRef.current.contains(target)) ||
-        (endingSoonRef.current && endingSoonRef.current.contains(target))
+        (endingSoonRef.current && endingSoonRef.current.contains(target)) ||
+        (scoreRef.current && scoreRef.current.contains(target))
       ) {
         return
       }
@@ -473,7 +489,7 @@ const body = () => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isDropdownOpen, isLiquidityOpen, isVolumeOpen, isTimeframeOpen, isNewestOpen, isEndingSoonOpen])
+  }, [isDropdownOpen, isLiquidityOpen, isVolumeOpen, isTimeframeOpen, isNewestOpen, isEndingSoonOpen, isScoreOpen])
 
   const goToPreviousSlide = () => {
     if (isTransitioning) return
@@ -866,6 +882,23 @@ const body = () => {
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','6h','12h','24h','3d','7d'].map(v => (
                         <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Score Dropdown */}
+              <div className="relative" ref={scoreRef}>
+                <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isScoreOpen ? closeAllModals() : openScore()}>
+                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
+                  <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isScoreOpen ? 'rotate-180' : ''}`}/>
+                </button>
+                {isScoreOpen && (
+                  <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                    <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
+                      {['Logical','Sentiment'].map(v => (
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedScore(v); setIsScoreOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>

@@ -34,6 +34,7 @@ const body = () => {
   const [isTfOpen, setIsTfOpen] = useState(false)
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false)
   const [isAssetsOpen, setIsAssetsOpen] = useState(false)
+  const [isScoreOpen, setIsScoreOpen] = useState(false)
 
   // Helper function to close all modals
   const closeAllModals = () => {
@@ -41,6 +42,7 @@ const body = () => {
     setIsTfOpen(false)
     setIsAnalysisOpen(false)
     setIsAssetsOpen(false)
+    setIsScoreOpen(false)
   }
 
   // Helper functions to open specific modal and close others
@@ -63,15 +65,22 @@ const body = () => {
     closeAllModals()
     setIsAssetsOpen(true)
   }
+
+  const openScore = () => {
+    closeAllModals()
+    setIsScoreOpen(true)
+  }
   const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null)
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
+  const [selectedScore, setSelectedScore] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const tfRef = useRef<HTMLDivElement>(null)
   const analysisRef = useRef<HTMLDivElement>(null)
   const assetsRef = useRef<HTMLDivElement>(null)
+  const scoreRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
   // Monitor auth state changes
@@ -87,7 +96,7 @@ const body = () => {
   }, [])
 
   useEffect(() => {
-    const anyOpen = isDropdownOpen || isTfOpen || isAnalysisOpen || isAssetsOpen
+    const anyOpen = isDropdownOpen || isTfOpen || isAnalysisOpen || isAssetsOpen || isScoreOpen
     if (!anyOpen) return
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -96,7 +105,8 @@ const body = () => {
         (dropdownRef.current && dropdownRef.current.contains(target)) ||
         (tfRef.current && tfRef.current.contains(target)) ||
         (analysisRef.current && analysisRef.current.contains(target)) ||
-        (assetsRef.current && assetsRef.current.contains(target))
+        (assetsRef.current && assetsRef.current.contains(target)) ||
+        (scoreRef.current && scoreRef.current.contains(target))
       ) {
         return
       }
@@ -115,7 +125,7 @@ const body = () => {
       document.removeEventListener('mousedown', handleClickOutside)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isDropdownOpen, isTfOpen, isAnalysisOpen, isAssetsOpen])
+  }, [isDropdownOpen, isTfOpen, isAnalysisOpen, isAssetsOpen, isScoreOpen])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -205,10 +215,7 @@ const body = () => {
   }
 
   const buildChatUrl = () => {
-    const base = `${CHAT_API_BASE}query`
-    return address
-      ? `${base}?wallet_address=${encodeURIComponent(address)}`
-      : base
+    return `${CHAT_API_BASE}query`
   }
 
   // Build query from selected tags
@@ -230,6 +237,11 @@ const body = () => {
       tags.push(`around ${selectedTimeframe}`)
     }
     
+    // Add score if selected
+    if (selectedScore) {
+      tags.push(selectedScore.toLowerCase())
+    }
+    
     // If we have tags, build a query
     if (tags.length > 0) {
       return tags.join(' ')
@@ -247,7 +259,7 @@ const body = () => {
       }
 
       // Check if query was built from tags
-      const hasTags = Boolean(selectedAsset || selectedAnalysis || selectedTimeframe)
+      const hasTags = Boolean(selectedAsset || selectedAnalysis || selectedTimeframe || selectedScore)
 
       const authorization = await authorizeInference(address, {
         tags: hasTags,
@@ -274,6 +286,7 @@ const body = () => {
         body: JSON.stringify({
           query: query,
           queries: ["string"],
+          wallet_address: address || "string",
         }),
       })
 
@@ -317,6 +330,7 @@ const body = () => {
       setSelectedTimeframe(null)
       setSelectedAnalysis(null)
       setSelectedAsset(null)
+      setSelectedScore(null)
     } catch (error: any) {
       console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
@@ -407,6 +421,7 @@ const body = () => {
       setSelectedTimeframe(null)
       setSelectedAnalysis(null)
       setSelectedAsset(null)
+      setSelectedScore(null)
       return
     }
 
@@ -657,6 +672,23 @@ const body = () => {
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['BTC','ETH','SOL','XRP','AAVE','UNI','BNB','ADA','DOGE','SUI','TRX','LINK'].map(v => (
                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Score Dropdown */}
+              <div className="relative" ref={scoreRef}>
+                <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isScoreOpen ? closeAllModals() : openScore()}>
+                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
+                   <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isScoreOpen ? 'rotate-180' : ''}`}/>
+                </button>
+                {isScoreOpen && (
+                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
+                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
+                      {['Logical','Sentiment'].map(v => (
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedScore(v); setIsScoreOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>

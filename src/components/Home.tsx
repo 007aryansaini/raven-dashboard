@@ -158,10 +158,7 @@ const Home = () => {
   }
 
   const buildChatUrl = () => {
-    const base = `${CHAT_API_BASE}query`
-    return address
-      ? `${base}?wallet_address=${encodeURIComponent(address)}`
-      : base
+    return `${CHAT_API_BASE}query`
   }
 
   const callAPI = async (query: string) => {
@@ -197,6 +194,7 @@ const Home = () => {
         body: JSON.stringify({
           query: query,
           queries: ["string"],
+          wallet_address: address || "string",
         }),
       })
 

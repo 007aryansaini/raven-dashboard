@@ -24,7 +24,7 @@ type ChatMessage = {
 
 const body = () => {
   const { isConnected, address } = useAccount()
-  const { refreshMetrics } = useUserMetrics()
+  const { refreshMetrics, creditsPending, inferenceRemaining } = useUserMetrics()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -356,6 +356,16 @@ const body = () => {
       return
     }
 
+    // Check if user has 0 credits and 0 inference
+    const credits = creditsPending ?? 0
+    const inference = inferenceRemaining ?? 0
+    if (credits === 0 && inference === 0) {
+      toast.warning('You have no credits or inference remaining. Please upgrade your plan to continue.', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
     // Check if tags are selected and build query from them
     const tagQuery = buildQueryFromTags()
     const trimmed = inputValue.trim()
@@ -628,7 +638,7 @@ const body = () => {
                 {isAnalysisOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                      {['AI signals','On-chain','Macro','Sentiment','Technical','Fundamental','News','Community'].map(v => (
+                      {['Macro','Sentiment'].map(v => (
                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
                       ))}
                     </div>
@@ -645,7 +655,7 @@ const body = () => {
                 {isAssetsOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                      {['BTC','ETH','SOL','XRP'].map(v => (
+                      {['BTC','ETH','SOL','XRP','AAVE','UNI','BNB','ADA','DOGE','SUI','TRX','LINK'].map(v => (
                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
                       ))}
                     </div>

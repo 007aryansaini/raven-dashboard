@@ -39,7 +39,7 @@ const cardMapping: Record<string, string> = {
 
 const body = () => {
   const { isConnected, address } = useAccount()
-  const { refreshMetrics } = useUserMetrics()
+  const { refreshMetrics, creditsPending, inferenceRemaining } = useUserMetrics()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -381,6 +381,16 @@ const body = () => {
     // Validate wallet is connected
     if (!isConnected) {
       toast.warning('Please connect your wallet to send messages', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Check if user has 0 credits and 0 inference
+    const credits = creditsPending ?? 0
+    const inference = inferenceRemaining ?? 0
+    if (credits === 0 && inference === 0) {
+      toast.warning('You have no credits or inference remaining. Please upgrade your plan to continue.', {
         style: { fontSize: '12px' }
       })
       return

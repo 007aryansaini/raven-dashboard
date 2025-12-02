@@ -194,8 +194,7 @@ const Home = () => {
         },
         body: JSON.stringify({
           query: query,
-          queries: ["string"],
-          wallet_address: address || "string",
+          wallet_address: address || "",
         }),
       })
 

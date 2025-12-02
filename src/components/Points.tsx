@@ -1,5 +1,5 @@
 
-import { Share2, Copy, X } from "lucide-react"
+import { Share2, Copy, X, CheckCircle2, UserPlus } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useAccount } from "wagmi"
 import { getBackendBaseUrl } from "../utils/constants"
@@ -7,6 +7,8 @@ import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import { useUserMetrics } from "../contexts/UserMetricsContext"
+import { createPortal } from "react-dom"
+import { verifyTwitterPost } from "../utils/twitterVerification"
 
 const Points = () => {
   const [xp, setXp] = useState<number | null>(null)
@@ -27,6 +29,13 @@ const Points = () => {
     totalCalculatedCredits: number
   } | null>(null)
   const [isQuestLoading, setIsQuestLoading] = useState(false)
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false)
+  const [tweetUrl, setTweetUrl] = useState("")
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [hasShared, setHasShared] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
+  const [isReferralInputModalOpen, setIsReferralInputModalOpen] = useState(false)
+  const [inputReferralCode, setInputReferralCode] = useState("")
 
   // Monitor auth state changes
   useEffect(() => {
@@ -151,14 +160,7 @@ const Points = () => {
     }
   }, [address, isConnected])
 
-  // Auto-fetch social quest API response when wallet is connected and user is logged in
-  useEffect(() => {
-    if (address && isConnected && twitterUser && !questResponse && !isQuestLoading) {
-      // Auto-fetch with default parameter 3 (social_quest)
-      handleSocialQuest('social_quest', 3)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, isConnected, twitterUser])
+
 
   const referralUrl = useMemo(() => {
     if (!referralCode) {
@@ -200,7 +202,7 @@ const Points = () => {
     window.open(twitterShareUrl, '_blank', 'width=550,height=420')
   }
 
-  const handleSocialQuest = async (reason: string, parameter: number) => {
+  const handleSocialQuest = async (reason: string) => {
     if (!address || !isConnected) {
       toast.warning('Please connect your wallet to complete quests', {
         style: { fontSize: '12px' }
@@ -220,7 +222,7 @@ const Points = () => {
         body: JSON.stringify({
           address: address,
           reason: reason,
-          parameter: parameter
+          parameter: 3
         })
       })
 
@@ -264,6 +266,204 @@ const Points = () => {
       })
     } finally {
       setIsQuestLoading(false)
+    }
+  }
+
+  // Share about Raven on Twitter
+  const handleShareAboutRaven = () => {
+    const shareText = `🚀 Check out Raven - AI-powered market predictions and insights! 
+
+✨ Get accurate predictions for crypto and prediction markets
+🤖 Powered by advanced AI technology
+📊 Real-time market analysis
+
+Join the future of trading predictions! 🎯`
+    
+    const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`
+    window.open(twitterShareUrl, '_blank', 'width=550,height=420')
+    setHasShared(true)
+  }
+
+  // Handle referral code input
+  const handleSubmitReferralCode = () => {
+    if (!inputReferralCode.trim()) {
+      toast.error('Please enter a referral code', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Print referral code to console
+    console.log('Referral code entered:', inputReferralCode.trim())
+    
+    // Show success message
+    toast.success('Referral code submitted! Check console for details.', {
+      style: { fontSize: '12px' },
+      autoClose: 3000,
+    })
+
+    // Close modal and reset
+    setIsReferralInputModalOpen(false)
+    setInputReferralCode("")
+  }
+
+  // Extract tweet ID from Twitter URL
+  const extractTweetId = (url: string): string | null => {
+    try {
+      // Handle various Twitter URL formats:
+      // https://twitter.com/username/status/1234567890
+      // https://x.com/username/status/1234567890
+      // https://twitter.com/i/web/status/1234567890
+      // Support usernames with numbers and underscores
+      
+      // Pattern 1: Standard tweet URL - capture username and tweet ID
+      const standardPattern = /(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/
+      const standardMatch = url.match(standardPattern)
+      if (standardMatch && standardMatch[1]) {
+        return standardMatch[1]
+      }
+      
+      // Pattern 2: Web status URL
+      const webPattern = /(?:twitter\.com|x\.com)\/i\/web\/status\/(\d+)/
+      const webMatch = url.match(webPattern)
+      if (webMatch && webMatch[1]) {
+        return webMatch[1]
+      }
+      
+      return null
+    } catch (error) {
+      console.error("Error extracting tweet ID:", error)
+      return null
+    }
+  }
+
+  // Verify Twitter post
+  const handleVerifyPost = async () => {
+    // Clear previous errors
+    setVerificationError(null)
+
+    if (!tweetUrl.trim()) {
+      const errorMsg = 'Please enter a valid Twitter post URL'
+      setVerificationError(errorMsg)
+      toast.error(errorMsg, {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    if (!address || !isConnected) {
+      const errorMsg = 'Please connect your wallet to verify your post'
+      setVerificationError(errorMsg)
+      toast.warning(errorMsg, {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    const tweetId = extractTweetId(tweetUrl)
+    if (!tweetId) {
+      const errorMsg = 'Invalid Twitter URL format. Please enter a valid tweet URL (e.g., https://x.com/username/status/123456)'
+      setVerificationError(errorMsg)
+      toast.error(errorMsg, {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    setIsVerifying(true)
+    setVerificationError(null)
+
+    try {
+      // Get Twitter user info from Firebase auth
+      const userAny = twitterUser as any
+      const twitterUsername = userAny.reloadUserInfo?.providerUserInfo?.[0]?.screenName || 
+                              twitterUser?.providerData.find(p => p.providerId === 'twitter.com')?.displayName ||
+                              twitterUser?.displayName ||
+                              null
+
+      console.log('Verifying tweet:', { tweetId, tweetUrl, address, twitterUsername })
+
+      // DEVELOPMENT MODE: Check if we should use mock verification
+      const USE_MOCK_VERIFICATION = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_VERIFICATION === 'true'
+      
+      let data: any = null
+
+      if (USE_MOCK_VERIFICATION) {
+        // Mock verification for development/testing
+        console.log('Using mock verification (development mode)')
+        await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API delay
+        
+        // In mock mode, we'll accept any valid tweet URL
+        data = {
+          verified: true,
+          postExists: true,
+          message: 'Mock verification successful (development mode)'
+        }
+      } else {
+        // Use frontend Twitter API verification
+        console.log('Using frontend Twitter API verification')
+        
+        // Optional: Get Twitter Bearer Token from environment variable if available
+        // If not provided, will use public oEmbed API
+        const twitterBearerToken = import.meta.env.VITE_TWITTER_BEARER_TOKEN || undefined
+        
+        // Verify tweet using frontend Twitter APIs
+        const verificationResult = await verifyTwitterPost(
+          tweetUrl,
+          tweetId,
+          ['raven', 'rave'], // Expected keywords to search for
+          twitterBearerToken
+        )
+        
+        console.log('Twitter verification result:', verificationResult)
+        
+        data = verificationResult
+      }
+      
+      console.log('Verification response data:', data)
+      
+      if (data.verified && data.postExists) {
+        // Post verified successfully
+        setVerificationError(null)
+        toast.success('Post verified successfully! 🎉', {
+          style: { fontSize: '12px' },
+          autoClose: 3000,
+        })
+
+        // Close modal and reset
+        setIsVerifyModalOpen(false)
+        setTweetUrl("")
+        setHasShared(false)
+        setVerificationError(null)
+
+        // Complete the quest and award credits
+        await handleSocialQuest('social_quest')
+      } else {
+        // Post not found or doesn't match
+        const errorMsg = data.message || 'Could not verify your post. Please make sure you posted the tweet with Raven content and try again.'
+        setVerificationError(errorMsg)
+        toast.error(errorMsg, {
+          style: { fontSize: '12px' },
+          autoClose: 4000,
+        })
+      }
+    } catch (error: unknown) {
+      console.error("Error verifying tweet:", error)
+      let errorMessage = "Failed to verify post"
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = 'Network error: Could not connect to server. Please check your internet connection and try again.'
+      } else if (error instanceof Error) {
+        errorMessage = error.message || "Failed to verify post"
+      }
+      
+      setVerificationError(errorMessage)
+      toast.error(`Verification failed: ${errorMessage}`, {
+        style: { fontSize: '12px' },
+        autoClose: 5000,
+      })
+    } finally {
+      setIsVerifying(false)
     }
   }
 
@@ -401,9 +601,72 @@ const Points = () => {
                          </div>
                        </div>
 
+                       {/* Enter Referral Code Card */}
+                       <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-1 flex-col gap-2">
+                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                                Enter Referral Code
+                              </div>
+                              <div className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+                                Were you referred by someone? Enter their referral code here.
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <button
+                            onClick={() => setIsReferralInputModalOpen(true)}
+                            className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] text-black"
+                          >
+                            <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
+                              Enter Referral Code
+                            </span>
+                            <UserPlus className="h-4 w-4" />
+                          </button>
+                       </div>
+
+                       {/* Share About Raven Quest Card */}
+                       <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex flex-1 flex-col gap-2">
+                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                                Share about Raven on Twitter
+                              </div>
+                              <div className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+                                Spread the word about Raven and earn rewards!
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                            <button
+                              onClick={handleShareAboutRaven}
+                              className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                                {hasShared ? "Shared!" : "Share on Twitter"}
+                              </span>
+                              <X className="h-4 w-4 text-white" />
+                            </button>
+
+                            {hasShared && (
+                              <button
+                                onClick={() => setIsVerifyModalOpen(true)}
+                                disabled={isVerifying}
+                                className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                              >
+                                <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
+                                  {isVerifying ? "Verifying..." : "Verify Post"}
+                                </span>
+                                {!isVerifying && <CheckCircle2 className="h-4 w-4" />}
+                              </button>
+                            )}
+                          </div>
+                       </div>
+
     
 
-
+                       
                        
 
 
@@ -411,9 +674,260 @@ const Points = () => {
                </div>
      </div>
 
+     {/* Verification Modal */}
+     <VerifyModal
+       isOpen={isVerifyModalOpen}
+       onClose={() => {
+         setIsVerifyModalOpen(false)
+         setTweetUrl("")
+         setVerificationError(null)
+       }}
+       tweetUrl={tweetUrl}
+       setTweetUrl={setTweetUrl}
+       onVerify={handleVerifyPost}
+       isVerifying={isVerifying}
+       error={verificationError}
+     />
+
+     {/* Referral Input Modal */}
+     <ReferralInputModal
+       isOpen={isReferralInputModalOpen}
+       onClose={() => {
+         setIsReferralInputModalOpen(false)
+         setInputReferralCode("")
+       }}
+       referralCode={inputReferralCode}
+       setReferralCode={setInputReferralCode}
+       onSubmit={handleSubmitReferralCode}
+     />
 
     </div>
   )
+}
+
+// Verification Modal Component
+interface VerifyModalProps {
+  isOpen: boolean
+  onClose: () => void
+  tweetUrl: string
+  setTweetUrl: (url: string) => void
+  onVerify: () => void
+  isVerifying: boolean
+  error: string | null
+}
+
+const VerifyModal = ({ isOpen, onClose, tweetUrl, setTweetUrl, onVerify, isVerifying, error }: VerifyModalProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div 
+        className="relative w-full max-w-md rounded-3xl bg-[#1A1A1A] p-6 sm:p-8 border border-[#2A2A2A] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 rounded-lg p-2 transition-colors hover:bg-[#2A2A2A]"
+          disabled={isVerifying}
+        >
+          <X className="h-5 w-5 text-[#D1D1D1]" />
+        </button>
+
+        {/* Modal Header */}
+        <div className="mb-6">
+          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+            Verify Your Post
+          </h2>
+          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+            Enter the URL of your Twitter post to verify you shared about Raven.
+          </p>
+        </div>
+
+        {/* Input Field */}
+        <div className="mb-6">
+          <label className="block font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF] mb-2">
+            Twitter Post URL
+          </label>
+          <input
+            type="text"
+            value={tweetUrl}
+            onChange={(e) => setTweetUrl(e.target.value)}
+            placeholder="https://twitter.com/username/status/..."
+            disabled={isVerifying}
+            className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <p className="mt-2 font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#808080]">
+            Copy the URL from your Twitter post and paste it here.
+          </p>
+          {error && (
+            <div className="mt-3 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">
+              <p className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#FF7D7D]">
+                {error}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            onClick={onClose}
+            disabled={isVerifying}
+            className="flex items-center justify-center rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onVerify}
+            disabled={isVerifying || !tweetUrl.trim()}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#45FFAE] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-black transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isVerifying ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                <span>Verifying...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Verify</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return createPortal(modalContent, document.body)
+}
+
+// Referral Input Modal Component
+interface ReferralInputModalProps {
+  isOpen: boolean
+  onClose: () => void
+  referralCode: string
+  setReferralCode: (code: string) => void
+  onSubmit: () => void
+}
+
+const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, onSubmit }: ReferralInputModalProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div 
+        className="relative w-full max-w-md rounded-3xl bg-[#1A1A1A] p-6 sm:p-8 border border-[#2A2A2A] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 rounded-lg p-2 transition-colors hover:bg-[#2A2A2A]"
+        >
+          <X className="h-5 w-5 text-[#D1D1D1]" />
+        </button>
+
+        {/* Modal Header */}
+        <div className="mb-6">
+          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+            Enter Referral Code
+          </h2>
+          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+            Enter the referral code of the person who referred you to Raven.
+          </p>
+        </div>
+
+        {/* Input Field */}
+        <div className="mb-6">
+          <label className="block font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF] mb-2">
+            Referral Code
+          </label>
+          <input
+            type="text"
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value)}
+            placeholder="Enter referral code here..."
+            className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                onSubmit()
+              }
+            }}
+            autoFocus
+          />
+          <p className="mt-2 font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#808080]">
+            Get the referral code from the person who invited you.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            onClick={onClose}
+            className="flex items-center justify-center rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-colors hover:bg-[#3A3A3A]"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={!referralCode.trim()}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#45FFAE] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-black transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            <span>Submit</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return createPortal(modalContent, document.body)
 }
 
 export default Points

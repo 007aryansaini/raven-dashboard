@@ -22,12 +22,12 @@ export const getReferralBaseUrl = () => {
 
   return `${baseHost.replace(/\/+$/, "")}/referral/`
 }
-export const SCORE_API_HOST = "http://provider.h100.ams2.val.akash.pub:32700/"
+export const SCORE_API_HOST = "http://provider.h100.hou.sfc.akash.pub:32758/"
 export const SCORE_API_BASE = import.meta.env.DEV
   ? "/score-api/"
   : SCORE_API_HOST
 export const SCORE_API_KEY = "422D5EE31621A6F3DD95E8D926EE3"
-const CHAT_API_HOST = "http://lj1mfoucldabr4ji897gq875i8.ingress.h100.ams2.val.akash.pub/"
+const CHAT_API_HOST = "http://o16tosrfsp85j9oad14dek442s.ingress.h100.hou.sfc.akash.pub/"
 export const CHAT_API_BASE = import.meta.env.DEV
   ? "/chat-api/"
   : CHAT_API_HOST

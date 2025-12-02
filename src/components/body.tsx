@@ -11,12 +11,8 @@ import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
 import polymarketLogo from "../assets/polymarketLogo.svg"
-import card1 from "../assets/card1.svg"
-import card2 from "../assets/card2.svg"
-import card3 from "../assets/card3.svg"
-import card4 from "../assets/card4.svg"
-import card5 from "../assets/card5.svg"
-import card6 from "../assets/card6.svg"
+import PolymarketEventCard from "./PolymarketEventCard"
+import { PolymarketFetcher, type PolymarketEvent, type PolymarketMarket } from "../utils/polymarketFetcher"
 
 type ChatMessage = {
   id: number
@@ -27,15 +23,8 @@ type ChatMessage = {
   answer?: string
 }
 
-// Card mapping: maps card source to heading text
-const cardMapping: Record<string, string> = {
-  [card1]: "Fed decision in september?",
-  [card2]: "Russia x Ukraine ceasefire in 2025?",
-  [card3]: "TCU vs North Carolina",
-  [card4]: "Crypto Trading Prediction",
-  [card5]: "Market Analysis Prediction",
-  [card6]: "Prediction Market"
-}
+// Polymarket fetcher instance
+const polymarketFetcher = new PolymarketFetcher()
 
 const body = () => {
   const { isConnected, address } = useAccount()
@@ -110,6 +99,9 @@ const body = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCardImage, setSelectedCardImage] = useState<string | null>(null)
+  const [polymarketEvents, setPolymarketEvents] = useState<Array<{ event: PolymarketEvent; market?: PolymarketMarket }>>([])
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false)
+  const [eventsError, setEventsError] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const liquidityRef = useRef<HTMLDivElement>(null)
   const volumeRef = useRef<HTMLDivElement>(null)
@@ -118,7 +110,9 @@ const body = () => {
   const endingSoonRef = useRef<HTMLDivElement>(null)
   const scoreRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
-  const totalSlides = 3 // 9 cards / 3 cards per slide = 3 slides
+  
+  // Calculate total slides based on fetched events (3 cards per slide)
+  const totalSlides = Math.max(1, Math.ceil(polymarketEvents.length / 3))
   const autoPlayInterval = 4000 // 4 seconds between slides
 
   // Monitor auth state changes
@@ -133,6 +127,48 @@ const body = () => {
     return () => unsubscribe()
   }, [])
 
+  // Fetch Polymarket events on component mount
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoadingEvents(true)
+      setEventsError(null)
+      
+      try {
+        const eventsWithMarkets = await polymarketFetcher.fetchEventsWithMarkets(20)
+        
+        if (eventsWithMarkets.length === 0) {
+          setEventsError('No events found. Please try again later.')
+          toast.warning('No Polymarket events available', {
+            style: { fontSize: '12px' }
+          })
+        } else {
+          setPolymarketEvents(eventsWithMarkets)
+          console.log('Fetched Polymarket events:', eventsWithMarkets.length, 'events')
+        }
+      } catch (error: any) {
+        console.error('Error fetching Polymarket events:', error)
+        const errorMessage = 'Failed to load events. Please check your connection and try again.'
+        setEventsError(errorMessage)
+        toast.error(errorMessage, {
+          style: { fontSize: '12px' },
+          autoClose: 5000,
+        })
+      } finally {
+        setIsLoadingEvents(false)
+      }
+    }
+
+    fetchEvents()
+  }, [])
+
+  // Reset current slide when events change
+  useEffect(() => {
+    const newTotalSlides = Math.max(1, Math.ceil(polymarketEvents.length / 3))
+    if (currentSlide >= newTotalSlides) {
+      setCurrentSlide(0)
+    }
+  }, [polymarketEvents.length, currentSlide])
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
@@ -141,19 +177,82 @@ const body = () => {
     setInputValue(e.target.value)
   }
 
-  const handleCardClick = (cardSrc: string) => {
-    const heading = cardMapping[cardSrc] || "Market Prediction"
+  const handleCardClick = (eventTitle: string, eventId?: string, eventImageUrl?: string) => {
+    console.log("Event card clicked - Question:", eventTitle, "Event ID:", eventId, "Image URL:", eventImageUrl)
     
-    // Store the selected card image and set the input value
-    // Ensure we're storing the actual image source string
-    console.log("Card clicked - Image source:", cardSrc, "Type:", typeof cardSrc)
-    setSelectedCardImage(cardSrc)
-    setInputValue(heading)
+    // Set the input value to the question
+    setInputValue(eventTitle)
+    console.log("Input value set to:", eventTitle)
     
-    // Auto-focus input
+    // Store the event image URL if available (for display in chat)
+    if (eventImageUrl) {
+      setSelectedCardImage(eventImageUrl)
+      console.log("Card image URL set to:", eventImageUrl)
+    } else if (eventId) {
+      // Fallback to event ID if no image URL
+      setSelectedCardImage(eventId)
+    }
+    
+    // Auto-focus the input field
     setTimeout(() => {
-      inputRef.current?.focus()
+      if (inputRef.current) {
+        inputRef.current.focus()
+        console.log("Input field focused, current value:", inputRef.current.value)
+      }
     }, 100)
+  }
+
+  // Handle direct submission from "Ask Raven" button on card
+  const handleAskRavenClick = async (eventTitle: string, eventId?: string, eventImageUrl?: string) => {
+    console.log("Ask Raven clicked - Question:", eventTitle, "Image URL:", eventImageUrl)
+    
+    // Validate before proceeding
+    if (!twitterUser) {
+      toast.warning('Please login with X (Twitter) to send messages', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    if (!isConnected) {
+      toast.warning('Please connect your wallet to send messages', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    const credits = creditsPending ?? 0
+    const inference = inferenceRemaining ?? 0
+    if (credits === 0 && inference === 0) {
+      toast.warning('You have no credits or inference remaining. Please upgrade your plan to continue.', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Store the image URL
+    const imageUrl = (eventImageUrl || '').trim()
+    const cardImageToUse = imageUrl && imageUrl !== '' ? imageUrl : undefined
+    
+    // Create user message with image
+    const userMessage: ChatMessage = {
+      id: Date.now(),
+      role: "user",
+      content: eventTitle,
+      imageSrc: cardImageToUse
+    }
+    
+    console.log("Submitting directly to chat - Question:", eventTitle, "Image:", cardImageToUse)
+    
+    // Add message to chat
+    setMessages((prev) => [...prev, userMessage])
+    
+    // Clear input and selected card
+    setInputValue("")
+    setSelectedCardImage(null)
+    
+    // Call API
+    await callAPI(eventTitle)
   }
 
   const formatMarkdown = (text: string) => {
@@ -432,16 +531,20 @@ const body = () => {
       return
     }
 
-    // Store the selected card image before clearing - ensure it's a string
-    const cardImageToUse = selectedCardImage ? String(selectedCardImage) : null
-    console.log("Submitting - Selected card image:", cardImageToUse, "Type:", typeof cardImageToUse)
+    // Store the selected card image before clearing - ensure it's a valid URL string
+    const cardImageToUse = selectedCardImage && selectedCardImage.trim() !== '' 
+      ? String(selectedCardImage).trim() 
+      : undefined
+    console.log("Submitting - Selected card image URL:", cardImageToUse, "Type:", typeof cardImageToUse)
 
     const userMessage: ChatMessage = {
       id: Date.now(),
       role: "user",
       content: finalQuery,
-      imageSrc: cardImageToUse || undefined
+      imageSrc: cardImageToUse
     }
+    
+    console.log("User message created with imageSrc:", userMessage.imageSrc)
 
     console.log("User message created:", userMessage)
 
@@ -548,27 +651,10 @@ const body = () => {
 
   // Define different card sets for each slide to show animation
   const getCardSet = (slideIndex: number) => {
-    const cardSets = [
-      // Slide 1: Original cards
-      [
-        { src: card1, alt: "Fed Decision Card" },
-        { src: card2, alt: "Russia Ukraine Card" },
-        { src: card3, alt: "TCU vs North Carolina Card" }
-      ],
-      // Slide 2: Different arrangement
-      [
-        { src: card4, alt: "Crypto Trading Card" },
-        { src: card5, alt: "Market Analysis Card" },
-        { src: card6, alt: "Prediction Card" }
-      ],
-      // Slide 3: Mixed arrangement
-      [
-        { src: card1, alt: "Fed Decision Card" },
-        { src: card4, alt: "Crypto Trading Card" },
-        { src: card2, alt: "Russia Ukraine Card" }
-      ]
-    ]
-    return cardSets[slideIndex] || cardSets[0]
+    // Get 3 events for the current slide
+    const startIndex = slideIndex * 3
+    const endIndex = startIndex + 3
+    return polymarketEvents.slice(startIndex, endIndex)
   }
 
   return (
@@ -636,18 +722,28 @@ const body = () => {
              {/* Carousel Content */}
                <div className="relative flex w-full flex-col gap-4 overflow-hidden rounded-3xl bg-[#121212]/60 p-4 backdrop-blur">
                {/* Animated Card Container */}
-               <div 
+               {isLoadingEvents ? (
+                 <div className="flex items-center justify-center py-12">
+                   <div className="font-urbanist text-sm text-[#808080]">Loading Polymarket events...</div>
+                 </div>
+               ) : eventsError ? (
+                 <div className="flex items-center justify-center py-12">
+                   <div className="font-urbanist text-sm text-[#FF7D7D]">{eventsError}</div>
+                 </div>
+               ) : polymarketEvents.length === 0 ? (
+                 <div className="flex items-center justify-center py-12">
+                   <div className="font-urbanist text-sm text-[#808080]">No events available</div>
+                 </div>
+               ) : (
+                 <div 
                    className={`grid gap-4 transition-all duration-500 ease-in-out sm:grid-cols-2 lg:grid-cols-3 ${
                      isTransitioning ? 'opacity-0 scale-[0.98]' : 'opacity-100 scale-100'
-                 }`}
-               >
-                   {getCardSet(currentSlide).map((card, index) => (
-                     <img 
-                       key={`${currentSlide}-${index}`}
-                       src={card.src} 
-                       alt={card.alt} 
-                       onClick={() => handleCardClick(card.src)}
-                       className={`w-full rounded-2xl border border-[#1F1F1F] bg-[#101010] object-cover transition-all duration-300 ease-out cursor-pointer hover:border-[#45FFAE] hover:scale-[1.02] ${
+                   }`}
+                 >
+                   {getCardSet(currentSlide).map((eventPair, index) => (
+                     <div
+                       key={`${currentSlide}-${eventPair.event.id}-${index}`}
+                       className={`transition-all duration-300 ease-out ${
                          isTransitioning 
                            ? 'translate-y-3 opacity-0' 
                            : 'translate-y-0 opacity-100'
@@ -655,9 +751,32 @@ const body = () => {
                        style={{
                          transitionDelay: `${index * 100}ms`
                        }}
-                     />
+                     >
+                       <PolymarketEventCard
+                         event={eventPair.event}
+                         market={eventPair.market}
+                         onClick={() => {
+                           // Send the event title (the question displayed on the card) to chat input
+                           // Pass the image URL so it appears in the chat
+                           const imageUrl = (eventPair.event.image || eventPair.event.icon || '').trim()
+                           const validImageUrl = imageUrl && imageUrl !== '' ? imageUrl : undefined
+                           console.log("Card onClick triggered - Question:", eventPair.event.title)
+                           console.log("Event image:", eventPair.event.image, "Event icon:", eventPair.event.icon)
+                           console.log("Final image URL:", validImageUrl)
+                           handleCardClick(eventPair.event.title, eventPair.event.id, validImageUrl)
+                         }}
+                         onAskRaven={() => {
+                           // Directly submit to chat when "Ask Raven" button is clicked
+                           const imageUrl = (eventPair.event.image || eventPair.event.icon || '').trim()
+                           const validImageUrl = imageUrl && imageUrl !== '' ? imageUrl : undefined
+                           console.log("Ask Raven button clicked - Question:", eventPair.event.title, "Image URL:", validImageUrl)
+                           handleAskRavenClick(eventPair.event.title, eventPair.event.id, validImageUrl)
+                         }}
+                       />
+                     </div>
                    ))}
-               </div>
+                 </div>
+               )}
              </div>
 
              {/* Pagination Dots */}

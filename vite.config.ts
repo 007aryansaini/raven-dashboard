@@ -26,6 +26,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/backend/, ''),
       },
+      '/polymarket-api': {
+        target: 'https://gamma-api.polymarket.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/polymarket-api/, ''),
+        secure: true,
+      },
     },
   },
 })

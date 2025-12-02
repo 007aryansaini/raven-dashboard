@@ -31,3 +31,7 @@ const CHAT_API_HOST = "http://o16tosrfsp85j9oad14dek442s.ingress.h100.hou.sfc.ak
 export const CHAT_API_BASE = import.meta.env.DEV
   ? "/chat-api/"
   : CHAT_API_HOST
+const POLYMARKET_API_HOST = "https://gamma-api.polymarket.com"
+export const POLYMARKET_API_BASE = import.meta.env.DEV
+  ? "/polymarket-api"
+  : POLYMARKET_API_HOST

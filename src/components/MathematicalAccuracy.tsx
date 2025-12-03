@@ -24,6 +24,33 @@ const TEMPORAL_MODEL_PREFERENCE = {
 
 const TEMPORAL_MODEL_PREFERENCE_FULL = `All three of these models are trained often with newer data to keep performance high and give the best forecasts. They are also trained on custom proprietary algorithms to make sure that they learn patterns prioritising the most recent ones but still learning from the old market trends.`
 
+const METRIC_DESCRIPTIONS: Record<MetricKey, string> = {
+  pdds: `Price-Derivative Directional Score (PDDS) can be extended so the raw price difference between forecast and realized drives direction scoring across multiple time states.
+
+Formula:
+PDDS = (Sum_{t,k} w_k * (sign_score_{t,k} * exp(-beta * |e_{t,k}| / (|Delta R_{t,k}| + epsilon))) * exp(-lambda * Sum_k alpha_k * |e_{t,k}| / (|Delta R_{t,k}| + epsilon))) / (Sum_{t,k} w_k)
+
+Variables:
+• e_{t,k} = R_{t,k} - F_{t,k}: forecast error
+• Delta R_{t,k} = R_{t,k} - P_t: realized move
+• sign_score_{t,k} = 1 if forecast direction matches realized, else 0
+• w_k: horizon weight
+• alpha_k: trajectory weight
+• beta, lambda: sensitivity parameters
+• epsilon: small stabilizer`,
+  directional: `The accuracy of direction of price changes shown by actual market prices compared to direction of price changes of the forecasted prices.
+
+Formula:
+DA = (1 / (n-1)) * Sum_{t=2 to n} 1[sign(p^pred_t - p^pred_{t-1}) = sign(p^actual_t - p^actual_{t-1})]
+
+Variables:
+• p^actual_t: actual price at time (t)
+• p^pred_t: predicted price at time (t)
+• sign(x): returns +1, 0, or -1
+• 1[.]: indicator function (1 if the condition is true, 0 otherwise)`,
+  price: ""
+}
+
 const METRIC_CONFIGS: Record<MetricKey, { label: string; endpoint: string }> = {
   pdds: {
     label: "PDDS score",
@@ -174,7 +201,7 @@ const formatTimestamp = (timestamp: number | null) => {
 // }
 
 // Tooltip Component
-const Tooltip = ({ children, content, className = "", position = "bottom", align = "center" }: { children: React.ReactNode; content: string; className?: string; position?: "top" | "bottom"; align?: "left" | "center" | "right" }) => {
+const Tooltip = ({ children, content, className = "", position = "bottom", align = "center", width = "w-80 max-w-md" }: { children: React.ReactNode; content: string; className?: string; position?: "top" | "bottom"; align?: "left" | "center" | "right"; width?: string }) => {
   const [isVisible, setIsVisible] = useState(false)
 
   const getAlignmentClasses = () => {
@@ -206,7 +233,7 @@ const Tooltip = ({ children, content, className = "", position = "bottom", align
       {children}
       {isVisible && (
         <div className={`absolute ${position === "top" ? "bottom-full mb-2" : "top-full mt-2"} ${getAlignmentClasses()} z-50 transform`}>
-          <div className="w-80 max-w-md rounded-lg border border-[#45FFAE]/40 bg-[#0B0B0B] px-4 py-3 text-xs text-white shadow-lg">
+          <div className={`${width} rounded-lg border border-[#45FFAE]/40 bg-[#0B0B0B] px-4 py-3 text-xs text-white shadow-lg`}>
             <div className="font-urbanist leading-relaxed whitespace-pre-line">{content}</div>
             <div className={`absolute ${getArrowAlignmentClasses()} ${position === "top" ? "top-full" : "bottom-full"} ${align === "center" ? "-translate-x-1/2 transform" : ""} border-4 border-transparent ${position === "top" ? "border-t-[#45FFAE]/40" : "border-b-[#45FFAE]/40"}`}></div>
           </div>
@@ -356,19 +383,35 @@ const MathematicalAccuracy = () => {
 
       <div className="flex flex-wrap gap-3">
         {(Object.entries(METRIC_CONFIGS) as [MetricKey, { label: string }][]).map(
-          ([metricKey, config]) => (
-            <button
-              key={metricKey}
-              onClick={() => setSelectedMetric(metricKey)}
-              className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                selectedMetric === metricKey
-                  ? "border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE]"
-                  : "border-[#2A2A2A] bg-transparent text-[#D0D0D0] hover:border-[#45FFAE]/80 hover:text-[#45FFAE]"
-              }`}
-            >
-              {config.label}
-            </button>
-          )
+          ([metricKey, config]) => {
+            const hasDescription = METRIC_DESCRIPTIONS[metricKey] && METRIC_DESCRIPTIONS[metricKey].length > 0
+            const button = (
+              <button
+                onClick={() => setSelectedMetric(metricKey)}
+                className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition cursor-pointer ${
+                  selectedMetric === metricKey
+                    ? "border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE]"
+                    : "border-[#2A2A2A] bg-transparent text-[#D0D0D0] hover:border-[#45FFAE]/80 hover:text-[#45FFAE]"
+                }`}
+              >
+                {config.label}
+              </button>
+            )
+            
+            return hasDescription ? (
+              <Tooltip
+                key={metricKey}
+                content={METRIC_DESCRIPTIONS[metricKey]}
+                className="cursor-help"
+                align={metricKey === "pdds" ? "left" : metricKey === "directional" ? "left" : "center"}
+                width="w-96 max-w-lg"
+              >
+                {button}
+              </Tooltip>
+            ) : (
+              <div key={metricKey}>{button}</div>
+            )
+          }
         )}
       </div>
 

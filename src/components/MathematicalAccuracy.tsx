@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { Info } from "lucide-react"
 import { SCORE_API_BASE, SCORE_API_KEY } from "../utils/constants"
 
 type MetricKey = "pdds" | "directional" | "price"
@@ -8,6 +9,18 @@ const MODEL_NAME_MAP: Record<ModelKey, string> = {
   RNN: "Kryos",
   LSTM: "Helion",
   GRU: "Astrax"
+}
+
+// Reverse mapping from API model names to ModelKey (handles both old and new formats)
+const API_MODEL_TO_KEY: Record<string, ModelKey> = {
+  // Old format
+  "RNN": "RNN",
+  "LSTM": "LSTM",
+  "GRU": "GRU",
+  // New format
+  "Kryos": "RNN",
+  "Helion": "LSTM",
+  "Astrax": "GRU"
 }
 
 const MODEL_DESCRIPTIONS: Record<ModelKey, string> = {
@@ -112,8 +125,11 @@ const parseMetricResponse = (payload: unknown): MetricRow[] => {
 
         // Extract values from each model, preserving order
         Object.entries(modelData).forEach(([modelKey, timestampData]) => {
-          const typedModelKey = (modelKey.split("_")[0] as ModelKey)
-          if (!Object.prototype.hasOwnProperty.call(MODEL_NAME_MAP, typedModelKey)) return
+          // Extract the first part of the model key (e.g., "Astrax" from "Astrax_Binance_AAVEUSDT_seq10_multiresolution")
+          const apiModelName = modelKey.split("_")[0]
+          // Map API model name to ModelKey (handles both old format: GRU/LSTM/RNN and new format: Astrax/Helion/Kryos)
+          const typedModelKey = API_MODEL_TO_KEY[apiModelName]
+          if (!typedModelKey || !Object.prototype.hasOwnProperty.call(MODEL_NAME_MAP, typedModelKey)) return
           if (!timestampData || typeof timestampData !== "object") return
 
           // Get the first (and typically only) timestamp-value pair
@@ -333,16 +349,16 @@ const MathematicalAccuracy = () => {
   const modelLegend = useMemo(
     () =>
       (Object.entries(MODEL_NAME_MAP) as [ModelKey, string][]).map(([key, label], index) => (
-        <Tooltip
-          key={key}
-          content={MODEL_DESCRIPTIONS[key]}
-          className="cursor-help"
-          align={index === 0 ? "left" : "center"}
-        >
-          <div className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
-            {label} ({key})
-          </div>
-        </Tooltip>
+        <div key={key} className="flex items-center gap-2 rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
+          <span>{label} ({key})</span>
+          <Tooltip
+            content={MODEL_DESCRIPTIONS[key]}
+            className="cursor-help"
+            align={index === 0 ? "left" : "center"}
+          >
+            <Info className="h-3 w-3 text-[#45FFAE] hover:text-[#45FFAE]/80 transition-colors" />
+          </Tooltip>
+        </div>
       )),
     []
   )
@@ -370,15 +386,16 @@ const MathematicalAccuracy = () => {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">{modelLegend}</div>
-        <Tooltip
-          content={`Kryos: ${TEMPORAL_MODEL_PREFERENCE.Kryos}\n\nHelion: ${TEMPORAL_MODEL_PREFERENCE.Helion}\n\nAstrax: ${TEMPORAL_MODEL_PREFERENCE.Astrax}\n\n${TEMPORAL_MODEL_PREFERENCE_FULL}`}
-          className="cursor-help"
-          align="right"
-        >
-          <div className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
-            Temporal model preference
-          </div>
-        </Tooltip>
+        <div className="flex items-center gap-2 rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
+          <span>Temporal model preference</span>
+          <Tooltip
+            content={`Kryos: ${TEMPORAL_MODEL_PREFERENCE.Kryos}\n\nHelion: ${TEMPORAL_MODEL_PREFERENCE.Helion}\n\nAstrax: ${TEMPORAL_MODEL_PREFERENCE.Astrax}\n\n${TEMPORAL_MODEL_PREFERENCE_FULL}`}
+            className="cursor-help"
+            align="right"
+          >
+            <Info className="h-3 w-3 text-[#45FFAE] hover:text-[#45FFAE]/80 transition-colors" />
+          </Tooltip>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -386,31 +403,31 @@ const MathematicalAccuracy = () => {
           ([metricKey, config]) => {
             const hasDescription = METRIC_DESCRIPTIONS[metricKey] && METRIC_DESCRIPTIONS[metricKey].length > 0
             const button = (
-              <button
-                onClick={() => setSelectedMetric(metricKey)}
-                className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition cursor-pointer ${
-                  selectedMetric === metricKey
-                    ? "border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE]"
-                    : "border-[#2A2A2A] bg-transparent text-[#D0D0D0] hover:border-[#45FFAE]/80 hover:text-[#45FFAE]"
-                }`}
-              >
-                {config.label}
-              </button>
+              <div key={metricKey} className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedMetric(metricKey)}
+                  className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition cursor-pointer ${
+                    selectedMetric === metricKey
+                      ? "border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE]"
+                      : "border-[#2A2A2A] bg-transparent text-[#D0D0D0] hover:border-[#45FFAE]/80 hover:text-[#45FFAE]"
+                  }`}
+                >
+                  {config.label}
+                </button>
+                {hasDescription && (
+                  <Tooltip
+                    content={METRIC_DESCRIPTIONS[metricKey]}
+                    className="cursor-help"
+                    align={metricKey === "pdds" ? "left" : metricKey === "directional" ? "left" : "center"}
+                    width="w-96 max-w-lg"
+                  >
+                    <Info className="h-4 w-4 text-[#45FFAE] hover:text-[#45FFAE]/80 transition-colors" />
+                  </Tooltip>
+                )}
+              </div>
             )
             
-            return hasDescription ? (
-              <Tooltip
-                key={metricKey}
-                content={METRIC_DESCRIPTIONS[metricKey]}
-                className="cursor-help"
-                align={metricKey === "pdds" ? "left" : metricKey === "directional" ? "left" : "center"}
-                width="w-96 max-w-lg"
-              >
-                {button}
-              </Tooltip>
-            ) : (
-              <div key={metricKey}>{button}</div>
-            )
+            return button
           }
         )}
       </div>
@@ -444,19 +461,28 @@ const MathematicalAccuracy = () => {
                   <th className="py-3 pr-4">Resolution</th>
                   <th className="py-3 pr-4">Timestamp</th>
                   <th className="py-3 pr-4">
-                    <Tooltip content={MODEL_DESCRIPTIONS.RNN} className="cursor-help inline-block">
+                    <div className="flex items-center gap-1.5">
                       <span>Kryos</span>
-                    </Tooltip>
+                      <Tooltip content={MODEL_DESCRIPTIONS.RNN} className="cursor-help inline-block" position="bottom">
+                        <Info className="h-3 w-3 text-[#7E7E7E] hover:text-[#45FFAE] transition-colors" />
+                      </Tooltip>
+                    </div>
                   </th>
                   <th className="py-3 pr-4">
-                    <Tooltip content={MODEL_DESCRIPTIONS.LSTM} className="cursor-help inline-block">
+                    <div className="flex items-center gap-1.5">
                       <span>Helion</span>
-                    </Tooltip>
+                      <Tooltip content={MODEL_DESCRIPTIONS.LSTM} className="cursor-help inline-block" position="bottom">
+                        <Info className="h-3 w-3 text-[#7E7E7E] hover:text-[#45FFAE] transition-colors" />
+                      </Tooltip>
+                    </div>
                   </th>
                   <th className="py-3 pr-4">
-                    <Tooltip content={MODEL_DESCRIPTIONS.GRU} className="cursor-help inline-block">
+                    <div className="flex items-center gap-1.5">
                       <span>Astrax</span>
-                    </Tooltip>
+                      <Tooltip content={MODEL_DESCRIPTIONS.GRU} className="cursor-help inline-block" position="bottom">
+                        <Info className="h-3 w-3 text-[#7E7E7E] hover:text-[#45FFAE] transition-colors" />
+                      </Tooltip>
+                    </div>
                   </th>
                 </tr>
               </thead>

@@ -10,6 +10,20 @@ const MODEL_NAME_MAP: Record<ModelKey, string> = {
   GRU: "Astrax"
 }
 
+const MODEL_DESCRIPTIONS: Record<ModelKey, string> = {
+  RNN: "Forecasts prices heavily weighted on the the last price.",
+  LSTM: "Forecasts prices based on pure patterns showed by the market.",
+  GRU: "Forecasts prices combining both previous trends and market patterns."
+}
+
+const TEMPORAL_MODEL_PREFERENCE = {
+  Astrax: "Neutral market flow, when market follows stable trends (bearish, bullish or sideways), Reliable when patterns are constant and any sudden fluctuations are also taken into account.",
+  Helion: "It purely relies on pattern capturing.",
+  Kryos: "Usually preferred for chaotic market when indicators going haywire, Preferred at the crime scene of black swan events or high liquidity flow. It captures changes from the most recent changes in the market and data."
+}
+
+const TEMPORAL_MODEL_PREFERENCE_FULL = `All three of these models are trained often with newer data to keep performance high and give the best forecasts. They are also trained on custom proprietary algorithms to make sure that they learn patterns prioritising the most recent ones but still learning from the old market trends.`
+
 const METRIC_CONFIGS: Record<MetricKey, { label: string; endpoint: string }> = {
   pdds: {
     label: "PDDS score",
@@ -159,6 +173,49 @@ const formatTimestamp = (timestamp: number | null) => {
 //   }
 // }
 
+// Tooltip Component
+const Tooltip = ({ children, content, className = "", position = "bottom", align = "center" }: { children: React.ReactNode; content: string; className?: string; position?: "top" | "bottom"; align?: "left" | "center" | "right" }) => {
+  const [isVisible, setIsVisible] = useState(false)
+
+  const getAlignmentClasses = () => {
+    if (align === "left") {
+      return "left-0 -translate-x-0"
+    } else if (align === "right") {
+      return "right-0 translate-x-0"
+    } else {
+      return "left-1/2 -translate-x-1/2"
+    }
+  }
+
+  const getArrowAlignmentClasses = () => {
+    if (align === "left") {
+      return "left-4"
+    } else if (align === "right") {
+      return "right-4"
+    } else {
+      return "left-1/2"
+    }
+  }
+
+  return (
+    <div
+      className={`relative ${className}`}
+      onMouseEnter={() => setIsVisible(true)}
+      onMouseLeave={() => setIsVisible(false)}
+    >
+      {children}
+      {isVisible && (
+        <div className={`absolute ${position === "top" ? "bottom-full mb-2" : "top-full mt-2"} ${getAlignmentClasses()} z-50 transform`}>
+          <div className="w-80 max-w-md rounded-lg border border-[#45FFAE]/40 bg-[#0B0B0B] px-4 py-3 text-xs text-white shadow-lg">
+            <div className="font-urbanist leading-relaxed whitespace-pre-line">{content}</div>
+            <div className={`absolute ${getArrowAlignmentClasses()} ${position === "top" ? "top-full" : "bottom-full"} ${align === "center" ? "-translate-x-1/2 transform" : ""} border-4 border-transparent ${position === "top" ? "border-t-[#45FFAE]/40" : "border-b-[#45FFAE]/40"}`}></div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const MathematicalAccuracy = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>("pdds")
@@ -248,13 +305,17 @@ const MathematicalAccuracy = () => {
 
   const modelLegend = useMemo(
     () =>
-      (Object.entries(MODEL_NAME_MAP) as [ModelKey, string][]).map(([key, label]) => (
-        <div
+      (Object.entries(MODEL_NAME_MAP) as [ModelKey, string][]).map(([key, label], index) => (
+        <Tooltip
           key={key}
-          className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors"
+          content={MODEL_DESCRIPTIONS[key]}
+          className="cursor-help"
+          align={index === 0 ? "left" : "center"}
         >
-          {label} ({key})
-        </div>
+          <div className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
+            {label} ({key})
+          </div>
+        </Tooltip>
       )),
     []
   )
@@ -282,9 +343,15 @@ const MathematicalAccuracy = () => {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">{modelLegend}</div>
-        <div className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
-          Temporal model preference
-        </div>
+        <Tooltip
+          content={`Kryos: ${TEMPORAL_MODEL_PREFERENCE.Kryos}\n\nHelion: ${TEMPORAL_MODEL_PREFERENCE.Helion}\n\nAstrax: ${TEMPORAL_MODEL_PREFERENCE.Astrax}\n\n${TEMPORAL_MODEL_PREFERENCE_FULL}`}
+          className="cursor-help"
+          align="right"
+        >
+          <div className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
+            Temporal model preference
+          </div>
+        </Tooltip>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -333,9 +400,21 @@ const MathematicalAccuracy = () => {
                   <th className="py-3 pr-4">Pair</th>
                   <th className="py-3 pr-4">Resolution</th>
                   <th className="py-3 pr-4">Timestamp</th>
-                  <th className="py-3 pr-4">Kryos</th>
-                  <th className="py-3 pr-4">Helion</th>
-                  <th className="py-3 pr-4">Astrax</th>
+                  <th className="py-3 pr-4">
+                    <Tooltip content={MODEL_DESCRIPTIONS.RNN} className="cursor-help inline-block">
+                      <span>Kryos</span>
+                    </Tooltip>
+                  </th>
+                  <th className="py-3 pr-4">
+                    <Tooltip content={MODEL_DESCRIPTIONS.LSTM} className="cursor-help inline-block">
+                      <span>Helion</span>
+                    </Tooltip>
+                  </th>
+                  <th className="py-3 pr-4">
+                    <Tooltip content={MODEL_DESCRIPTIONS.GRU} className="cursor-help inline-block">
+                      <span>Astrax</span>
+                    </Tooltip>
+                  </th>
                 </tr>
               </thead>
               <tbody>

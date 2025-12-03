@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    {
+      "source": "/score-api/:path*",
+      "destination": "http://provider.h100.hou.sfc.akash.pub:31126/:path*"
+    },
+    {
+      "source": "/chat-api/:path*",
+      "destination": "http://lvg0034cmpcjd34dpu80ihffg8.ingress.h100.hou.sfc.akash.pub/:path*"
+    }
+  ]
+}
+

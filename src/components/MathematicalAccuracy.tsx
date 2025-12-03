@@ -280,7 +280,12 @@ const MathematicalAccuracy = () => {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">{modelLegend}</div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">{modelLegend}</div>
+        <div className="rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
+          Temporal model preference
+        </div>
+      </div>
 
       <div className="flex flex-wrap gap-3">
         {(Object.entries(METRIC_CONFIGS) as [MetricKey, { label: string }][]).map(

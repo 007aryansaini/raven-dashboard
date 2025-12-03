@@ -281,7 +281,6 @@ const body = () => {
       }
       
       if (timeAgoMs > 0) {
-        const startTime = now - timeAgoMs
         // Since we don't have creation date, we'll filter by events that are still active
         // and haven't ended yet, or use endDate as a proxy
         filtered = filtered.filter(item => {
@@ -397,7 +396,7 @@ const body = () => {
   }
 
   // Handle direct submission from "Ask Raven" button on card
-  const handleAskRavenClick = async (eventTitle: string, eventId?: string, eventImageUrl?: string) => {
+  const handleAskRavenClick = async (eventTitle: string, _eventId?: string, eventImageUrl?: string) => {
     console.log("Ask Raven clicked - Question:", eventTitle, "Image URL:", eventImageUrl)
     
     // Validate before proceeding

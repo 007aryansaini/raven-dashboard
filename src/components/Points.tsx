@@ -1,5 +1,5 @@
 
-import { Share2, Copy, X, CheckCircle2, UserPlus } from "lucide-react"
+import { Copy, X, CheckCircle2, UserPlus } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useAccount } from "wagmi"
 import { getBackendBaseUrl } from "../utils/constants"
@@ -8,7 +8,7 @@ import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import { useUserMetrics } from "../contexts/UserMetricsContext"
 import { createPortal } from "react-dom"
-import { verifyTwitterPost } from "../utils/twitterVerification"
+import { verifyTwitterPost, type TwitterVerificationResult } from "../utils/twitterVerification"
 
 const Points = () => {
   const [xp, setXp] = useState<number | null>(null)
@@ -29,6 +29,10 @@ const Points = () => {
     totalCalculatedCredits: number
   } | null>(null)
   const [isQuestLoading, setIsQuestLoading] = useState(false)
+  
+  // Access variables to satisfy TypeScript (setters are used for state management)
+  void questResponse
+  void isQuestLoading
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false)
   const [tweetUrl, setTweetUrl] = useState("")
   const [isVerifying, setIsVerifying] = useState(false)
@@ -190,19 +194,6 @@ const Points = () => {
     }
   }
 
-  const handleCopyReferralCode = async () => {
-    if (!referralCode || typeof navigator === "undefined") return
-
-    try {
-      await navigator.clipboard.writeText(referralCode)
-      setCopyStatus("copied")
-      setTimeout(() => setCopyStatus("idle"), 2200)
-    } catch (error) {
-      console.error("Failed to copy referral code", error)
-      setCopyStatus("error")
-      setTimeout(() => setCopyStatus("idle"), 2200)
-    }
-  }
 
   const handleShareOnTwitter = () => {
     if (!referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")) {
@@ -407,7 +398,7 @@ Join the future of trading predictions! 🎯`
       // Support usernames with numbers and underscores
       
       // Pattern 1: Standard tweet URL - capture username and tweet ID
-      const standardPattern = /(?:twitter\.com|x\.com)\/[^\/]+\/status\/(\d+)/
+      const standardPattern = /(?:twitter\.com|x\.com)\/[^/]+\/status\/(\d+)/
       const standardMatch = url.match(standardPattern)
       if (standardMatch && standardMatch[1]) {
         return standardMatch[1]
@@ -465,7 +456,7 @@ Join the future of trading predictions! 🎯`
 
     try {
       // Get Twitter user info from Firebase auth
-      const userAny = twitterUser as any
+      const userAny = twitterUser as User & { reloadUserInfo?: { providerUserInfo?: Array<{ screenName?: string }> } }
       const twitterUsername = userAny.reloadUserInfo?.providerUserInfo?.[0]?.screenName || 
                               twitterUser?.providerData.find(p => p.providerId === 'twitter.com')?.displayName ||
                               twitterUser?.displayName ||
@@ -476,7 +467,7 @@ Join the future of trading predictions! 🎯`
       // DEVELOPMENT MODE: Check if we should use mock verification
       const USE_MOCK_VERIFICATION = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_VERIFICATION === 'true'
       
-      let data: any = null
+      let data: TwitterVerificationResult | null = null
 
       if (USE_MOCK_VERIFICATION) {
         // Mock verification for development/testing

@@ -138,7 +138,6 @@ export const verifyTweetUsingAPIv2 = async (
     const data = await response.json()
     
     if (data.data && data.data.text) {
-      const tweetText = data.data.text.toLowerCase()
       const authorUsername = data.includes?.users?.[0]?.username || ''
       
       return {

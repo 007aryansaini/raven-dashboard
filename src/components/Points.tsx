@@ -523,13 +523,11 @@ Join the future of trading predictions! 🎯`
                        <div className="flex w-full flex-col gap-4 md:flex-row">
                          {/* Achievement Card */}
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between justify-center items-center text-center">
-    
-                              <div className="font-urbanist text-2xl font-bold leading-none tracking-[0%] text-[#45FFAE]">{xpDisplayText}</div>
+                          <div className="flex flex-col items-center justify-center min-h-[100px]">
+                              <div className="font-urbanist text-2xl md:text-4xl lg:text-5xl font-bold leading-none tracking-[0%] text-[#45FFAE] text-center">{xpDisplayText}</div>
                               {xpError && (
-                                <div className="text-right text-xs font-urbanist text-[#FF7D7D]">{xpError}</div>
+                                <div className="text-center text-xs font-urbanist text-[#FF7D7D] mt-2">{xpError}</div>
                               )}
-                       
                           </div>
                          </div>
 

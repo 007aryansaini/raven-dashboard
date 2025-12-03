@@ -523,35 +523,14 @@ Join the future of trading predictions! 🎯`
                        <div className="flex w-full flex-col gap-4 md:flex-row">
                          {/* Achievement Card */}
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex flex-1 flex-row items-center gap-4">
-                              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2A2A2A]">
-                                <div className="h-8 w-8 rounded-full bg-[#3A3A3A]"></div>
-                              </div>
-                              <div className="flex flex-1 flex-col gap-2">
-                                <div className="font-urbanist font-medium text-sm leading-none tracking-[0%] text-[#FFFFFF]">Title here</div>
-                                <div className="flex flex-row items-center gap-2">
-                                  <div className="flex items-center gap-1 rounded-full bg-[#45FFAE] px-2 py-1 text-black">
-                                    <div className="h-2 w-2 rounded-full bg-white"></div>
-                                    <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">Level-0</span>
-                                  </div>
-                                </div>
-                                <div className="h-1 w-full rounded-full bg-[#2A2A2A]">
-                                  <div className="h-full w-0 rounded-full bg-[#45FFAE]"></div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-1">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between justify-center items-center text-center">
+    
                               <div className="font-urbanist text-2xl font-bold leading-none tracking-[0%] text-[#45FFAE]">{xpDisplayText}</div>
                               {xpError && (
                                 <div className="text-right text-xs font-urbanist text-[#FF7D7D]">{xpError}</div>
                               )}
-                            </div>
+                       
                           </div>
-                           <button className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A]">
-                             <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share it to your achievement</span>
-                             <Share2 className="h-4 w-4 text-white" />
-                           </button>
                          </div>
 
                          {/* Invite Friends Card */}

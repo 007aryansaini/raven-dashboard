@@ -36,6 +36,7 @@ const Points = () => {
   const [verificationError, setVerificationError] = useState<string | null>(null)
   const [isReferralInputModalOpen, setIsReferralInputModalOpen] = useState(false)
   const [inputReferralCode, setInputReferralCode] = useState("")
+  const [isRedeemingReferralCode, setIsRedeemingReferralCode] = useState(false)
 
   // Monitor auth state changes
   useEffect(() => {
@@ -189,6 +190,20 @@ const Points = () => {
     }
   }
 
+  const handleCopyReferralCode = async () => {
+    if (!referralCode || typeof navigator === "undefined") return
+
+    try {
+      await navigator.clipboard.writeText(referralCode)
+      setCopyStatus("copied")
+      setTimeout(() => setCopyStatus("idle"), 2200)
+    } catch (error) {
+      console.error("Failed to copy referral code", error)
+      setCopyStatus("error")
+      setTimeout(() => setCopyStatus("idle"), 2200)
+    }
+  }
+
   const handleShareOnTwitter = () => {
     if (!referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")) {
       return
@@ -285,7 +300,7 @@ Join the future of trading predictions! 🎯`
   }
 
   // Handle referral code input
-  const handleSubmitReferralCode = () => {
+  const handleSubmitReferralCode = async () => {
     if (!inputReferralCode.trim()) {
       toast.error('Please enter a referral code', {
         style: { fontSize: '12px' }
@@ -293,18 +308,93 @@ Join the future of trading predictions! 🎯`
       return
     }
 
-    // Print referral code to console
-    console.log('Referral code entered:', inputReferralCode.trim())
-    
-    // Show success message
-    toast.success('Referral code submitted! Check console for details.', {
-      style: { fontSize: '12px' },
-      autoClose: 3000,
-    })
+    if (!address || !isConnected) {
+      toast.error('Please connect your wallet to redeem a referral code', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
 
-    // Close modal and reset
-    setIsReferralInputModalOpen(false)
-    setInputReferralCode("")
+    setIsRedeemingReferralCode(true)
+
+    try {
+      const response = await fetch(`${getBackendBaseUrl()}referral/redeem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: inputReferralCode.trim(),
+          newUser: address,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        const errorMessage = errorData.error || `Failed to redeem referral code: ${response.status}`
+        
+        // Handle specific error messages
+        let userFriendlyMessage = errorMessage
+        if (errorMessage === 'invalid_code_or_already_referred') {
+          userFriendlyMessage = 'Invalid referral code or you have already been referred'
+        } else if (errorMessage === 'self_referral_not_allowed') {
+          userFriendlyMessage = 'You cannot refer yourself'
+        } else if (errorMessage === 'referral_not_allowed_by_referrer') {
+          userFriendlyMessage = 'Referral not allowed by referrer'
+        }
+        
+        toast.error(userFriendlyMessage, {
+          style: { fontSize: '12px' },
+          autoClose: 4000,
+        })
+        return
+      }
+
+      const data = await response.json()
+      console.log('Referral redemption response:', data)
+
+      // Show success message with details
+      const referredCredits = data.referred?.credits || 0
+      const referredXp = data.referred?.xp || 0
+      
+      toast.success(`Referral code redeemed! You earned ${referredCredits} credits and ${referredXp} XP.`, {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+
+      // Refresh metrics to show updated credits and XP
+      await refreshMetrics()
+      
+      // Refresh XP to show updated values
+      if (address && isConnected) {
+        const xpResponse = await fetch(`${getBackendBaseUrl()}users/${address}/xp`)
+        if (xpResponse.ok) {
+          const xpData = await xpResponse.json()
+          const xpValue = Number(
+            xpData?.xp ??
+              xpData?.points ??
+              xpData?.xpPoints ??
+              xpData?.xpTotal ??
+              xpData?.xp_total ??
+              0
+          )
+          setXp(Number.isFinite(xpValue) ? xpValue : 0)
+        }
+      }
+
+      // Close modal and reset
+      setIsReferralInputModalOpen(false)
+      setInputReferralCode("")
+    } catch (error: unknown) {
+      console.error("Error redeeming referral code:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to redeem referral code"
+      toast.error(`Referral redemption failed: ${errorMessage}`, {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+    } finally {
+      setIsRedeemingReferralCode(false)
+    }
   }
 
   // Extract tweet ID from Twitter URL
@@ -520,7 +610,7 @@ Join the future of trading predictions! 🎯`
                        </div>
 
                        {/* Cards Container */}
-                       <div className="flex w-full flex-col gap-4 md:flex-row">
+                       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
                          {/* Achievement Card */}
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
                           <div className="flex flex-col items-center justify-center min-h-[100px]">
@@ -533,112 +623,106 @@ Join the future of trading predictions! 🎯`
 
                          {/* Invite Friends Card */}
                          <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Invite your friends</div>
-                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
-                                {referralCode ? referralCode : isReferralCodeLoading ? "Loading..." : "—"}
-                              </div>
-                            </div>
-                           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                             <div className="flex flex-1 items-center rounded-xl bg-[#2A2A2A] px-3 py-2">
-                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1] truncate">
-                                 {referralUrl}
-                               </span>
+                           <div className="flex flex-col items-center justify-center gap-3 text-center min-h-[100px]">
+                             <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Invite your friends</div>
+                             
+                             <div className="flex flex-col gap-2 w-full items-center">
+                               <div className="flex flex-1 items-center rounded-xl bg-[#2A2A2A] px-3 py-2 w-full max-w-md">
+                                 <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1] truncate w-full text-center">
+                                   {referralUrl}
+                                 </span>
+                               </div>
+                               <button
+                                 onClick={handleCopyReferralLink}
+                                 disabled={!referralCode || isReferralCodeLoading}
+                                 className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+                               >
+                                 <Copy className="h-4 w-4 text-white cursor-pointer" />
+                               </button>
                              </div>
-                             <button
-                               onClick={handleCopyReferralLink}
-                               disabled={!referralCode || isReferralCodeLoading}
-                               className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+                             
+                             <div className="text-xs font-urbanist text-center">
+                               {copyStatus === "copied" && (
+                                 <span className="text-[#45FFAE] cursor-pointer">Link copied!</span>
+                               )}
+                               {copyStatus === "error" && (
+                                 <span className="text-[#FF7D7D]">Copy failed</span>
+                               )}
+                               {referralCodeError && (
+                                 <span className="text-[#FF7D7D]">{referralCodeError}</span>
+                               )}
+                             
+                             </div>
+                             
+                             <button 
+                               onClick={handleShareOnTwitter}
+                               disabled={!referralCode || isReferralCodeLoading || !referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")}
+                               className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                              >
-                               <Copy className="h-4 w-4 text-white" />
+                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on</span>
+                               <X className="h-4 w-4 text-white" />
                              </button>
                            </div>
-                           <div className="text-xs font-urbanist">
-                             {copyStatus === "copied" && (
-                               <span className="text-[#45FFAE] cursor-pointer">Link copied!</span>
-                             )}
-                             {copyStatus === "error" && (
-                               <span className="text-[#FF7D7D]">Copy failed</span>
-                             )}
-                             {referralCodeError && (
-                               <span className="text-[#FF7D7D]">{referralCodeError}</span>
-                             )}
-                             {isReferralCodeLoading && !referralCodeError && (
-                               <span className="text-[#808080]">Loading referral code...</span>
-                             )}
-                           </div>
-                           <button 
-                             onClick={handleShareOnTwitter}
-                             disabled={!referralCode || isReferralCodeLoading || !referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")}
-                             className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                           >
-                             <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on</span>
-                             <X className="h-4 w-4 text-white" />
-                           </button>
                          </div>
-                       </div>
 
-                       {/* Enter Referral Code Card */}
-                       <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex flex-1 flex-col gap-2">
+                         {/* Enter Referral Code Card */}
+                         <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
+                            <div className="flex flex-col items-center justify-center gap-2 text-center min-h-[100px]">
                               <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
                                 Enter Referral Code
                               </div>
                               <div className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
                                 Were you referred by someone? Enter their referral code here.
                               </div>
+                              
+                              <button
+                                onClick={() => setIsReferralInputModalOpen(true)}
+                                className="flex w-fit flex-row cursor-pointer items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] text-black"
+                              >
+                                <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
+                                  Enter Referral Code
+                                </span>
+                                <UserPlus className="h-4 w-4" />
+                              </button>
                             </div>
-                          </div>
-                          
-                          <button
-                            onClick={() => setIsReferralInputModalOpen(true)}
-                            className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] text-black"
-                          >
-                            <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
-                              Enter Referral Code
-                            </span>
-                            <UserPlus className="h-4 w-4" />
-                          </button>
-                       </div>
+                         </div>
 
-                       {/* Share About Raven Quest Card */}
-                       <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex flex-1 flex-col gap-2">
+                         {/* Share About Raven Quest Card */}
+                         <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
+                            <div className="flex flex-col items-center justify-center gap-2 text-center min-h-[100px]">
                               <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
                                 Share about Raven on Twitter
                               </div>
                               <div className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
                                 Spread the word about Raven and earn rewards!
                               </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <button
-                              onClick={handleShareAboutRaven}
-                              className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
-                                {hasShared ? "Shared!" : "Share on Twitter"}
-                              </span>
-                              <X className="h-4 w-4 text-white" />
-                            </button>
+                              
+                              <div className="flex flex-col items-center gap-2">
+                                <button
+                                  onClick={handleShareAboutRaven}
+                                  className="flex w-fit flex-row cursor-pointer items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                                    {hasShared ? "Shared!" : "Share on"}
+                                  </span>
+                                  <X className="h-4 w-4 text-white" />
+                                </button>
 
-                            {hasShared && (
-                              <button
-                                onClick={() => setIsVerifyModalOpen(true)}
-                                disabled={isVerifying}
-                                className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed text-black"
-                              >
-                                <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
-                                  {isVerifying ? "Verifying..." : "Verify Post"}
-                                </span>
-                                {!isVerifying && <CheckCircle2 className="h-4 w-4" />}
-                              </button>
-                            )}
-                          </div>
+                                {hasShared && (
+                                  <button
+                                    onClick={() => setIsVerifyModalOpen(true)}
+                                    disabled={isVerifying}
+                                    className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                                  >
+                                    <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
+                                      {isVerifying ? "Verifying..." : "Verify Post"}
+                                    </span>
+                                    {!isVerifying && <CheckCircle2 className="h-4 w-4" />}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                         </div>
                        </div>
 
     
@@ -676,6 +760,7 @@ Join the future of trading predictions! 🎯`
        referralCode={inputReferralCode}
        setReferralCode={setInputReferralCode}
        onSubmit={handleSubmitReferralCode}
+       isLoading={isRedeemingReferralCode}
      />
 
     </div>
@@ -809,9 +894,10 @@ interface ReferralInputModalProps {
   referralCode: string
   setReferralCode: (code: string) => void
   onSubmit: () => void
+  isLoading?: boolean
 }
 
-const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, onSubmit }: ReferralInputModalProps) => {
+const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, onSubmit, isLoading = false }: ReferralInputModalProps) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -841,7 +927,8 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 rounded-lg p-2 transition-colors hover:bg-[#2A2A2A]"
+          disabled={isLoading}
+          className="absolute top-4 right-4 rounded-lg p-2 transition-colors hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <X className="h-5 w-5 text-[#D1D1D1]" />
         </button>
@@ -866,9 +953,10 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
             value={referralCode}
             onChange={(e) => setReferralCode(e.target.value)}
             placeholder="Enter referral code here..."
-            className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors"
+            disabled={isLoading}
+            className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
+              if (e.key === 'Enter' && !isLoading) {
                 onSubmit()
               }
             }}
@@ -883,17 +971,27 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             onClick={onClose}
-            className="flex items-center justify-center rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-colors hover:bg-[#3A3A3A]"
+            disabled={isLoading}
+            className="flex items-center justify-center rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             onClick={onSubmit}
-            disabled={!referralCode.trim()}
+            disabled={!referralCode.trim() || isLoading}
             className="flex items-center justify-center gap-2 rounded-xl bg-[#45FFAE] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-black transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Submit</span>
+            {isLoading ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                <span>Redeeming...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Submit</span>
+              </>
+            )}
           </button>
         </div>
       </div>

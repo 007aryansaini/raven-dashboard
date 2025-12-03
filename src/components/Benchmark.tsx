@@ -153,7 +153,7 @@ const Benchmark = () => {
             </div>
             <div className="flex items-center justify-between py-3 border-b border-[#2A2A2A]">
               <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">
-                Galaxy Score Accuracy on Cryptocurrency Social Media Dataset
+                Logic Score Accuracy on Cryptocurrency Social Media Dataset
               </div>
               <div className="flex items-center gap-2">
                 <div className="font-urbanist text-sm font-bold leading-none tracking-[0%] text-[#45FFAE]">
@@ -247,7 +247,7 @@ const Benchmark = () => {
                     </td>
                   </tr>
                   <tr className="border-b border-[#2A2A2A]">
-                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Galaxy Score</td>
+                    <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Logic Score</td>
                     <td className="py-3 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">80.9%</td>
                     <td className="py-3 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">150 posts</td>
                     <td className="py-3 px-4">
@@ -355,7 +355,7 @@ const Benchmark = () => {
                   <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">+20.2%</td>
                 </tr>
                 <tr className="border-b border-[#2A2A2A]">
-                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Galaxy Score</td>
+                  <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-white">Logic Score</td>
                   <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">80.9%</td>
                   <td className="py-4 px-4 font-urbanist text-xs leading-none tracking-[0%] text-[#808080]">65.3%</td>
                   <td className="py-4 px-4 font-urbanist text-xs font-bold leading-none tracking-[0%] text-[#45FFAE]">+15.6%</td>
@@ -431,7 +431,7 @@ const Benchmark = () => {
                   <div className="h-2 w-2 rounded-full bg-[#FFD700]"></div>
                 </div>
                 <div className="flex-1">
-                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Galaxy Scores</div>
+                  <div className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-white">Logic Scores</div>
                   <div className="font-urbanist text-xs leading-none tracking-[0%] text-[#808080] mt-1">80.9% accuracy</div>
                 </div>
               </div>

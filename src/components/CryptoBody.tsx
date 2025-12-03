@@ -661,7 +661,7 @@ const body = () => {
                 {isAnalysisOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                      {['Macro','Sentiment'].map(v => (
+                      {['Sentiment','Accuracy'].map(v => (
                         <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-sm text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
                       ))}
                     </div>

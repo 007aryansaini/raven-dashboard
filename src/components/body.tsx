@@ -1,5 +1,5 @@
 import { ArrowUp, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAccount } from 'wagmi'
 import { onAuthStateChanged, type User } from "firebase/auth"
@@ -111,8 +111,6 @@ const body = () => {
   const scoreRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   
-  // Calculate total slides based on fetched events (3 cards per slide)
-  const totalSlides = Math.max(1, Math.ceil(polymarketEvents.length / 3))
   const autoPlayInterval = 4000 // 4 seconds between slides
 
   // Monitor auth state changes
@@ -134,7 +132,7 @@ const body = () => {
       setEventsError(null)
       
       try {
-        const eventsWithMarkets = await polymarketFetcher.fetchEventsWithMarkets(20)
+        const eventsWithMarkets = await polymarketFetcher.fetchEventsWithMarkets(100)
         
         if (eventsWithMarkets.length === 0) {
           setEventsError('No events found. Please try again later.')
@@ -161,13 +159,209 @@ const body = () => {
     fetchEvents()
   }, [])
 
-  // Reset current slide when events change
+  // Sort and filter events based on selected options
+  const sortedEvents = useMemo(() => {
+    let filtered = [...polymarketEvents]
+
+    // Helper function to get liquidity value (from event or market)
+    const getLiquidity = (item: { event: PolymarketEvent; market?: PolymarketMarket }) => {
+      return item.market?.liquidity ?? item.event.liquidity ?? 0
+    }
+
+    // Helper function to get volume value (from event or market)
+    const getVolume = (item: { event: PolymarketEvent; market?: PolymarketMarket }) => {
+      return item.market?.volume ?? item.event.volume ?? 0
+    }
+
+    // Helper function to get end date
+    const getEndDate = (item: { event: PolymarketEvent; market?: PolymarketMarket }) => {
+      if (item.market?.endDate) return new Date(item.market.endDate).getTime()
+      if (item.event.endDate) return new Date(item.event.endDate).getTime()
+      return 0
+    }
+
+    // Filter by Liquidity
+    if (selectedLiquidity) {
+      const allLiquidity = filtered.map(getLiquidity).filter(v => v > 0)
+      if (allLiquidity.length > 0) {
+        const maxLiquidity = Math.max(...allLiquidity)
+        const minLiquidity = Math.min(...allLiquidity)
+        const midLiquidity = (maxLiquidity + minLiquidity) / 2
+        
+        if (selectedLiquidity === 'High') {
+          filtered = filtered.filter(item => {
+            const liq = getLiquidity(item)
+            return liq >= midLiquidity
+          })
+        } else if (selectedLiquidity === 'Low') {
+          filtered = filtered.filter(item => {
+            const liq = getLiquidity(item)
+            return liq < midLiquidity
+          })
+        } else if (selectedLiquidity === 'Medium') {
+          filtered = filtered.filter(item => {
+            const liq = getLiquidity(item)
+            const lowerThird = minLiquidity + (maxLiquidity - minLiquidity) / 3
+            const upperThird = minLiquidity + 2 * (maxLiquidity - minLiquidity) / 3
+            return liq >= lowerThird && liq <= upperThird
+          })
+        }
+      }
+    }
+
+    // Filter by Volume
+    if (selectedVolume) {
+      const allVolume = filtered.map(getVolume).filter(v => v > 0)
+      if (allVolume.length > 0) {
+        const maxVolume = Math.max(...allVolume)
+        const minVolume = Math.min(...allVolume)
+        const midVolume = (maxVolume + minVolume) / 2
+        
+        if (selectedVolume === 'High') {
+          filtered = filtered.filter(item => {
+            const vol = getVolume(item)
+            return vol >= midVolume
+          })
+        } else if (selectedVolume === 'Low') {
+          filtered = filtered.filter(item => {
+            const vol = getVolume(item)
+            return vol < midVolume
+          })
+        } else if (selectedVolume === 'Medium') {
+          filtered = filtered.filter(item => {
+            const vol = getVolume(item)
+            const lowerThird = minVolume + (maxVolume - minVolume) / 3
+            const upperThird = minVolume + 2 * (maxVolume - minVolume) / 3
+            return vol >= lowerThird && vol <= upperThird
+          })
+        }
+      }
+    }
+
+    // Filter by Timeframe (events ending within the timeframe)
+    if (selectedTimeframe) {
+      const now = Date.now()
+      let timeframeMs = 0
+      
+      switch (selectedTimeframe) {
+        case '1h': timeframeMs = 60 * 60 * 1000; break
+        case '4h': timeframeMs = 4 * 60 * 60 * 1000; break
+        case '12h': timeframeMs = 12 * 60 * 60 * 1000; break
+        case '24h': timeframeMs = 24 * 60 * 60 * 1000; break
+        case '3d': timeframeMs = 3 * 24 * 60 * 60 * 1000; break
+        case '7d': timeframeMs = 7 * 24 * 60 * 60 * 1000; break
+        case '30d': timeframeMs = 30 * 24 * 60 * 60 * 1000; break
+        case '90d': timeframeMs = 90 * 24 * 60 * 60 * 1000; break
+        case 'YTD': {
+          const yearStart = new Date(new Date().getFullYear(), 0, 1).getTime()
+          timeframeMs = now - yearStart
+          break
+        }
+        case '1y': timeframeMs = 365 * 24 * 60 * 60 * 1000; break
+      }
+      
+      if (timeframeMs > 0) {
+        const endTime = now + timeframeMs
+        filtered = filtered.filter(item => {
+          const endDate = getEndDate(item)
+          return endDate > now && endDate <= endTime
+        })
+      }
+    }
+
+    // Filter by Newest (creation date)
+    if (selectedNewest) {
+      const now = Date.now()
+      let timeAgoMs = 0
+      
+      switch (selectedNewest) {
+        case 'Today': timeAgoMs = 24 * 60 * 60 * 1000; break
+        case 'This Week': timeAgoMs = 7 * 24 * 60 * 60 * 1000; break
+        case 'This Month': timeAgoMs = 30 * 24 * 60 * 60 * 1000; break
+      }
+      
+      if (timeAgoMs > 0) {
+        const startTime = now - timeAgoMs
+        // Since we don't have creation date, we'll filter by events that are still active
+        // and haven't ended yet, or use endDate as a proxy
+        filtered = filtered.filter(item => {
+          const endDate = getEndDate(item)
+          // Keep events that are ending in the future (recently created)
+          return endDate > now
+        })
+      }
+    }
+
+    // Filter by Ending Soon timeframe first
+    if (selectedEndingSoon) {
+      const now = Date.now()
+      let timeframeMs = 0
+      
+      switch (selectedEndingSoon) {
+        case '1h': timeframeMs = 60 * 60 * 1000; break
+        case '6h': timeframeMs = 6 * 60 * 60 * 1000; break
+        case '12h': timeframeMs = 12 * 60 * 60 * 1000; break
+        case '24h': timeframeMs = 24 * 60 * 60 * 1000; break
+        case '3d': timeframeMs = 3 * 24 * 60 * 60 * 1000; break
+        case '7d': timeframeMs = 7 * 24 * 60 * 60 * 1000; break
+      }
+      
+      if (timeframeMs > 0) {
+        const endTime = now + timeframeMs
+        filtered = filtered.filter(item => {
+          const endDate = getEndDate(item)
+          return endDate > now && endDate <= endTime
+        })
+      }
+      
+      // Sort by end date (ascending - closest first) after filtering
+      filtered.sort((a, b) => {
+        const endDateA = getEndDate(a)
+        const endDateB = getEndDate(b)
+        return endDateA - endDateB // Ascending: closest first
+      })
+    }
+
+    // Sort by Liquidity (High = descending, Low = ascending)
+    if (selectedLiquidity === 'High' || selectedLiquidity === 'Low') {
+      filtered.sort((a, b) => {
+        const liqA = getLiquidity(a)
+        const liqB = getLiquidity(b)
+        return selectedLiquidity === 'High' ? liqB - liqA : liqA - liqB
+      })
+    }
+
+    // Sort by Volume (High = descending, Low = ascending)
+    if (selectedVolume === 'High' || selectedVolume === 'Low') {
+      filtered.sort((a, b) => {
+        const volA = getVolume(a)
+        const volB = getVolume(b)
+        return selectedVolume === 'High' ? volB - volA : volA - volB
+      })
+    }
+
+    // Default sort by volume (descending) if no specific sorting is selected
+    if (!selectedLiquidity && !selectedVolume && !selectedEndingSoon) {
+      filtered.sort((a, b) => {
+        const volA = getVolume(a)
+        const volB = getVolume(b)
+        return volB - volA // Descending: highest volume first
+      })
+    }
+
+    return filtered
+  }, [polymarketEvents, selectedLiquidity, selectedVolume, selectedTimeframe, selectedNewest, selectedEndingSoon])
+
+  // Calculate total slides based on sorted events (3 cards per slide)
+  const totalSlides = Math.max(1, Math.ceil(sortedEvents.length / 3))
+
+  // Reset current slide when sorted events change or sorting options change
   useEffect(() => {
-    const newTotalSlides = Math.max(1, Math.ceil(polymarketEvents.length / 3))
-    if (currentSlide >= newTotalSlides) {
+    const newTotalSlides = Math.max(1, Math.ceil(sortedEvents.length / 3))
+    if (currentSlide >= newTotalSlides || newTotalSlides === 1) {
       setCurrentSlide(0)
     }
-  }, [polymarketEvents.length, currentSlide])
+  }, [sortedEvents.length, currentSlide, selectedLiquidity, selectedVolume, selectedTimeframe, selectedNewest, selectedEndingSoon])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -651,10 +845,10 @@ const body = () => {
 
   // Define different card sets for each slide to show animation
   const getCardSet = (slideIndex: number) => {
-    // Get 3 events for the current slide
+    // Get 3 events for the current slide from sorted events
     const startIndex = slideIndex * 3
     const endIndex = startIndex + 3
-    return polymarketEvents.slice(startIndex, endIndex)
+    return sortedEvents.slice(startIndex, endIndex)
   }
 
   return (
@@ -730,7 +924,7 @@ const body = () => {
                  <div className="flex items-center justify-center py-12">
                    <div className="font-urbanist text-sm text-[#FF7D7D]">{eventsError}</div>
                  </div>
-               ) : polymarketEvents.length === 0 ? (
+               ) : sortedEvents.length === 0 ? (
                  <div className="flex items-center justify-center py-12">
                    <div className="font-urbanist text-sm text-[#808080]">No events available</div>
                  </div>

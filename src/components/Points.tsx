@@ -1,5 +1,5 @@
 
-import { Copy, X, CheckCircle2, UserPlus } from "lucide-react"
+import { Copy, X, CheckCircle2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useAccount } from "wagmi"
 import { getBackendBaseUrl } from "../utils/constants"
@@ -41,6 +41,10 @@ const Points = () => {
   const [isReferralInputModalOpen, setIsReferralInputModalOpen] = useState(false)
   const [inputReferralCode, setInputReferralCode] = useState("")
   const [isRedeemingReferralCode, setIsRedeemingReferralCode] = useState(false)
+  const [isWhitelistModalOpen, setIsWhitelistModalOpen] = useState(false)
+  const [whitelistAddresses, setWhitelistAddresses] = useState("")
+  const [isWhitelisting, setIsWhitelisting] = useState(false)
+  const [whitelistErrors, setWhitelistErrors] = useState<string[]>([])
 
   // Monitor auth state changes
   useEffect(() => {
@@ -53,6 +57,7 @@ const Points = () => {
     })
     return () => unsubscribe()
   }, [])
+
 
   useEffect(() => {
     if (!address || !isConnected) {
@@ -208,6 +213,116 @@ const Points = () => {
     window.open(twitterShareUrl, '_blank', 'width=550,height=420')
   }
 
+  // Validate Ethereum address
+  const isValidEthereumAddress = (address: string): boolean => {
+    // Ethereum address should be 42 characters (0x + 40 hex characters)
+    const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/
+    return ethAddressRegex.test(address.trim())
+  }
+
+  // Handle whitelist submission
+  const handleWhitelistSubmit = async () => {
+    if (!address || !isConnected) {
+      toast.error('Please connect your wallet to whitelist addresses', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    if (!whitelistAddresses.trim()) {
+      toast.error('Please enter at least one address', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Parse comma-separated addresses
+    const addresses = whitelistAddresses
+      .split(',')
+      .map(addr => addr.trim())
+      .filter(addr => addr.length > 0)
+
+    if (addresses.length === 0) {
+      toast.error('Please enter at least one valid address', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Validate each address
+    const errors: string[] = []
+    const validAddresses: string[] = []
+
+    addresses.forEach((addr, index) => {
+      if (!isValidEthereumAddress(addr)) {
+        errors.push(`Address ${index + 1} "${addr}" is not a valid Ethereum address`)
+      } else {
+        validAddresses.push(addr)
+      }
+    })
+
+    if (errors.length > 0) {
+      setWhitelistErrors(errors)
+      toast.error(`Invalid addresses found. Please check and try again.`, {
+        style: { fontSize: '12px' },
+        autoClose: 5000,
+      })
+      return
+    }
+
+    // Remove duplicates
+    const uniqueAddresses = Array.from(new Set(validAddresses))
+
+    setIsWhitelisting(true)
+    setWhitelistErrors([])
+
+    try {
+      const response = await fetch(`${getBackendBaseUrl()}referral/allow`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          referrer: address,
+          allowed: uniqueAddresses,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        const errorMessage = errorData.error || `Failed to whitelist addresses: ${response.status}`
+        
+        toast.error(errorMessage, {
+          style: { fontSize: '12px' },
+          autoClose: 4000,
+        })
+        return
+      }
+
+      const data = await response.json()
+      console.log('Whitelist response:', data)
+
+      toast.success(`Successfully whitelisted ${data.updated || uniqueAddresses.length} address(es)!`, {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+
+      // Close modal and reset
+      setIsWhitelistModalOpen(false)
+      setWhitelistAddresses("")
+      setWhitelistErrors([])
+    } catch (error: unknown) {
+      console.error("Error whitelisting addresses:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to whitelist addresses"
+      toast.error(`Whitelist failed: ${errorMessage}`, {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+    } finally {
+      setIsWhitelisting(false)
+    }
+  }
+
   const handleSocialQuest = async (reason: string) => {
     if (!address || !isConnected) {
       toast.warning('Please connect your wallet to complete quests', {
@@ -293,15 +408,28 @@ Join the future of trading predictions! 🎯`
   // Handle referral code input
   const handleSubmitReferralCode = async () => {
     if (!inputReferralCode.trim()) {
-      toast.error('Please enter a referral code', {
+      toast.error('Please enter an invite code', {
         style: { fontSize: '12px' }
       })
       return
     }
 
     if (!address || !isConnected) {
-      toast.error('Please connect your wallet to redeem a referral code', {
+      toast.error('Please connect your wallet to redeem an invite code', {
         style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Extract inviteToken from URL query parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const inviteToken = urlParams.get('inviteToken')
+
+    // Check if inviteToken exists in URL
+    if (!inviteToken) {
+      toast.error('You are not referred', {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
       })
       return
     }
@@ -317,17 +445,18 @@ Join the future of trading predictions! 🎯`
         body: JSON.stringify({
           code: inputReferralCode.trim(),
           newUser: address,
+          inviteToken: inviteToken,
         }),
       })
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-        const errorMessage = errorData.error || `Failed to redeem referral code: ${response.status}`
+        const errorMessage = errorData.error || `Failed to redeem invite code: ${response.status}`
         
         // Handle specific error messages
         let userFriendlyMessage = errorMessage
         if (errorMessage === 'invalid_code_or_already_referred') {
-          userFriendlyMessage = 'Invalid referral code or you have already been referred'
+          userFriendlyMessage = 'Invalid invite code or you have already been referred'
         } else if (errorMessage === 'self_referral_not_allowed') {
           userFriendlyMessage = 'You cannot refer yourself'
         } else if (errorMessage === 'referral_not_allowed_by_referrer') {
@@ -348,7 +477,7 @@ Join the future of trading predictions! 🎯`
       const referredCredits = data.referred?.credits || 0
       const referredXp = data.referred?.xp || 0
       
-      toast.success(`Referral code redeemed! You earned ${referredCredits} credits and ${referredXp} XP.`, {
+      toast.success(`Invite code redeemed! You earned ${referredCredits} credits and ${referredXp} XP.`, {
         style: { fontSize: '12px' },
         autoClose: 4000,
       })
@@ -376,10 +505,19 @@ Join the future of trading predictions! 🎯`
       // Close modal and reset
       setIsReferralInputModalOpen(false)
       setInputReferralCode("")
+      
+      // Clear referral code from localStorage and URL
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('pending-referral-code')
+        // Clean up URL parameter
+        const url = new URL(window.location.href)
+        url.searchParams.delete('rc')
+        window.history.replaceState({}, '', url.toString())
+      }
     } catch (error: unknown) {
       console.error("Error redeeming referral code:", error)
-      const errorMessage = error instanceof Error ? error.message : "Failed to redeem referral code"
-      toast.error(`Referral redemption failed: ${errorMessage}`, {
+      const errorMessage = error instanceof Error ? error.message : "Failed to redeem invite code"
+      toast.error(`Invite code redemption failed: ${errorMessage}`, {
         style: { fontSize: '12px' },
         autoClose: 4000,
       })
@@ -653,29 +791,16 @@ Join the future of trading predictions! 🎯`
                                <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on</span>
                                <X className="h-4 w-4 text-white" />
                              </button>
+                             
+                             <button 
+                               onClick={() => setIsWhitelistModalOpen(true)}
+                               disabled={!address || !isConnected}
+                               className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                             >
+                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">Whitelist Addresses</span>
+                               <CheckCircle2 className="h-4 w-4" />
+                             </button>
                            </div>
-                         </div>
-
-                         {/* Enter Referral Code Card */}
-                         <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                            <div className="flex flex-col items-center justify-center gap-2 text-center min-h-[100px]">
-                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
-                                Enter Referral Code
-                              </div>
-                              <div className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
-                                Were you referred by someone? Enter their referral code here.
-                              </div>
-                              
-                              <button
-                                onClick={() => setIsReferralInputModalOpen(true)}
-                                className="flex w-fit flex-row cursor-pointer items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] text-black"
-                              >
-                                <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
-                                  Enter Referral Code
-                                </span>
-                                <UserPlus className="h-4 w-4" />
-                              </button>
-                            </div>
                          </div>
 
                          {/* Share About Raven Quest Card */}
@@ -747,11 +872,33 @@ Join the future of trading predictions! 🎯`
        onClose={() => {
          setIsReferralInputModalOpen(false)
          setInputReferralCode("")
+         // Clear referral code from localStorage and URL when modal is closed
+         if (typeof window !== 'undefined') {
+           window.localStorage.removeItem('pending-referral-code')
+           const url = new URL(window.location.href)
+           url.searchParams.delete('rc')
+           window.history.replaceState({}, '', url.toString())
+         }
        }}
        referralCode={inputReferralCode}
        setReferralCode={setInputReferralCode}
        onSubmit={handleSubmitReferralCode}
        isLoading={isRedeemingReferralCode}
+     />
+
+     {/* Whitelist Addresses Modal */}
+     <WhitelistModal
+       isOpen={isWhitelistModalOpen}
+       onClose={() => {
+         setIsWhitelistModalOpen(false)
+         setWhitelistAddresses("")
+         setWhitelistErrors([])
+       }}
+       addresses={whitelistAddresses}
+       setAddresses={setWhitelistAddresses}
+       onSubmit={handleWhitelistSubmit}
+       isLoading={isWhitelisting}
+       errors={whitelistErrors}
      />
 
     </div>
@@ -927,23 +1074,23 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
         {/* Modal Header */}
         <div className="mb-6">
           <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
-            Enter Referral Code
+            Enter Invite Code
           </h2>
           <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
-            Enter the referral code of the person who referred you to Raven.
+            Enter the invite code of the person who referred you to Raven.
           </p>
         </div>
 
         {/* Input Field */}
         <div className="mb-6">
           <label className="block font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF] mb-2">
-            Referral Code
+            Invite Code
           </label>
           <input
             type="text"
             value={referralCode}
             onChange={(e) => setReferralCode(e.target.value)}
-            placeholder="Enter referral code here..."
+            placeholder="Enter invite code here..."
             disabled={isLoading}
             className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onKeyDown={(e) => {
@@ -954,7 +1101,7 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
             autoFocus
           />
           <p className="mt-2 font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#808080]">
-            Get the referral code from the person who invited you.
+            Get the invite code from the person who invited you.
           </p>
         </div>
 
@@ -981,6 +1128,136 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
               <>
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Submit</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return createPortal(modalContent, document.body)
+}
+
+// Whitelist Addresses Modal Component
+interface WhitelistModalProps {
+  isOpen: boolean
+  onClose: () => void
+  addresses: string
+  setAddresses: (addresses: string) => void
+  onSubmit: () => void
+  isLoading?: boolean
+  errors: string[]
+}
+
+const WhitelistModal = ({ isOpen, onClose, addresses, setAddresses, onSubmit, isLoading = false, errors }: WhitelistModalProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div 
+        className="relative w-full max-w-md rounded-3xl bg-[#1A1A1A] p-6 sm:p-8 border border-[#2A2A2A] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          disabled={isLoading}
+          className="absolute top-4 right-4 rounded-lg p-2 transition-colors hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <X className="h-5 w-5 text-[#D1D1D1]" />
+        </button>
+
+        {/* Modal Header */}
+        <div className="mb-6">
+          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+            Whitelist Addresses
+          </h2>
+          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+            Enter wallet addresses (comma-separated) that you want to allow as valid referrals.
+          </p>
+        </div>
+
+        {/* Input Field */}
+        <div className="mb-6">
+          <label className="block font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF] mb-2">
+            Wallet Addresses
+          </label>
+          <textarea
+            value={addresses}
+            onChange={(e) => setAddresses(e.target.value)}
+            placeholder="0x1234..., 0x5678..., 0x9abc..."
+            disabled={isLoading}
+            rows={4}
+            className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.ctrlKey && !isLoading) {
+                onSubmit()
+              }
+            }}
+            autoFocus
+          />
+          <p className="mt-2 font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#808080]">
+            Enter addresses separated by commas. Each address will be validated.
+          </p>
+          
+          {/* Error Messages */}
+          {errors.length > 0 && (
+            <div className="mt-3 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 max-h-32 overflow-y-auto">
+              {errors.map((error, index) => (
+                <p key={index} className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#FF7D7D] mb-1">
+                  {error}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="flex items-center justify-center rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={!addresses.trim() || isLoading}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#45FFAE] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-black transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                <span>Whitelisting...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Whitelist</span>
               </>
             )}
           </button>

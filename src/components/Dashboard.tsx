@@ -1,5 +1,14 @@
 import { useLocation } from "react-router-dom"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAccount } from "wagmi"
+import { onAuthStateChanged, type User } from "firebase/auth"
+import { auth } from '../firebase'
+import { toast } from 'react-toastify'
+import { getBackendBaseUrl } from "../utils/constants"
+import { useUserMetrics } from "../contexts/UserMetricsContext"
+import { createPortal } from "react-dom"
+import { X, CheckCircle2 } from "lucide-react"
+
 import SideBar from "./SideBar"
 import NavBar from "./NavBar"
 import Body from "./body"
@@ -12,6 +21,169 @@ import MathematicalAccuracy from "./MathematicalAccuracy"
 const Dashboard = () => {
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const { address, isConnected } = useAccount()
+  const { refreshMetrics } = useUserMetrics()
+  const [twitterUser, setTwitterUser] = useState<User | null>(null)
+  const [isReferralInputModalOpen, setIsReferralInputModalOpen] = useState(false)
+  const [inputReferralCode, setInputReferralCode] = useState("")
+  const [isRedeemingReferralCode, setIsRedeemingReferralCode] = useState(false)
+  const [hasAutoOpenedModal, setHasAutoOpenedModal] = useState(false)
+
+  // Monitor auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setTwitterUser(user)
+      } else {
+        setTwitterUser(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
+
+  // Check for referral code in URL and auto-open modal on root route only
+  useEffect(() => {
+    // Only check on root route
+    if (location.pathname !== '/') {
+      return
+    }
+
+    // Only check when user is fully authenticated
+    if (!twitterUser || !isConnected || !address) {
+      if (!twitterUser || !isConnected) {
+        setHasAutoOpenedModal(false)
+      }
+      return
+    }
+
+    // Skip if we've already auto-opened the modal or modal is already open
+    if (hasAutoOpenedModal || isReferralInputModalOpen) {
+      return
+    }
+
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(location.search)
+    const rc = urlParams.get('rc')
+    
+    if (rc) {
+      // Small delay to ensure everything is initialized
+      const timer = setTimeout(() => {
+        console.log('✅ Opening invite code modal on root route with referral code:', rc)
+        setIsReferralInputModalOpen(true)
+        setHasAutoOpenedModal(true)
+      }, 1500)
+
+      return () => clearTimeout(timer)
+    }
+  }, [location.pathname, location.search, twitterUser, isConnected, address, hasAutoOpenedModal, isReferralInputModalOpen])
+
+  // Handle referral code submission
+  const handleSubmitReferralCode = async () => {
+    if (!inputReferralCode.trim()) {
+      toast.error('Please enter an invite code', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    if (!address || !isConnected) {
+      toast.error('Please connect your wallet to redeem an invite code', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Extract rc from URL query parameters to verify user was referred
+    const urlParams = new URLSearchParams(window.location.search)
+    const rc = urlParams.get('rc')
+    const inviteTokenFromUrl = urlParams.get('inviteToken')
+
+    // Check if user was referred - rc parameter indicates referral
+    if (!rc) {
+      toast.error('You are not referred', {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+      return
+    }
+
+    setIsRedeemingReferralCode(true)
+
+    try {
+      // API parameters:
+      // code: referral code from URL (rc parameter)
+      // newUser: wallet address
+      // inviteToken: what user enters in the input box (or from URL if present)
+      const response = await fetch(`${getBackendBaseUrl()}referral/redeem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: rc, // Referral code from URL
+          newUser: address, // Wallet address
+          inviteToken: inviteTokenFromUrl || inputReferralCode.trim(), // Use inviteToken from URL if present, otherwise use what user entered
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        const errorMessage = errorData.error || `Failed to redeem invite code: ${response.status}`
+        
+        // Handle specific error messages
+        let userFriendlyMessage = errorMessage
+        if (errorMessage === 'invalid_code_or_already_referred') {
+          userFriendlyMessage = 'Invalid invite code or you have already been referred'
+        } else if (errorMessage === 'self_referral_not_allowed') {
+          userFriendlyMessage = 'You cannot refer yourself'
+        } else if (errorMessage === 'referral_not_allowed_by_referrer') {
+          userFriendlyMessage = 'Referral not allowed by referrer'
+        }
+        
+        toast.error(userFriendlyMessage, {
+          style: { fontSize: '12px' },
+          autoClose: 4000,
+        })
+        return
+      }
+
+      const data = await response.json()
+      console.log('Referral redemption response:', data)
+
+      // Show success message with details
+      const referredCredits = data.referred?.credits || 0
+      const referredXp = data.referred?.xp || 0
+      
+      toast.success(`Invite code redeemed! You earned ${referredCredits} credits and ${referredXp} XP.`, {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+
+      // Refresh metrics to show updated credits and XP
+      await refreshMetrics()
+
+      // Close modal and reset
+      setIsReferralInputModalOpen(false)
+      setInputReferralCode("")
+      
+      // Clean up URL parameters
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('rc')
+        url.searchParams.delete('inviteToken')
+        window.history.replaceState({}, '', url.toString())
+      }
+    } catch (error: unknown) {
+      console.error("Error redeeming referral code:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to redeem invite code"
+      toast.error(`Invite code redemption failed: ${errorMessage}`, {
+        style: { fontSize: '12px' },
+        autoClose: 4000,
+      })
+    } finally {
+      setIsRedeemingReferralCode(false)
+    }
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-black text-white">
@@ -48,8 +220,148 @@ const Dashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Referral Input Modal - Only shown on root route */}
+      {location.pathname === '/' && (
+        <ReferralInputModal
+          isOpen={isReferralInputModalOpen}
+          onClose={() => {
+            setIsReferralInputModalOpen(false)
+            setInputReferralCode("")
+            // Clean up URL parameters when modal is closed
+            if (typeof window !== 'undefined') {
+              const url = new URL(window.location.href)
+              url.searchParams.delete('rc')
+              url.searchParams.delete('inviteToken')
+              window.history.replaceState({}, '', url.toString())
+            }
+          }}
+          referralCode={inputReferralCode}
+          setReferralCode={setInputReferralCode}
+          onSubmit={handleSubmitReferralCode}
+          isLoading={isRedeemingReferralCode}
+        />
+      )}
     </div>
   )
+}
+
+// Referral Input Modal Component
+interface ReferralInputModalProps {
+  isOpen: boolean
+  onClose: () => void
+  referralCode: string
+  setReferralCode: (code: string) => void
+  onSubmit: () => void
+  isLoading?: boolean
+}
+
+const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, onSubmit, isLoading = false }: ReferralInputModalProps) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  const modalContent = (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose()
+        }
+      }}
+    >
+      <div 
+        className="relative w-full max-w-md rounded-3xl bg-[#1A1A1A] p-6 sm:p-8 border border-[#2A2A2A] mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          disabled={isLoading}
+          className="absolute top-4 right-4 rounded-lg p-2 transition-colors hover:bg-[#2A2A2A] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <X className="h-5 w-5 text-[#D1D1D1]" />
+        </button>
+
+        {/* Modal Header */}
+        <div className="mb-6">
+          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+            Enter Invite Code
+          </h2>
+          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+            Enter the invite code of the person who referred you to Raven.
+          </p>
+        </div>
+
+        {/* Input Field */}
+        <div className="mb-6">
+          <label className="block font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF] mb-2">
+            Invite Code
+          </label>
+          <input
+            type="text"
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value)}
+            placeholder="Enter invite code here..."
+            disabled={isLoading}
+            className="w-full rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] placeholder:text-[#808080] border border-transparent focus:border-[#45FFAE] focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isLoading) {
+                onSubmit()
+              }
+            }}
+            autoFocus
+          />
+          <p className="mt-2 font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#808080]">
+            Get the invite code from the person who invited you.
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="flex items-center justify-center rounded-xl bg-[#2A2A2A] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF] transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={!referralCode.trim() || isLoading}
+            className="flex items-center justify-center gap-2 rounded-xl bg-[#45FFAE] px-4 py-3 font-urbanist text-sm font-medium leading-none tracking-[0%] text-black transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                <span>Redeeming...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Submit</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  return createPortal(modalContent, document.body)
 }
 
 export default Dashboard

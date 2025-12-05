@@ -317,6 +317,23 @@ const body = () => {
         }
       }
 
+      // If reasoning contains "ANSWER" heading, split it properly
+      // Move "ANSWER" heading and everything after it to the answer field
+      if (reasoning) {
+        const answerMatch = reasoning.match(/(.*?)(\n\s*)?(ANSWER|Answer)(\s*\n)(.*)/is)
+        if (answerMatch) {
+          // Everything before "ANSWER" stays in reasoning
+          reasoning = answerMatch[1].trim()
+          // "ANSWER" heading + everything after goes to answer
+          const answerHeading = answerMatch[3] // "ANSWER" or "Answer"
+          const answerContent = answerMatch[5] // Content after ANSWER
+          // Combine existing answer (if any) with the extracted answer
+          answer = answer 
+            ? `${answerHeading}\n\n${answerContent}\n\n${answer}`.trim()
+            : `${answerHeading}\n\n${answerContent}`.trim()
+        }
+      }
+
       // Add assistant message with reasoning and answer
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [

@@ -159,7 +159,9 @@ const Dashboard = () => {
         autoClose: 4000,
       })
 
-      // Refresh metrics to show updated credits and XP
+      // Refresh metrics to show updated credits and XP in navbar
+      // Add a small delay to ensure backend has processed the referral redemption
+      await new Promise(resolve => setTimeout(resolve, 500))
       await refreshMetrics()
 
       // Close modal and reset

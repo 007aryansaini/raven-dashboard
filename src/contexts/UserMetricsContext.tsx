@@ -130,9 +130,11 @@ export const UserMetricsProvider = ({ children }: { children: ReactNode }) => {
     const controller = new AbortController();
     try {
       await fetchUserSummary(controller.signal);
-    } finally {
-      controller.abort();
+    } catch (error) {
+      console.error("Error refreshing metrics:", error);
     }
+    // Note: We don't abort here as the request should complete naturally
+    // The abort controller is used for cleanup if component unmounts during fetch
   }, [fetchUserSummary]);
 
   useEffect(() => {

@@ -31,7 +31,7 @@ const Benchmark = () => {
         <div className="flex w-full flex-col gap-6 rounded-3xl bg-[#141414] p-6 sm:p-8">
           <div className="flex items-center gap-3">
             <Trophy className="h-8 w-8 text-[#FFD700]" />
-            <h1 className="font-urbanist text-2xl font-bold leading-tight tracking-[0%] text-white sm:text-3xl">
+            <h1 className="font-urbanist text-xl sm:text-2xl lg:text-3xl font-bold leading-tight tracking-[0%] text-white">
             FT Reasoning Model
             </h1>
           </div>

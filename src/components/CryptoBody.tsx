@@ -508,8 +508,8 @@ const body = () => {
                  </div>
                 <div className="w-full flex flex-row justify-center items-center px-2">
                  <div className="flex flex-row border border-gray-500 w-full sm:w-fit h-auto sm:h-9 rounded-full mt-2 gap-2 sm:gap-3 items-center px-2 sm:px-3 py-1.5">
-                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                    <div className="font-urbanist font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                    <div className="font-urbanist font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
                   </>
@@ -564,7 +564,7 @@ const body = () => {
                       <div className="rounded-lg lg:rounded-xl bg-[#0B0B0B] p-2 lg:p-3">
                         <BTCPriceChart />
                       </div>
-                      <div className="mt-2 lg:mt-3 font-urbanist text-[10px] lg:text-xs leading-none tracking-[0%] text-[#808080]">
+                      <div className="mt-2 lg:mt-3 font-urbanist text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">
                         Displaying sample BTC closing prices for illustrative purposes.
                       </div>
                     </div>
@@ -619,7 +619,7 @@ const body = () => {
                <div className="flex flex-row items-center justify-between">
                        <div className="flex flex-row gap-1 lg:gap-2 items-center">
                             <img src={bolt} alt="bolt"  className="h-2.5 w-2.5 lg:h-3 lg:w-3"/>
-                            <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
+                            <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
                             <MoveRight className="text-[#808080] text-center h-3 w-3 lg:h-4 lg:w-4"/>
                        </div>
                </div>
@@ -652,7 +652,7 @@ const body = () => {
               <div className="relative" ref={dropdownRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
                   <img src={cryptoTrade} alt="crypto" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
-                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
@@ -673,7 +673,7 @@ const body = () => {
               {/* Timeframe Dropdown */}
               <div className="relative" ref={tfRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isTfOpen ? closeAllModals() : openTf()}>
-                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTfOpen && (
@@ -690,7 +690,7 @@ const body = () => {
               {/* Analysis Dropdown */}
               <div className="relative" ref={analysisRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isAnalysisOpen ? closeAllModals() : openAnalysis()}>
-                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAnalysisOpen && (
@@ -707,7 +707,7 @@ const body = () => {
               {/* Assets Dropdown */}
               <div className="relative" ref={assetsRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isAssetsOpen ? closeAllModals() : openAssets()}>
-                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAssetsOpen && (
@@ -724,7 +724,7 @@ const body = () => {
               {/* Score Dropdown */}
               <div className="relative" ref={scoreRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isScoreOpen ? closeAllModals() : openScore()}>
-                  <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isScoreOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isScoreOpen && (

@@ -378,7 +378,7 @@ const MathematicalAccuracy = () => {
       }}
     >
       <div className="flex flex-col gap-2">
-        <h1 className="font-urbanist text-4xl font-semibold text-[#45FFAE]">Mathematical Accuracy</h1>
+        <h1 className="font-urbanist text-xl sm:text-2xl lg:text-3xl font-semibold text-[#45FFAE]">Mathematical Accuracy</h1>
         <p className="font-urbanist text-sm text-[#BFBFBF]">
           View the latest scoring breakdown across Kryos, Helion, and Astrax.
         </p>

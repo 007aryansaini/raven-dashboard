@@ -705,7 +705,7 @@ Join the future of trading predictions! 🎯`
              backgroundColor: '#000000'
            }}>
         <div className="flex flex-col items-center gap-4 text-center max-w-md">
-          <div className="font-urbanist text-2xl sm:text-3xl font-medium leading-tight tracking-[0%] text-[#FFFFFF]">
+          <div className="font-urbanist text-xl sm:text-2xl lg:text-3xl font-medium leading-tight tracking-[0%] text-[#FFFFFF]">
             Connect to View Points
           </div>
           <div className="font-urbanist text-sm sm:text-base font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
@@ -734,7 +734,7 @@ Join the future of trading predictions! 🎯`
                <div className="flex w-full flex-col items-center gap-6">
                       
                        <div className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl bg-[#141414] px-6 py-8 text-center sm:px-10 sm:py-10">
-                             <div className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] sm:text-3xl">Earn Points, Unlock Rewards</div> 
+                             <div className="font-urbanist text-xl sm:text-2xl lg:text-3xl font-medium leading-tight tracking-[0%] text-[#FFFFFF]">Earn Points, Unlock Rewards</div> 
                              <div className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">Finish quick quests and stack points to claim rewards.</div>
                        </div>
 

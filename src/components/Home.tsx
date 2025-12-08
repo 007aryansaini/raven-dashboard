@@ -341,7 +341,7 @@ const Home = () => {
                  ? 'opacity-100 translate-y-0' 
                  : 'opacity-0 translate-y-8'
              }`}>
-               <div className="font-urbanist font-medium text-2xl sm:text-3xl lg:text-4xl leading-tight tracking-[0%] text-[#FFFFFF] px-2">Artificial Prediction Intelligence</div>
+               <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] px-2">Artificial Prediction Intelligence</div>
                <div className="flex w-full flex-row items-center justify-center px-2">
                  <div className={`mt-2 flex h-8 lg:h-10 w-auto items-center gap-2 lg:gap-4 rounded-full border border-gray-500 px-3 lg:px-4 transition-all duration-500 ease-out ${
                    isVisible 

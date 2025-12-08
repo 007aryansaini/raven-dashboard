@@ -906,8 +906,8 @@ const body = () => {
                  <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">Polymarket Predictions</div>
                 <div className="w-full flex flex-row justify-center items-center px-2">
                  <div className="flex flex-row border border-gray-500 w-full sm:w-fit h-auto sm:h-9 rounded-full mt-2 gap-2 sm:gap-3 items-center px-2 sm:px-3 py-1.5">
-                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                    <div className="font-urbanist font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                    <div className="font-urbanist font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
                   </>
@@ -1107,7 +1107,7 @@ const body = () => {
                <div className="flex flex-row items-center justify-between">
                        <div className="flex flex-row gap-1 lg:gap-2 items-center">
                             <img src={bolt} alt="bolt"  className="h-2.5 w-2.5 lg:h-3 lg:w-3"/>
-                            <div className="font-urbanist font-medium text-[10px] lg:text-xs leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
+                            <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
                             <MoveRight className="text-[#808080] text-center h-3 w-3 lg:h-4 lg:w-4"/>
                        </div>
                </div>

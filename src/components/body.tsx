@@ -880,22 +880,25 @@ const body = () => {
          }}>
            {/* Content Area - Takes flex-1 to push input to bottom */}
            <div className="flex-1 w-full flex flex-col items-center min-h-0 overflow-hidden">
-           {messages.length === 0 && (
-             <div className="flex flex-col items-center gap-3 text-center">
-               <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">Polymarket Predictions</div>
-               <div className="flex w-full flex-row items-center justify-center">
-                 <div className="mt-2 flex w-auto items-center gap-3 rounded-full border border-gray-500 px-4 py-2">
-                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                    <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+           <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2">
+                {messages.length === 0 && (
+                  <>
+                 <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">Polymarket Predictions</div>
+                <div className="w-full flex flex-row justify-center items-center px-2">
+                 <div className="flex flex-row border border-gray-500 w-full sm:w-fit h-auto sm:h-9 rounded-full mt-2 gap-2 sm:gap-3 items-center px-2 sm:px-3 py-1.5">
+                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                    <div className="font-urbanist font-medium text-[10px] sm:text-xs leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
+                  </>
+                )}
            </div>
-           )}
 
-           {messages.length === 0 ? (
-             /* Carousel Container */
+      <div className="flex w-full max-w-5xl flex-1 flex-col gap-3 lg:gap-6 min-h-0">
+        {messages.length === 0 ? (
+           <div className="w-full">
            <div 
-               className="relative w-full max-w-5xl mt-6 sm:mt-8 lg:mt-25"
+               className="relative w-full mt-6 sm:mt-8 lg:mt-25"
              onMouseEnter={() => setIsAutoPlay(false)}
              onMouseLeave={() => setIsAutoPlay(true)}
            >
@@ -1007,9 +1010,9 @@ const body = () => {
                ))}
              </div>
            </div>
-           ) : (
-             /* Chat Interface */
-             <div className="flex-1 w-full max-w-5xl rounded-2xl lg:rounded-3xl bg-[#141414] p-3 sm:p-4 lg:p-6 flex flex-col min-h-0 overflow-hidden">
+          </div>
+        ) : (
+          <div className="flex-1 w-full max-w-5xl rounded-2xl lg:rounded-3xl bg-[#141414] p-3 sm:p-4 lg:p-6 flex flex-col min-h-0 overflow-hidden">
                <div className="flex-1 min-h-0 overflow-y-auto rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-3 lg:p-4 space-y-3 lg:space-y-4">
                  {messages.map((message) => (
                    <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
@@ -1056,7 +1059,7 @@ const body = () => {
                            </div>
                          )}
                          {!message.reasoning && !message.answer && (
-                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#121212] text-[#FFFFFF]">
+                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
                              {message.content}
                            </div>
                          )}
@@ -1066,7 +1069,7 @@ const body = () => {
                  ))}
                  {isLoading && (
                    <div className="flex justify-start">
-                     <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#121212] text-[#FFFFFF]">
+                     <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
                        <div className="font-urbanist text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
                      </div>
                    </div>
@@ -1074,11 +1077,12 @@ const body = () => {
                  <div ref={chatEndRef} />
                </div>
              </div>
-           )}
+        )}
+      </div>
            </div>
 
            {/* Input Area - Always at bottom */}
-           <div className="flex w-full max-w-5xl flex-col gap-3 lg:gap-4 rounded-2xl lg:rounded-3xl bg-[#141414] p-4 lg:p-6 flex-shrink-0">
+           <div className="flex flex-col gap-2.5 lg:gap-3.5 w-full max-w-5xl lg:h-40 bg-[#141414] rounded-lg p-3 lg:p-4 justify-between flex-shrink-0">
                
                <div className="flex flex-row items-center justify-between">
                        <div className="flex flex-row gap-1 lg:gap-2 items-center">
@@ -1090,10 +1094,10 @@ const body = () => {
 
 
 
-         <div className="flex w-full flex-col items-start justify-between gap-2 lg:gap-4 rounded-xl lg:rounded-2xl bg-[#1A1A1A] p-3 lg:p-4 sm:flex-row sm:items-center sm:p-6">
+          <div className="h-auto lg:h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 lg:p-2 items-start justify-between" >
 
-            <div className="flex flex-1 items-center gap-2 lg:gap-3">
-                <img src={blackDot} alt="history" className="h-3.5 w-3.5 lg:h-4 lg:w-4 flex-shrink-0"/>
+            <div className="flex flex-row items-center justify-between gap-1.5 lg:gap-2 flex-1">
+                <img src={blackDot} alt="history" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
                 <div className="font-urbanist font-medium text-sm lg:text-base text-[#3E3E3E]">|</div>
                 <input 
                   ref={inputRef}
@@ -1102,22 +1106,14 @@ const body = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 bg-transparent font-urbanist text-sm lg:text-base font-medium text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none"
+                  className="font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
                 />
             </div>
 
-            <button
-              type="button"
+            <ArrowUp 
+              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 cursor-pointer transition-all duration-200 ${(inputValue.trim() || buildQueryFromTags()) ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
               onClick={handleSubmit}
-              className={`flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full border transition-all duration-200 ${
-                (inputValue.trim() || buildQueryFromTags())
-                  ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
-                  : 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed'}`}
-              aria-label="Submit query"
-              disabled={!inputValue.trim() && !buildQueryFromTags()}
-            >
-              <ArrowUp className="h-4 w-4 lg:h-5 lg:w-5" />
-            </button>
+            />
 
          </div>
 

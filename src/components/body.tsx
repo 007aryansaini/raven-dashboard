@@ -7,7 +7,7 @@ import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
 import { CHAT_API_BASE } from "../utils/constants"
-import { authorizeInference } from "../utils/inference"
+import { authorizeInference, recordInference } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
 import polymarketLogo from "../assets/polymarketLogo.svg"
 import PolymarketEventCard from "./PolymarketEventCard"
@@ -580,17 +580,25 @@ const body = () => {
       const hasTags = Boolean(selectedLiquidity || selectedVolume || selectedTimeframe || selectedNewest || selectedEndingSoon || selectedScore)
 
       // Map selectedScore to mode
-      let mode = ""
+      let mode = "basic"
       if (selectedScore === "Logical") {
         mode = "scores.logic"
       } else if (selectedScore === "Sentiment") {
         mode = "scores.sentiment"
       }
 
+      // Determine reason based on tags and query
+      let reason = query
+      if (hasTags) {
+        reason = "tags_price_accuracy_basic"
+      }
+
+      // 1. Check authorization before AI call
       const authorization = await authorizeInference(address, {
-        tags: hasTags,
-        reason: query,
         mode: mode,
+        quantity: 1,
+        reason: reason,
+        tags: hasTags,
       })
 
       if (!authorization.allowed) {
@@ -668,6 +676,19 @@ const body = () => {
         ]
         return newMessages
       })
+
+      // 3. After successful AI response, record the usage
+      try {
+        await recordInference(address, {
+          mode: mode,
+          quantity: 1,
+          reason: reason,
+          tags: hasTags,
+        })
+      } catch (error: any) {
+        console.error("Error recording inference:", error)
+        // Don't show error to user, just log it
+      }
 
       void refreshMetrics()
       

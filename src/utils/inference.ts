@@ -16,8 +16,12 @@ export type AuthorizeInferenceResponse = {
   cost: number;
 };
 
-const defaultOptions: Required<Pick<AuthorizeInferenceOptions, 'reason'>> = {
-  reason: "",
+export type RecordInferenceResponse = {
+  success: boolean;
+  allowed: boolean;
+  method: "initial_grant" | "deny" | "subscription" | "credits";
+  reason: string;
+  cost: number;
 };
 
 export async function authorizeInference(
@@ -28,12 +32,26 @@ export async function authorizeInference(
     throw new Error("Wallet not connected");
   }
 
-  const payload = {
+  const payload: any = {
     user: account,
-    tags: Boolean(options.tags ?? false),
-    reason: options.reason ?? defaultOptions.reason,
-    mode: options.mode ?? "",
+    quantity: options.quantity ?? 1,
   };
+
+  if (options.mode) {
+    payload.mode = options.mode;
+  }
+
+  if (options.reason) {
+    payload.reason = options.reason;
+  }
+
+  if (options.tags !== undefined) {
+    payload.tags = Boolean(options.tags);
+  }
+
+  if (options.contextHash) {
+    payload.contextHash = options.contextHash;
+  }
 
   const response = await fetch(`${getBackendBaseUrl()}inference/authorize`, {
     method: "POST",
@@ -51,6 +69,54 @@ export async function authorizeInference(
 
   const data = await response.json();
   console.debug("[inference] authorizeInference response:", data);
+  return data;
+}
+
+export async function recordInference(
+  account: string | null | undefined,
+  options: AuthorizeInferenceOptions = {}
+): Promise<RecordInferenceResponse> {
+  if (!account) {
+    throw new Error("Wallet not connected");
+  }
+
+  const payload: any = {
+    user: account,
+    quantity: options.quantity ?? 1,
+  };
+
+  if (options.mode) {
+    payload.mode = options.mode;
+  }
+
+  if (options.reason) {
+    payload.reason = options.reason;
+  }
+
+  if (options.tags !== undefined) {
+    payload.tags = Boolean(options.tags);
+  }
+
+  if (options.contextHash) {
+    payload.contextHash = options.contextHash;
+  }
+
+  const response = await fetch(`${getBackendBaseUrl()}inference/record`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Inference record failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+  console.debug("[inference] recordInference response:", data);
   return data;
 }
 

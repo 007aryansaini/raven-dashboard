@@ -340,7 +340,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
   }`}
   onClick={() => handleNavigation('/polymarket', 'polymarket')}
 >
-  <img src={polymarketMarket} alt="polymarket"  className="h-4 w-4"/>
+  <img src={polymarketMarket} alt="polymarket"  className="h-6 w-6"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
     location.pathname === '/polymarket' ? 'text-[#FFFFFF]' : 'text-[#808080]'
   }`}>Polymarket</div>
@@ -355,7 +355,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
   }`}
   onClick={() => handleNavigation('/crypto', 'crypto')}
 >
-  <img src={cryptoTrade} alt="crypto"  className="h-4 w-4"/>
+  <img src={cryptoTrade} alt="crypto"  className="h-6 w-6"/>
   <div className={`font-urbanist font-normal text-sm leading-none tracking-[0%] ${
     location.pathname === '/crypto' ? 'text-[#FFFFFF]' : 'text-[#808080]'
   }`}>Crypto</div>
@@ -364,7 +364,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
 
 <div className="group flex flex-row items-center justify-between gap-2 ml-3 w-52 lg:w-56 h-14 cursor-pointer hover:bg-[#1a1a1a] rounded-lg p-2 transition-all duration-200 ease-in-out" onClick={() => handleNavigation('/points', null)}>
 <div className="flex flex-row items-center gap-2">
-<img className="w-8 h-8 group-hover:fill-[#45FFAE] transition-all duration-200" src={points} alt="points" />
+<img className="w-6 h-6 group-hover:fill-[#45FFAE] transition-all duration-200" src={points} alt="points" />
 <div className="font-urbanist font-normal text-sm leading-none tracking-[0%] group-hover:text-[#45FFAE] text-[#808080] transition-colors duration-200">Points</div>
 </div>
 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#45FFAE]">
@@ -379,7 +379,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
   location.pathname === '/score' || location.pathname === '/mathematical-accuracy' ? 'bg-[#1a1a1a]' : ''
 }`} onClick={() => setIsScoreDropdownOpen(!isScoreDropdownOpen)} data-score-button>
 <div className="flex flex-row items-center gap-2">
-<svg className={`w-8 h-8 transition-all duration-200 ${
+<svg className={`w-6 h-6 transition-all duration-200 ${
   location.pathname === '/score' || location.pathname === '/mathematical-accuracy' ? 'text-[#45FFAE]' : 'text-[#808080] group-hover:text-[#45FFAE]'
 }`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

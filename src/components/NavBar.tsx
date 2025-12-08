@@ -293,7 +293,7 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
               className="flex flex-row items-center gap-1 lg:gap-2 border-t border-l rounded-lg p-1.5 lg:p-2 transition-all duration-200 ease-in-out bg-[#45FFAE]/10 border-[#45FFAE] cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105"
               onClick={handleLoginWithX}
             >
-              <img src={walletLogo} alt="logo"  className="h-5 w-5 lg:h-6 lg:w-6"/>
+              <img src={walletLogo} alt="logo"  className="h-4 w-4"/>
               <div className="font-urbanist font-medium text-sm lg:text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
                 <span className="hidden sm:inline">Login with X</span>
                 <span className="sm:hidden">Login</span>
@@ -306,7 +306,7 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
             <div 
               className="flex flex-row items-center gap-1 lg:gap-2 border-t border-l rounded-lg p-1.5 lg:p-2 bg-[#45FFAE]/5 border-[#45FFAE]/50 cursor-not-allowed opacity-60"
             >
-              <img src={walletLogo} alt="logo"  className="h-5 w-5 lg:h-6 lg:w-6"/>
+              <img src={walletLogo} alt="logo"  className="h-4 w-4"/>
               <div className="font-urbanist font-medium text-sm lg:text-lg leading-none tracking-[0%] text-[#45FFAE] text-center">
                 Loading...
               </div>
@@ -318,7 +318,7 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
             <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg p-1.5 lg:p-2 cursor-pointer hover:bg-[#45FFAE]/15 hover:scale-105 transition-all duration-200 ease-in-out"
             onClick={handleConnectWallet}
             >
-               <img src={walletLogo} alt="logo"  className="h-5 w-5 lg:h-6 lg:w-6"/>
+               <img src={walletLogo} alt="logo"  className="h-4 w-4"/>
                <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#45FFAE] text-center">
                {isConnected ? (
                  <span className="hidden sm:inline">{truncateEthAddress(address as string)}</span>

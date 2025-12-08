@@ -6,7 +6,6 @@ import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
 import { toast } from 'react-toastify'
 import bolt from "../assets/bolt.svg"
-import blackDot from "../assets/blackDot.svg"
 import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
@@ -1097,8 +1096,6 @@ const body = () => {
           <div className="h-auto lg:h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 lg:p-2 items-start justify-between" >
 
             <div className="flex flex-row items-center justify-between gap-1.5 lg:gap-2 flex-1">
-                <img src={blackDot} alt="history" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
-                <div className="font-urbanist font-medium text-sm lg:text-base text-[#3E3E3E]">|</div>
                 <input 
                   ref={inputRef}
                   type="text" 

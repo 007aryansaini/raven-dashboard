@@ -882,7 +882,7 @@ const body = () => {
            <div className="flex-1 w-full flex flex-col items-center min-h-0 overflow-hidden">
            {messages.length === 0 && (
              <div className="flex flex-col items-center gap-3 text-center">
-               <div className="font-urbanist font-medium text-3xl leading-tight tracking-[0%] text-[#FFFFFF] sm:text-4xl">Polymarket Predictions</div>
+               <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">Polymarket Predictions</div>
                <div className="flex w-full flex-row items-center justify-center">
                  <div className="mt-2 flex w-auto items-center gap-3 rounded-full border border-gray-500 px-4 py-2">
                     <div className="font-urbanist font-medium text-xs leading-none tracking-[0%] text-[#4f4f4f] p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>

@@ -665,18 +665,19 @@ const body = () => {
         return newMessages
       })
 
-      // 3. After successful AI response, record the usage
-      try {
-        await recordInference(address, {
-          mode: mode,
-          quantity: 1,
-          reason: reason,
-          tags: hasTags,
-        })
-      } catch (error: any) {
+      // Set loading to false immediately after response is received and message is added
+      setIsLoading(false)
+
+      // 3. After successful AI response, record the usage (async, don't wait)
+      recordInference(address, {
+        mode: mode,
+        quantity: 1,
+        reason: reason,
+        tags: hasTags,
+      }).catch((error: any) => {
         console.error("Error recording inference:", error)
         // Don't show error to user, just log it
-      }
+      })
 
       void refreshMetrics()
       
@@ -704,7 +705,6 @@ const body = () => {
         ]
         return newMessages
       })
-    } finally {
       setIsLoading(false)
     }
   }

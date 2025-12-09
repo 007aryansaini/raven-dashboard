@@ -9,6 +9,10 @@
       "destination": "http://5u39o9kvl18q333qp57ib670bk.ingress.h100.ams2.val.akash.pub/:path*"
     },
     {
+      "source": "/polymarket-api/:path*",
+      "destination": "https://gamma-api.polymarket.com/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

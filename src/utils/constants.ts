@@ -25,5 +25,4 @@ export const getReferralBaseUrl = () => {
 export const SCORE_API_BASE = "/score-api/" // Use proxy in both dev and production
 export const SCORE_API_KEY = "422D5EE31621A6F3DD95E8D926EE3"
 export const CHAT_API_BASE = "/chat-api/" // Use proxy in both dev and production
-const POLYMARKET_API_HOST = "https://gamma-api.polymarket.com"
 export const POLYMARKET_API_BASE = "/polymarket-api" // Use proxy in both dev and production

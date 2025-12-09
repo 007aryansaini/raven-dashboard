@@ -295,7 +295,13 @@ const SideBar = ({ onClose }: SideBarProps) => {
   }
 
   const handleNavigation = (path: string, tab: TabType) => {
-    navigate(path)
+    // If already on the same route, force a reset by navigating with replace and state
+    if (location.pathname === path) {
+      // Force navigation with replace to trigger route change detection
+      navigate(path, { replace: true, state: { reset: Date.now() } })
+    } else {
+      navigate(path)
+    }
     setActiveTab(tab)
     onClose?.() // Close sidebar on mobile after navigation
   }

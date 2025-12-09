@@ -113,13 +113,13 @@ const body = () => {
   
   const autoPlayInterval = 4000 // 4 seconds between slides
 
-  // Clear messages when navigating to this screen (detect route changes)
+  // Clear messages when navigating to this screen (detect route changes or navigation state)
   useEffect(() => {
     if (location.pathname === '/polymarket') {
       setMessages([])
       setInputValue("")
     }
-  }, [location.pathname])
+  }, [location.pathname, location.state])
 
   // Monitor auth state changes
   useEffect(() => {

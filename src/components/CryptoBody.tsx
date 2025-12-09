@@ -83,13 +83,13 @@ const body = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Clear messages when navigating to this screen (detect route changes)
+  // Clear messages when navigating to this screen (detect route changes or navigation state)
   useEffect(() => {
     if (location.pathname === '/crypto' || location.pathname === '/') {
       setMessages([])
       setInputValue("")
     }
-  }, [location.pathname])
+  }, [location.pathname, location.state])
 
   // Monitor auth state changes
   useEffect(() => {

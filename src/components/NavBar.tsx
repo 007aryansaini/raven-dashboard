@@ -266,15 +266,15 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
         {/* User Credits and Inferences - Left Side - Only show when logged in and wallet connected */}
         <div className="flex flex-row items-center gap-2 lg:gap-3 flex-1 lg:flex-none">
           {twitterUser && isConnected && (
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-3">
-              <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-2 lg:px-3 py-1.5 lg:py-2">
+              <div className="flex flex-row items-center gap-2 lg:gap-3">
+              <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-2 lg:px-3 py-1.5 lg:py-2 whitespace-nowrap">
                 <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#45FFAE]">
                   <span className="hidden lg:inline">Credits Remaining: </span>
                   <span className="lg:hidden">Credits: </span>
                   <span className="font-semibold">{formatMetricValue(creditsPending)}</span>
                 </div>
               </div>
-              <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-2 lg:px-3 py-1.5 lg:py-2">
+              <div className="flex flex-row items-center gap-1 lg:gap-2 bg-[#45FFAE]/10 border-t border-l border-[#45FFAE] rounded-lg px-2 lg:px-3 py-1.5 lg:py-2 whitespace-nowrap">
                 <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#45FFAE]">
                   <span className="hidden lg:inline">Inference Remaining: </span>
                   <span className="lg:hidden">Inference: </span>

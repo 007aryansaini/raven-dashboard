@@ -1,7 +1,7 @@
 
 import { ArrowUp } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAccount } from 'wagmi'
 import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
@@ -30,7 +30,16 @@ const Home = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Clear messages when navigating to this screen (detect route changes)
+  useEffect(() => {
+    if (location.pathname === '/' || location.pathname === '/home') {
+      setMessages([])
+      setInputValue("")
+    }
+  }, [location.pathname])
 
   // Monitor auth state changes
   useEffect(() => {

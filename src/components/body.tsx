@@ -1,6 +1,6 @@
 import { ArrowUp, MoveRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { useRef, useState, useEffect, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAccount } from 'wagmi'
 import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
@@ -109,8 +109,17 @@ const body = () => {
   const endingSoonRef = useRef<HTMLDivElement>(null)
   const scoreRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const location = useLocation()
   
   const autoPlayInterval = 4000 // 4 seconds between slides
+
+  // Clear messages when navigating to this screen (detect route changes)
+  useEffect(() => {
+    if (location.pathname === '/polymarket') {
+      setMessages([])
+      setInputValue("")
+    }
+  }, [location.pathname])
 
   // Monitor auth state changes
   useEffect(() => {

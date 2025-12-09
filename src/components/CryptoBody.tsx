@@ -1,6 +1,6 @@
 import { ArrowUp, MoveRight } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAccount } from 'wagmi'
 import { onAuthStateChanged, type User } from "firebase/auth"
 import { auth } from '../firebase'
@@ -81,6 +81,15 @@ const body = () => {
   const assetsRef = useRef<HTMLDivElement>(null)
   const scoreRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Clear messages when navigating to this screen (detect route changes)
+  useEffect(() => {
+    if (location.pathname === '/crypto' || location.pathname === '/') {
+      setMessages([])
+      setInputValue("")
+    }
+  }, [location.pathname])
 
   // Monitor auth state changes
   useEffect(() => {
@@ -311,29 +320,46 @@ const body = () => {
 
       const data = await response.json()
 
-      // Extract final_answer from response (new structure) or fallback to old structure
-      let finalAnswer = ""
-      let reasoning = ""
-      let answer = ""
-
-      // Check for final_answer in new response structure
-      if (data.result && data.result.final_answer) {
-        finalAnswer = data.result.final_answer
-      } else if (data.final_answer) {
-        finalAnswer = data.final_answer
-      } else if (data.success && data.results && data.results.length > 0) {
-        // Fallback to old response structure
-        const firstResult = data.results[0]
-        if (firstResult.results && firstResult.results.length > 0) {
-          const resultData = firstResult.results[0]
-          reasoning = resultData.reasoning || ""
-          answer = resultData.answer || ""
+      // Helper function to recursively search for a field in the JSON object
+      const findInObject = (obj: any, fieldName: string, visited = new Set()): string => {
+        if (!obj || typeof obj !== 'object' || visited.has(obj)) {
+          return ""
         }
+        visited.add(obj)
+
+        // Check if current object has the field
+        if (obj[fieldName] && typeof obj[fieldName] === 'string' && obj[fieldName].trim()) {
+          return obj[fieldName]
+        }
+
+        // Recursively search in all properties
+        for (const key in obj) {
+          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            const value = obj[key]
+            if (value && typeof value === 'object') {
+              const found = findInObject(value, fieldName, visited)
+              if (found) {
+                return found
+              }
+            }
+          }
+        }
+
+        return ""
       }
 
-      // If we have final_answer, use it; otherwise use the extracted answer/reasoning
-      let displayContent = finalAnswer || answer || "No answer available"
+      // Step 1: Search for final_answer anywhere in the response
+      let finalAnswer = findInObject(data, 'final_answer')
+
+      // Step 2: If final_answer not found, search for reasoning and answer
+      let reasoning = ""
+      let answer = ""
       
+      if (!finalAnswer) {
+        reasoning = findInObject(data, 'reasoning')
+        answer = findInObject(data, 'answer')
+      }
+
       // If reasoning contains "ANSWER" heading and we don't have final_answer, split it properly
       if (!finalAnswer && reasoning) {
         const answerMatch = reasoning.match(/(.*?)(\n\s*)?(ANSWER|Answer)(\s*\n)(.*)/is)
@@ -347,11 +373,26 @@ const body = () => {
           answer = answer 
             ? `${answerHeading}\n\n${answerContent}\n\n${answer}`.trim()
             : `${answerHeading}\n\n${answerContent}`.trim()
-          displayContent = answer || "No answer available"
         }
       }
 
-      // Add assistant message with final_answer or answer
+      // Step 3: Determine display content with fallback mechanism
+      let displayContent = ""
+      if (finalAnswer) {
+        // Priority 1: Use final_answer if available
+        displayContent = finalAnswer
+      } else if (answer) {
+        // Priority 2: Use answer if available
+        displayContent = answer
+      } else if (reasoning) {
+        // Priority 3: Use reasoning if available
+        displayContent = reasoning
+      } else {
+        // Priority 4: Fallback to "No data available"
+        displayContent = "No data available"
+      }
+
+      // Add assistant message with final_answer or answer/reasoning
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
           ...prev,
@@ -533,30 +574,30 @@ const body = () => {
              <div className="flex flex-col gap-3 lg:gap-5 w-full min-h-0 lg:h-96 p-2 sm:p-4 items-center justify-center">
                <div className="flex flex-col gap-2.5 lg:gap-3.5 items-center justify-center w-full">
                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('What will the BTC price be in the next 5 mins?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What will the BTC price be in the next 5 mins?</span>
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Tell me the sentiment around ETH ?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Tell me the sentiment around ETH ?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Where will BTC close by the end of this month?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Where will BTC close by the end of this month?</span>
-                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
-                   </div>
-                 </div>
-                 
-                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Will ETH outperform BTC this week?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Will ETH outperform BTC this week?</span>
-                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
-                   </div>
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('When will ETH cross $5K this month?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">When will ETH cross $5K this month?</span>
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('What is the Expected CPI in USA?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What is the Expected CPI in USA?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
                  
                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Why could ETH drop below $3K in the next 24 hours?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Why could ETH drop below $3K in the next 24 hours?</span>
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion("What's the primarily reason of Bitcoin falling recently?")}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What's the primarily reason of Bitcoin falling recently?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
+                   </div>
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Which airdrop to target right now in coming 2026?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Which airdrop to target right now in coming 2026?</span>
+                     <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
+                   </div>
+                 </div>
+                 
+                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
+                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Should I invest in Bitcoin now?')}>
+                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Should I invest in Bitcoin now?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>

@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [inputReferralCode, setInputReferralCode] = useState("")
   const [isRedeemingReferralCode, setIsRedeemingReferralCode] = useState(false)
   const [hasAutoOpenedModal, setHasAutoOpenedModal] = useState(false)
+  const [isCheckingInviteStatus, setIsCheckingInviteStatus] = useState(false)
 
   // Monitor auth state changes
   useEffect(() => {
@@ -41,7 +42,7 @@ const Dashboard = () => {
     return () => unsubscribe()
   }, [])
 
-  // Check for referral code in URL and auto-open modal on root route only
+  // Check for referral status and/or referral code in URL and auto-open modal on root route only
   useEffect(() => {
     // Only check on root route
     if (location.pathname !== '/') {
@@ -57,11 +58,11 @@ const Dashboard = () => {
     }
 
     // Skip if we've already auto-opened the modal or modal is already open
-    if (hasAutoOpenedModal || isReferralInputModalOpen) {
+    if (hasAutoOpenedModal || isReferralInputModalOpen || isCheckingInviteStatus) {
       return
     }
 
-    // Check for referral code in URL
+    // Check for referral code in URL first
     const urlParams = new URLSearchParams(location.search)
     const rc = urlParams.get('rc')
     
@@ -75,7 +76,48 @@ const Dashboard = () => {
 
       return () => clearTimeout(timer)
     }
-  }, [location.pathname, location.search, twitterUser, isConnected, address, hasAutoOpenedModal, isReferralInputModalOpen])
+
+    // If no referral code in URL, check invite status
+    const controller = new AbortController()
+    const checkInviteStatus = async () => {
+      try {
+        setIsCheckingInviteStatus(true)
+        const resp = await fetch(`${getBackendBaseUrl()}invite/status/${address}`, {
+          method: 'GET',
+          signal: controller.signal,
+        })
+        if (!resp.ok) {
+          throw new Error(`Failed to check invite status: ${resp.status}`)
+        }
+        const data = await resp.json()
+        const hasUsedInvite = Boolean(data?.hasUsedInvite)
+
+        if (!hasUsedInvite) {
+          // Prompt user to add invite code
+          setTimeout(() => {
+            setIsReferralInputModalOpen(true)
+            setHasAutoOpenedModal(true)
+          }, 800)
+        } else {
+          setHasAutoOpenedModal(true)
+        }
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error('Error checking invite status:', err)
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsCheckingInviteStatus(false)
+        }
+      }
+    }
+
+    checkInviteStatus()
+
+    return () => {
+      controller.abort()
+    }
+  }, [location.pathname, location.search, twitterUser, isConnected, address, hasAutoOpenedModal, isReferralInputModalOpen, isCheckingInviteStatus])
 
   // Handle referral code submission
   const handleSubmitReferralCode = async () => {
@@ -93,14 +135,19 @@ const Dashboard = () => {
       return
     }
 
-    // Extract rc from URL query parameters to verify user was referred
+    // Extract rc from URL query parameters if present
     const urlParams = new URLSearchParams(window.location.search)
     const rc = urlParams.get('rc')
     const inviteTokenFromUrl = urlParams.get('inviteToken')
 
-    // Check if user was referred - rc parameter indicates referral
-    if (!rc) {
-      toast.error('You are not referred', {
+    // Decide which code to send:
+    // - If rc is present in URL, use that as code and user input as inviteToken
+    // - If rc is absent, treat user input as the invite code directly
+    const codeToUse = rc || inputReferralCode.trim()
+    const inviteTokenToUse = rc ? (inviteTokenFromUrl || inputReferralCode.trim()) : inviteTokenFromUrl || undefined
+
+    if (!codeToUse) {
+      toast.error('Please enter a valid invite code', {
         style: { fontSize: '12px' },
         autoClose: 4000,
       })
@@ -120,9 +167,9 @@ const Dashboard = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          code: rc, // Referral code from URL
+          code: codeToUse, // Referral code (from URL if present, otherwise user input)
           newUser: address, // Wallet address
-          inviteToken: inviteTokenFromUrl || inputReferralCode.trim(), // Use inviteToken from URL if present, otherwise use what user entered
+          inviteToken: inviteTokenToUse, // Invite token from URL or user input (when rc is present)
         }),
       })
 

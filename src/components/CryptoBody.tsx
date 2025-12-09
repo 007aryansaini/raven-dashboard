@@ -311,11 +311,18 @@ const body = () => {
 
       const data = await response.json()
 
-      // Extract reasoning and answer from response
+      // Extract final_answer from response (new structure) or fallback to old structure
+      let finalAnswer = ""
       let reasoning = ""
       let answer = ""
 
-      if (data.success && data.results && data.results.length > 0) {
+      // Check for final_answer in new response structure
+      if (data.result && data.result.final_answer) {
+        finalAnswer = data.result.final_answer
+      } else if (data.final_answer) {
+        finalAnswer = data.final_answer
+      } else if (data.success && data.results && data.results.length > 0) {
+        // Fallback to old response structure
         const firstResult = data.results[0]
         if (firstResult.results && firstResult.results.length > 0) {
           const resultData = firstResult.results[0]
@@ -324,9 +331,11 @@ const body = () => {
         }
       }
 
-      // If reasoning contains "ANSWER" heading, split it properly
-      // Move "ANSWER" heading and everything after it to the answer field
-      if (reasoning) {
+      // If we have final_answer, use it; otherwise use the extracted answer/reasoning
+      let displayContent = finalAnswer || answer || "No answer available"
+      
+      // If reasoning contains "ANSWER" heading and we don't have final_answer, split it properly
+      if (!finalAnswer && reasoning) {
         const answerMatch = reasoning.match(/(.*?)(\n\s*)?(ANSWER|Answer)(\s*\n)(.*)/is)
         if (answerMatch) {
           // Everything before "ANSWER" stays in reasoning
@@ -338,36 +347,38 @@ const body = () => {
           answer = answer 
             ? `${answerHeading}\n\n${answerContent}\n\n${answer}`.trim()
             : `${answerHeading}\n\n${answerContent}`.trim()
+          displayContent = answer || "No answer available"
         }
       }
 
-      // Add assistant message with reasoning and answer
+      // Add assistant message with final_answer or answer
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
           ...prev,
           {
             id: Date.now() + 1,
             role: "assistant" as const,
-            content: answer || "No answer available",
-            reasoning: reasoning || undefined,
-            answer: answer || undefined,
+            content: displayContent,
+            reasoning: finalAnswer ? undefined : (reasoning || undefined),
+            answer: finalAnswer || answer || undefined,
           },
         ]
         return newMessages
       })
 
-      // 3. After successful AI response, record the usage
-      try {
-        await recordInference(address, {
-          mode: mode,
-          quantity: 1,
-          reason: reason,
-          tags: hasTags,
-        })
-      } catch (error: any) {
+      // Set loading to false immediately after response is received and message is added
+      setIsLoading(false)
+
+      // 3. After successful AI response, record the usage (async, don't wait)
+      recordInference(address, {
+        mode: mode,
+        quantity: 1,
+        reason: reason,
+        tags: hasTags,
+      }).catch((error: any) => {
         console.error("Error recording inference:", error)
         // Don't show error to user, just log it
-      }
+      })
 
       void refreshMetrics()
       
@@ -393,7 +404,6 @@ const body = () => {
         ]
         return newMessages
       })
-    } finally {
       setIsLoading(false)
     }
   }

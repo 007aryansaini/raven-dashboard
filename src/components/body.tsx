@@ -522,7 +522,7 @@ const body = () => {
   }
 
   const buildChatUrl = () => {
-    return `${CHAT_API_BASE}query`
+    return `${CHAT_API_BASE}polymarket-predict`
   }
 
   // Build query from selected tags
@@ -632,46 +632,34 @@ const body = () => {
 
       const data = await response.json()
 
-      // Extract reasoning and answer from response
-      let reasoning = ""
-      let answer = ""
+      // Extract final_answer from the new polymarket-predict response structure
+      let finalAnswer = ""
 
-      if (data.success && data.results && data.results.length > 0) {
-        const firstResult = data.results[0]
-        if (firstResult.results && firstResult.results.length > 0) {
-          const resultData = firstResult.results[0]
-          reasoning = resultData.reasoning || ""
-          answer = resultData.answer || ""
+      if (data.success && data.result && data.result.final_answer) {
+        finalAnswer = data.result.final_answer
+      } else if (data.result && data.result.final_answer) {
+        finalAnswer = data.result.final_answer
+      } else {
+        // Fallback: try to construct from other fields if final_answer is missing
+        if (data.result) {
+          const result = data.result
+          if (result.answer) {
+            finalAnswer = result.answer
+          } else if (result.reasoning) {
+            finalAnswer = result.reasoning
+          }
         }
       }
 
-      // If reasoning contains "ANSWER" heading, split it properly
-      // Move "ANSWER" heading and everything after it to the answer field
-      if (reasoning) {
-        const answerMatch = reasoning.match(/(.*?)(\n\s*)?(ANSWER|Answer)(\s*\n)(.*)/is)
-        if (answerMatch) {
-          // Everything before "ANSWER" stays in reasoning
-          reasoning = answerMatch[1].trim()
-          // "ANSWER" heading + everything after goes to answer
-          const answerHeading = answerMatch[3] // "ANSWER" or "Answer"
-          const answerContent = answerMatch[5] // Content after ANSWER
-          // Combine existing answer (if any) with the extracted answer
-          answer = answer 
-            ? `${answerHeading}\n\n${answerContent}\n\n${answer}`.trim()
-            : `${answerHeading}\n\n${answerContent}`.trim()
-        }
-      }
-
-      // Add assistant message with reasoning and answer
+      // Add assistant message with final_answer
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
           ...prev,
           {
             id: Date.now() + 1,
             role: "assistant" as const,
-            content: answer || "No answer available",
-            reasoning: reasoning || undefined,
-            answer: answer || undefined,
+            content: finalAnswer || "No answer available",
+            answer: finalAnswer || undefined,
           },
         ]
         return newMessages

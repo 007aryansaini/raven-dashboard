@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/score-api/:path*",
-      "destination": "http://provider.h100.ams2.val.akash.pub:32315/:path*"
+      "destination": "http://provider.h100.hou.sfc.akash.pub:32221/:path*"
     },
     {
       "source": "/chat-api/:path*",
-      "destination": "http://5u39o9kvl18q333qp57ib670bk.ingress.h100.ams2.val.akash.pub/:path*"
+      "destination": "http://8q5mqi7445befaofb2iknlnvk4.ingress.h100.hou.sfc.akash.pub/:path*"
     },
     {
       "source": "/polymarket-api/:path*",

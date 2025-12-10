@@ -61,7 +61,7 @@ Variables:
 • p^pred_t: predicted price at time (t)
 • sign(x): returns +1, 0, or -1
 • 1[.]: indicator function (1 if the condition is true, 0 otherwise)`,
-  price: ""
+  price: `A negative price accuracy shows that the prices predicted by the model are much farther from the actual prices compared to just drawing a mean line, this can happen due to change in market trends and noise entering different time intervals.`
 }
 
 const METRIC_CONFIGS: Record<MetricKey, { label: string; endpoint: string }> = {
@@ -350,7 +350,7 @@ const MathematicalAccuracy = () => {
     () =>
       (Object.entries(MODEL_NAME_MAP) as [ModelKey, string][]).map(([key, label], index) => (
         <div key={key} className="flex items-center gap-2 rounded-full border border-[#45FFAE]/40 px-3 py-1 text-xs font-semibold text-[#45FFAE] transition-colors">
-          <span>{label} ({key})</span>
+          <span>{label}</span>
           <Tooltip
             content={MODEL_DESCRIPTIONS[key]}
             className="cursor-help"

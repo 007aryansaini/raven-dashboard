@@ -10,7 +10,7 @@ import cryptoTrade from "../assets/cryptoTrade.svg"
 import { useTab } from "../contexts/TabContext"
 import { createChart, ColorType } from "lightweight-charts"
 import { CHAT_API_BASE } from "../utils/constants"
-import { authorizeInference, recordInference } from "../utils/inference"
+import { authorizeInference, recordInference, type AuthorizeInferenceResponse } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
 import { useTypingEffect } from "../utils/useTypingEffect"
 type ChatMessage = {
@@ -329,7 +329,7 @@ const body = () => {
 
       // 1. Check authorization before AI call - only if credits >= 6 or inference >= 2
       const shouldAuthorize = (creditsPending ?? 0) >= 6 || (inferenceRemaining ?? 0) >= 2
-      let authorization = { allowed: true, reason: "", method: "credits" as const, cost: 0 }
+      let authorization: AuthorizeInferenceResponse = { allowed: true, reason: "", method: "credits", cost: 0 }
       
       if (shouldAuthorize) {
         console.log('🔐 Authorizing inference - credits:', creditsPending, 'inference:', inferenceRemaining)

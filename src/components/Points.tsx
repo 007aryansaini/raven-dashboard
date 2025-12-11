@@ -445,7 +445,7 @@ Join the future of trading predictions! 🎯`
         body: JSON.stringify({
           code: inputReferralCode.trim(),
           newUser: address,
-          inviteToken: inviteToken,
+          inviteCode: inviteToken,
         }),
       })
 

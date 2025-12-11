@@ -12,6 +12,7 @@ import { useUserMetrics } from "../contexts/UserMetricsContext"
 import polymarketLogo from "../assets/polymarketLogo.svg"
 import PolymarketEventCard from "./PolymarketEventCard"
 import { PolymarketFetcher, type PolymarketEvent, type PolymarketMarket } from "../utils/polymarketFetcher"
+import { useTypingEffect } from "../utils/useTypingEffect"
 
 type ChatMessage = {
   id: number
@@ -20,6 +21,47 @@ type ChatMessage = {
   imageSrc?: string
   reasoning?: string
   answer?: string
+}
+
+// Component to handle typing effect for assistant messages
+const TypingAssistantMessage = ({ 
+  message, 
+  isTyping, 
+  formatMarkdown 
+}: { 
+  message: ChatMessage
+  isTyping: boolean
+  formatMarkdown: (text: string) => string
+}) => {
+  const displayedReasoning = useTypingEffect(message.reasoning || '', 8, isTyping && !!message.reasoning)
+  const displayedAnswer = useTypingEffect(message.answer || '', 8, isTyping && !!message.answer && !message.reasoning)
+  const displayedContent = useTypingEffect(message.content, 8, isTyping && !message.reasoning && !message.answer)
+
+  return (
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
+      {message.reasoning && (
+        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+          <div 
+            className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedReasoning) }}
+          />
+        </div>
+      )}
+      {message.answer && (
+        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+          <div 
+            className="font-urbanist text-xs lg:text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedAnswer) }}
+          />
+        </div>
+      )}
+      {!message.reasoning && !message.answer && (
+        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
+          {displayedContent}
+        </div>
+      )}
+    </div>
+  )
 }
 
 // Polymarket fetcher instance
@@ -96,6 +138,7 @@ const body = () => {
   const [selectedEndingSoon, setSelectedEndingSoon] = useState<string | null>(null)
   const [selectedScore, setSelectedScore] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [typingMessageIds, setTypingMessageIds] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(false)
   const [selectedCardImage, setSelectedCardImage] = useState<string | null>(null)
   const [polymarketEvents, setPolymarketEvents] = useState<Array<{ event: PolymarketEvent; market?: PolymarketMarket }>>([])
@@ -117,6 +160,7 @@ const body = () => {
   useEffect(() => {
     if (location.pathname === '/polymarket') {
       setMessages([])
+      setTypingMessageIds(new Set())
       setInputValue("")
     }
   }, [location.pathname, location.state])
@@ -602,22 +646,30 @@ const body = () => {
         reason = "tags_price_accuracy_basic"
       }
 
-      // 1. Check authorization before AI call
-      const authorization = await authorizeInference(address, {
-        mode: mode,
-        quantity: 1,
-        reason: reason,
-        tags: hasTags,
-      })
+      // 1. Check authorization before AI call - only if credits >= 6 or inference >= 2
+      const shouldAuthorize = (creditsPending ?? 0) >= 6 || (inferenceRemaining ?? 0) >= 2
+      let authorization = { allowed: true, reason: "", method: "credits" as const, cost: 0 }
+      
+      if (shouldAuthorize) {
+        console.log('🔐 Authorizing inference - credits:', creditsPending, 'inference:', inferenceRemaining)
+        authorization = await authorizeInference(address, {
+          mode: mode,
+          quantity: 1,
+          reason: reason,
+          tags: hasTags,
+        })
 
-      if (!authorization.allowed) {
-        toast.warning(
-          `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
-          {
-            style: { fontSize: "12px" },
-          }
-        )
-        return
+        if (!authorization.allowed) {
+          toast.warning(
+            `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
+            {
+              style: { fontSize: "12px" },
+            }
+          )
+          return
+        }
+      } else {
+        console.log('⏭️ Skipping authorization - credits:', creditsPending, 'inference:', inferenceRemaining, '(need credits >= 6 or inference >= 2)')
       }
 
       console.log("Building chat URL:", buildChatUrl())
@@ -661,11 +713,12 @@ const body = () => {
       }
 
       // Add assistant message with final_answer
+      const newMessageId = Date.now() + 1
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
           ...prev,
           {
-            id: Date.now() + 1,
+            id: newMessageId,
             role: "assistant" as const,
             content: finalAnswer || "No answer available",
             answer: finalAnswer || undefined,
@@ -673,6 +726,8 @@ const body = () => {
         ]
         return newMessages
       })
+      // Mark this message for typing effect
+      setTypingMessageIds((prev) => new Set(prev).add(newMessageId))
 
       // Set loading to false immediately after response is received and message is added
       setIsLoading(false)
@@ -1058,29 +1113,11 @@ const body = () => {
                          </div>
                        </div>
                      ) : (
-                       <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
-                         {message.reasoning && (
-                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
-                             <div 
-                               className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
-                               dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning) }}
-                             />
-                           </div>
-                         )}
-                         {message.answer && (
-                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
-                             <div 
-                               className="font-urbanist text-xs lg:text-sm leading-relaxed"
-                               dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
-                             />
-                           </div>
-                         )}
-                         {!message.reasoning && !message.answer && (
-                           <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
-                             {message.content}
-                           </div>
-                         )}
-                       </div>
+                       <TypingAssistantMessage 
+                         message={message} 
+                         isTyping={typingMessageIds.has(message.id)}
+                         formatMarkdown={formatMarkdown}
+                       />
                      )}
                    </div>
                  ))}

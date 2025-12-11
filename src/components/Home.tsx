@@ -10,12 +10,55 @@ import blackDot from "../assets/blackDot.svg"
 import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
+import { useTypingEffect } from "../utils/useTypingEffect"
+
 type ChatMessage = {
   id: number
   role: "user" | "assistant"
   content: string
   reasoning?: string
   answer?: string
+}
+
+// Component to handle typing effect for assistant messages
+const TypingAssistantMessage = ({ 
+  message, 
+  isTyping, 
+  formatMarkdown 
+}: { 
+  message: ChatMessage
+  isTyping: boolean
+  formatMarkdown: (text: string) => string
+}) => {
+  const displayedReasoning = useTypingEffect(message.reasoning || '', 8, isTyping && !!message.reasoning)
+  const displayedAnswer = useTypingEffect(message.answer || '', 8, isTyping && !!message.answer && !message.reasoning)
+  const displayedContent = useTypingEffect(message.content, 8, isTyping && !message.reasoning && !message.answer)
+
+  return (
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
+      {message.reasoning && (
+        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+          <div 
+            className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedReasoning) }}
+          />
+        </div>
+      )}
+      {message.answer && (
+        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+          <div 
+            className="font-urbanist text-xs lg:text-sm leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedAnswer) }}
+          />
+        </div>
+      )}
+      {!message.reasoning && !message.answer && (
+        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
+          {displayedContent}
+        </div>
+      )}
+    </div>
+  )
 }
 
 const Home = () => {
@@ -28,6 +71,7 @@ const Home = () => {
   const [isVisible, setIsVisible] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [typingMessageIds, setTypingMessageIds] = useState<Set<number>>(new Set())
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
@@ -37,6 +81,7 @@ const Home = () => {
   useEffect(() => {
     if (location.pathname === '/' || location.pathname === '/home') {
       setMessages([])
+      setTypingMessageIds(new Set())
       setInputValue("")
     }
   }, [location.pathname])
@@ -178,20 +223,29 @@ const Home = () => {
         throw new Error("Wallet not connected")
       }
 
-      const authorization = await authorizeInference(address, {
-        tags: false,
-        reason: query,
-        mode: "",
-      })
+      // Check authorization only if credits >= 6 or inference >= 2
+      const shouldAuthorize = (creditsPending ?? 0) >= 6 || (inferenceRemaining ?? 0) >= 2
+      let authorization = { allowed: true, reason: "", method: "credits" as const, cost: 0 }
+      
+      if (shouldAuthorize) {
+        console.log('🔐 Authorizing inference - credits:', creditsPending, 'inference:', inferenceRemaining)
+        authorization = await authorizeInference(address, {
+          tags: false,
+          reason: query,
+          mode: "",
+        })
 
-      if (!authorization.allowed) {
-        toast.warning(
-          `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
-          {
-            style: { fontSize: "12px" },
-          }
-        )
-        return
+        if (!authorization.allowed) {
+          toast.warning(
+            `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
+            {
+              style: { fontSize: "12px" },
+            }
+          )
+          return
+        }
+      } else {
+        console.log('⏭️ Skipping authorization - credits:', creditsPending, 'inference:', inferenceRemaining, '(need credits >= 6 or inference >= 2)')
       }
 
       const response = await fetch(buildChatUrl(), {
@@ -244,11 +298,12 @@ const Home = () => {
       }
 
       // Add assistant message with reasoning and answer
+      const newMessageId = Date.now() + 1
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
           ...prev,
           {
-            id: Date.now() + 1,
+            id: newMessageId,
             role: "assistant" as const,
             content: answer || "No answer available",
             reasoning: reasoning || undefined,
@@ -257,6 +312,8 @@ const Home = () => {
         ]
         return newMessages
       })
+      // Mark this message for typing effect
+      setTypingMessageIds((prev) => new Set(prev).add(newMessageId))
 
       void refreshMetrics()
     } catch (error: any) {
@@ -265,17 +322,20 @@ const Home = () => {
         style: { fontSize: "12px" },
       })
       // Add error message
+      const errorMessageId = Date.now() + 1
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
           ...prev,
           {
-            id: Date.now() + 1,
+            id: errorMessageId,
             role: "assistant" as const,
             content: "Sorry, I encountered an error while processing your request. Please try again.",
           },
         ]
         return newMessages
       })
+      // Mark this message for typing effect
+      setTypingMessageIds((prev) => new Set(prev).add(errorMessageId))
     } finally {
       setIsLoading(false)
     }
@@ -376,29 +436,11 @@ const Home = () => {
                            {message.content}
                          </div>
                        ) : (
-                         <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
-                           {message.reasoning && (
-                             <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
-                               <div 
-                                 className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
-                                 dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning) }}
-                               />
-                             </div>
-                           )}
-                           {message.answer && (
-                             <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
-                               <div 
-                                 className="font-urbanist text-xs lg:text-sm leading-relaxed"
-                                 dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
-                               />
-                             </div>
-                           )}
-                           {!message.reasoning && !message.answer && (
-                             <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
-                               {message.content}
-                             </div>
-                           )}
-                         </div>
+                         <TypingAssistantMessage 
+                           message={message} 
+                           isTyping={typingMessageIds.has(message.id)}
+                           formatMarkdown={formatMarkdown}
+                         />
                        )}
                      </div>
                    ))}

@@ -12,6 +12,8 @@ import { createChart, ColorType } from "lightweight-charts"
 import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference, recordInference, type AuthorizeInferenceResponse } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
+import { useSequentialTyping } from "../utils/useSequentialTyping"
+import { useTypingEffect } from "../utils/useTypingEffect"
 type ChatMessage = {
   id: number
   role: "user" | "assistant"
@@ -24,11 +26,29 @@ type ChatMessage = {
 // Component to handle typing effect for assistant messages
 const TypingAssistantMessage = ({ 
   message, 
+  isTyping,
   formatMarkdown 
 }: { 
   message: ChatMessage
+  isTyping: boolean
   formatMarkdown: (text: string) => string
 }) => {
+  // Sequential typing: reasoning first, then answer
+  // Fast typing speed: 3ms per character (like ChatGPT)
+  const { displayedFirst: displayedReasoning, displayedSecond: displayedAnswer, isFirstComplete } = useSequentialTyping(
+    message.reasoning || '',
+    message.answer || '',
+    3, // Fast typing speed
+    isTyping && !!(message.reasoning || message.answer)
+  )
+  
+  // Ensure full content is displayed when typing completes or is disabled
+  const finalReasoning = isTyping ? displayedReasoning : (message.reasoning || '')
+  const finalAnswer = isTyping ? displayedAnswer : (message.answer || '')
+  
+  // For content without reasoning/answer structure
+  const displayedContent = useTypingEffect(message.content, 3, isTyping && !message.reasoning && !message.answer)
+
   return (
     <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4">
       {message.reasoning && (
@@ -42,11 +62,11 @@ const TypingAssistantMessage = ({
           <div 
             className="text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning || '') }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(finalReasoning) }}
           />
         </div>
       )}
-      {message.answer && (
+      {message.answer && (isFirstComplete || !isTyping) && (
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] text-[#FFFFFF]">
           <div 
             className="font-semibold text-base text-[#45FFAE] mb-3"
@@ -57,7 +77,7 @@ const TypingAssistantMessage = ({
           <div 
             className="text-xs lg:text-sm leading-relaxed"
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(finalAnswer) }}
           />
         </div>
       )}
@@ -65,7 +85,7 @@ const TypingAssistantMessage = ({
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm leading-relaxed bg-[#1F1F1F] text-[#FFFFFF]">
           <div 
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.content) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedContent) }}
           />
         </div>
       )}
@@ -127,6 +147,7 @@ const body = () => {
   const [selectedScore, setSelectedScore] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [typingMessageIds, setTypingMessageIds] = useState<Set<number>>(new Set())
   const dropdownRef = useRef<HTMLDivElement>(null)
   const tfRef = useRef<HTMLDivElement>(null)
   const analysisRef = useRef<HTMLDivElement>(null)
@@ -563,8 +584,23 @@ const body = () => {
         ]
         return newMessages
       })
+      // Mark message as typing
+      setTypingMessageIds((prev) => new Set(prev).add(newMessageId))
       // Set loading to false immediately after response is received and message is added
       setIsLoading(false)
+      
+      // Calculate approximate typing duration and remove from typing set when complete
+      const reasoningLength = (reasoning || '').length
+      const answerLength = (answer || '').length
+      const typingDuration = (reasoningLength * 3) + 300 + (answerLength * 3) + 100 // 3ms per char + 300ms delay between sections + buffer
+      
+      setTimeout(() => {
+        setTypingMessageIds((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(newMessageId)
+          return newSet
+        })
+      }, typingDuration)
 
       // 3. After successful AI response, record the usage (async, don't wait)
       recordInference(address, {
@@ -798,6 +834,7 @@ const body = () => {
                   ) : (
                     <TypingAssistantMessage 
                       message={message} 
+                      isTyping={typingMessageIds.has(message.id)}
                       formatMarkdown={formatMarkdown}
                     />
                   )}

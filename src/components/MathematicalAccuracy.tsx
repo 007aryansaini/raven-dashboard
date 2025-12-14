@@ -450,7 +450,7 @@ const MathematicalAccuracy = () => {
           </div>
         ) : activeState.rows.length === 0 ? (
           <div className="flex h-[260px] items-center justify-center text-sm text-[#BFBFBF]">
-            No data available yet.
+            Coming soon
           </div>
         ) : (
           <div className="max-w-full overflow-x-auto">

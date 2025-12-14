@@ -488,8 +488,9 @@ const body = () => {
 
       // Extract reasoning and answer from the new response structure
       // Handle multiple possible structures:
-      // 1. data.results[0].results[0].response.results[0].reasoning (nested response)
-      // 2. data.results[0].results[0].reasoning (direct)
+      // 1. data.results[0].results[0].response.results[0].predictions.reasoning (predictions structure)
+      // 2. data.results[0].results[0].response.results[0].reasoning (nested response)
+      // 3. data.results[0].results[0].reasoning (direct)
       let reasoning = ""
       let answer = ""
 
@@ -498,11 +499,20 @@ const body = () => {
         if (firstResult.results && firstResult.results.length > 0) {
           const resultData = firstResult.results[0]
           
-          // Check for nested response structure first
+          // Check for predictions structure first (new structure)
           if (resultData.response && resultData.response.results && resultData.response.results.length > 0) {
             const nestedResult = resultData.response.results[0]
-            reasoning = (nestedResult.reasoning || "").trim()
-            answer = (nestedResult.answer || "").trim()
+            
+            // Check for predictions object
+            if (nestedResult.predictions) {
+              reasoning = (nestedResult.predictions.reasoning || "").trim()
+              // Use final_answer first, then prediction, then answer
+              answer = (nestedResult.predictions.final_answer || nestedResult.predictions.prediction || nestedResult.predictions.answer || "").trim()
+            } else {
+              // Fallback to direct fields in nested result
+              reasoning = (nestedResult.reasoning || "").trim()
+              answer = (nestedResult.answer || "").trim()
+            }
           } else {
             // Fallback to direct structure
             reasoning = (resultData.reasoning || "").trim()

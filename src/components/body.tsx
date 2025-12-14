@@ -833,8 +833,17 @@ const body = () => {
           // Check for nested response structure first
           if (resultData.response && resultData.response.results && resultData.response.results.length > 0) {
             const nestedResult = resultData.response.results[0]
-            reasoning = (nestedResult.reasoning || "").trim()
-            answer = (nestedResult.answer || "").trim()
+            
+            // Check for predictions object (new structure)
+            if (nestedResult.predictions) {
+              reasoning = (nestedResult.predictions.reasoning || "").trim()
+              // Use final_answer first, then prediction, then answer
+              answer = (nestedResult.predictions.final_answer || nestedResult.predictions.prediction || nestedResult.predictions.answer || "").trim()
+            } else {
+              // Fallback to direct fields in nested result
+              reasoning = (nestedResult.reasoning || "").trim()
+              answer = (nestedResult.answer || "").trim()
+            }
           } else {
             // Fallback to direct structure
             reasoning = (resultData.reasoning || "").trim()

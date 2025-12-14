@@ -1001,7 +1001,7 @@ const body = () => {
         quantity: 1,
         reason: reason,
         tags: hasTags,
-      }).catch((error: any) => {
+      }).catch(() => {
         // Error recording inference - don't show error to user
       })
 

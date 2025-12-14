@@ -583,13 +583,6 @@ Join the future of trading predictions! 🎯`
     setVerificationError(null)
 
     try {
-      // Get Twitter user info from Firebase auth
-      const userAny = twitterUser as User & { reloadUserInfo?: { providerUserInfo?: Array<{ screenName?: string }> } }
-      const twitterUsername = userAny.reloadUserInfo?.providerUserInfo?.[0]?.screenName || 
-                              twitterUser?.providerData.find(p => p.providerId === 'twitter.com')?.displayName ||
-                              twitterUser?.displayName ||
-                              null
-
       // DEVELOPMENT MODE: Check if we should use mock verification
       const USE_MOCK_VERIFICATION = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_VERIFICATION === 'true'
       

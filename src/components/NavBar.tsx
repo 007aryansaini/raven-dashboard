@@ -103,7 +103,7 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
         throw new Error(`Initial grant request failed: ${response.status}`);
       }
 
-      const data = await response.json();
+      await response.json();
       
       // Refresh metrics to get updated credits
       await refreshMetrics();

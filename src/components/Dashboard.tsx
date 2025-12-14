@@ -111,7 +111,6 @@ const Dashboard = () => {
         })
         
         if (!resp.ok) {
-          const errorText = await resp.text()
           throw new Error(`Failed to check invite status: ${resp.status}`)
         }
         
@@ -206,7 +205,6 @@ const Dashboard = () => {
         })
         
         if (!resp.ok) {
-          const errorText = await resp.text()
           throw new Error(`Failed to check invite status: ${resp.status}`)
         }
         
@@ -383,7 +381,7 @@ const Dashboard = () => {
           return
         }
 
-        const data = await response.json()
+        await response.json()
 
         toast.success('Invite code assigned successfully!', {
           style: { fontSize: '12px' },

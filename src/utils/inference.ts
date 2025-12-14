@@ -68,7 +68,6 @@ export async function authorizeInference(
   }
 
   const data = await response.json();
-  console.debug("[inference] authorizeInference response:", data);
   return data;
 }
 
@@ -116,7 +115,6 @@ export async function recordInference(
   }
 
   const data = await response.json();
-  console.debug("[inference] recordInference response:", data);
   return data;
 }
 

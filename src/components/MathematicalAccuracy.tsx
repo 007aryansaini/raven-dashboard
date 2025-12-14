@@ -306,9 +306,6 @@ const MathematicalAccuracy = () => {
         }
 
         const payload = await response.json()
-        if (metricKey === "pdds") {
-          console.log("PDDS score API response", payload)
-        }
         const rows = parseMetricResponse(payload)
 
         setMetricsState((prev) => ({
@@ -317,7 +314,6 @@ const MathematicalAccuracy = () => {
         }))
       } catch (error: unknown) {
         if (controller.signal.aborted) return
-        console.error(`Error fetching ${metricKey} data`, error)
         setMetricsState((prev) => ({
           ...prev,
           [metricKey]: {

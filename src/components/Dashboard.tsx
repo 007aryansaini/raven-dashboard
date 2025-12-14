@@ -45,7 +45,6 @@ const Dashboard = () => {
   // Reset modal state when address changes (new wallet connection)
   useEffect(() => {
     if (address) {
-      console.log('🔄 Wallet address changed, resetting modal state:', address)
       setHasAutoOpenedModal(false)
       setIsReferralInputModalOpen(false)
       setIsCheckingInviteStatus(false)
@@ -54,57 +53,44 @@ const Dashboard = () => {
 
   // Check invite status and show modal only if referral code is in URL
   useEffect(() => {
-    console.log('🔎 Effect triggered - pathname:', location.pathname, 'search:', location.search, 'twitterUser:', !!twitterUser, 'isConnected:', isConnected, 'address:', address, 'hasAutoOpenedModal:', hasAutoOpenedModal, 'isReferralInputModalOpen:', isReferralInputModalOpen, 'isCheckingInviteStatus:', isCheckingInviteStatus)
-    
     // Only check on root route
     if (location.pathname !== '/') {
-      console.log('⏭️ Not on root route, skipping')
       return
     }
 
     // Check for referral code in URL first - only proceed if rc exists
     const urlParams = new URLSearchParams(location.search)
     const rc = urlParams.get('rc')
-    console.log('🔗 Referral code in URL:', rc)
     
     // If no referral code in URL, don't do anything
     if (!rc) {
-      console.log('⏭️ No referral code in URL, skipping')
       return
     }
 
     // Only check when user is fully authenticated (Twitter login + wallet connected)
     if (!twitterUser) {
-      console.log('⏳ Waiting for Twitter login...')
       return
     }
     
     if (!isConnected) {
-      console.log('⏳ Waiting for wallet connection...')
       return
     }
     
     if (!address) {
-      console.log('⏳ Waiting for wallet address...')
       return
     }
 
-    console.log('✅ All conditions met - Twitter:', !!twitterUser, 'Wallet connected:', isConnected, 'Address:', address)
-
     // Skip if we've already checked and handled this referral code
     if (hasAutoOpenedModal) {
-      console.log('⏭️ Modal already auto-opened, skipping')
       return
     }
     
     if (isReferralInputModalOpen) {
-      console.log('⏭️ Modal already open, skipping')
       return
     }
 
     // Skip if already checking to avoid duplicate calls
     if (isCheckingInviteStatus) {
-      console.log('⏭️ Already checking invite status, skipping')
       return
     }
 
@@ -115,10 +101,6 @@ const Dashboard = () => {
         setIsCheckingInviteStatus(true)
         const baseUrl = getBackendBaseUrl()
         const apiUrl = `${baseUrl}invite/status/${address}`
-        console.log('🔍 Base URL:', baseUrl)
-        console.log('🔍 Full API URL:', apiUrl)
-        console.log('📤 Request details - Method: GET, Address:', address, 'Referral code:', rc)
-        console.log('📤 Full request URL:', apiUrl)
         
         const resp = await fetch(apiUrl, {
           method: 'GET',
@@ -128,66 +110,46 @@ const Dashboard = () => {
           },
         })
         
-        console.log('📥 Response status:', resp.status, resp.statusText)
-        
         if (!resp.ok) {
           const errorText = await resp.text()
-          console.error('❌ API error response:', errorText)
           throw new Error(`Failed to check invite status: ${resp.status}`)
         }
         
         const data = await resp.json()
-        console.log('📋 Invite status response data:', JSON.stringify(data, null, 2))
         const hasUsedInvite = Boolean(data?.hasUsedInvite)
-        console.log('🔍 hasUsedInvite:', hasUsedInvite)
 
         // If user has already used an invite code, don't show the modal
         if (hasUsedInvite) {
-          console.log('✅ User has already used an invite code, skipping modal')
           setHasAutoOpenedModal(true)
           setIsCheckingInviteStatus(false)
           return
         }
 
         // If user hasn't used an invite code, show the modal
-        console.log('✅ User has not used invite code, opening modal with referral code from URL:', rc)
         // Small delay to ensure everything is initialized
         setTimeout(() => {
-          console.log('🎯 Opening modal now')
           setIsReferralInputModalOpen(true)
           setHasAutoOpenedModal(true)
           setIsCheckingInviteStatus(false)
         }, 500)
       } catch (err) {
         if (!controller.signal.aborted) {
-          console.error('❌ Error checking invite status:', err)
-          if (err instanceof Error) {
-            console.error('❌ Error message:', err.message)
-            console.error('❌ Error stack:', err.stack)
-          }
           setIsCheckingInviteStatus(false)
-        } else {
-          console.log('🛑 Request was aborted')
         }
       }
     }
 
-    console.log('🚀 Starting invite status check...')
     checkInviteStatus()
 
     return () => {
-      console.log('🧹 Cleaning up - aborting controller')
       controller.abort()
     }
   }, [location.pathname, location.search, twitterUser, isConnected, address, hasAutoOpenedModal, isReferralInputModalOpen])
 
   // Check invite status when there's NO referral code in URL
   useEffect(() => {
-    console.log('🔎 No-Referral-Code Effect triggered - pathname:', location.pathname, 'search:', location.search, 'twitterUser:', !!twitterUser, 'isConnected:', isConnected, 'address:', address, 'hasAutoOpenedModal:', hasAutoOpenedModal, 'isReferralInputModalOpen:', isReferralInputModalOpen, 'isCheckingInviteStatus:', isCheckingInviteStatus)
-    
     // Only check on root route
     if (location.pathname !== '/') {
-      console.log('⏭️ Not on root route, skipping')
       return
     }
 
@@ -197,42 +159,33 @@ const Dashboard = () => {
     
     // If referral code exists in URL, skip this flow (handled by previous useEffect)
     if (rc) {
-      console.log('⏭️ Referral code exists in URL, skipping no-referral-code flow')
       return
     }
 
     // Only check when user is fully authenticated (Twitter login + wallet connected)
     if (!twitterUser) {
-      console.log('⏳ Waiting for Twitter login...')
       return
     }
     
     if (!isConnected) {
-      console.log('⏳ Waiting for wallet connection...')
       return
     }
     
     if (!address) {
-      console.log('⏳ Waiting for wallet address...')
       return
     }
 
-    console.log('✅ All conditions met for no-referral-code flow - Twitter:', !!twitterUser, 'Wallet connected:', isConnected, 'Address:', address)
-
     // Skip if we've already checked and handled this
     if (hasAutoOpenedModal) {
-      console.log('⏭️ Modal already auto-opened, skipping')
       return
     }
     
     if (isReferralInputModalOpen) {
-      console.log('⏭️ Modal already open, skipping')
       return
     }
 
     // Skip if already checking to avoid duplicate calls
     if (isCheckingInviteStatus) {
-      console.log('⏭️ Already checking invite status, skipping')
       return
     }
 
@@ -243,9 +196,6 @@ const Dashboard = () => {
         setIsCheckingInviteStatus(true)
         const baseUrl = getBackendBaseUrl()
         const apiUrl = `${baseUrl}invite/status/${address}`
-        console.log('🔍 [No-Referral-Code] Base URL:', baseUrl)
-        console.log('🔍 [No-Referral-Code] Full API URL:', apiUrl)
-        console.log('📤 [No-Referral-Code] Request details - Method: GET, Address:', address)
         
         const resp = await fetch(apiUrl, {
           method: 'GET',
@@ -255,55 +205,38 @@ const Dashboard = () => {
           },
         })
         
-        console.log('📥 [No-Referral-Code] Response status:', resp.status, resp.statusText)
-        
         if (!resp.ok) {
           const errorText = await resp.text()
-          console.error('❌ [No-Referral-Code] API error response:', errorText)
           throw new Error(`Failed to check invite status: ${resp.status}`)
         }
         
         const data = await resp.json()
-        console.log('📋 [No-Referral-Code] Invite status response data:', JSON.stringify(data, null, 2))
         const hasUsedInvite = Boolean(data?.hasUsedInvite)
-        console.log('🔍 [No-Referral-Code] hasUsedInvite:', hasUsedInvite)
 
         // If user has already used an invite code, don't show the modal
         if (hasUsedInvite) {
-          console.log('✅ [No-Referral-Code] User has already used an invite code, skipping modal')
           setHasAutoOpenedModal(true)
           setIsCheckingInviteStatus(false)
           return
         }
 
         // If user hasn't used an invite code, show the modal asking for invite code
-        console.log('✅ [No-Referral-Code] User has not used invite code, opening modal to ask for invite code')
         // Small delay to ensure everything is initialized
         setTimeout(() => {
-          console.log('🎯 [No-Referral-Code] Opening modal now')
           setIsReferralInputModalOpen(true)
           setHasAutoOpenedModal(true)
           setIsCheckingInviteStatus(false)
         }, 500)
       } catch (err) {
         if (!controller.signal.aborted) {
-          console.error('❌ [No-Referral-Code] Error checking invite status:', err)
-          if (err instanceof Error) {
-            console.error('❌ [No-Referral-Code] Error message:', err.message)
-            console.error('❌ [No-Referral-Code] Error stack:', err.stack)
-          }
           setIsCheckingInviteStatus(false)
-        } else {
-          console.log('🛑 [No-Referral-Code] Request was aborted')
         }
       }
     }
 
-    console.log('🚀 [No-Referral-Code] Starting invite status check...')
     checkInviteStatus()
 
     return () => {
-      console.log('🧹 [No-Referral-Code] Cleaning up - aborting controller')
       controller.abort()
     }
   }, [location.pathname, location.search, twitterUser, isConnected, address, hasAutoOpenedModal, isReferralInputModalOpen])
@@ -334,7 +267,6 @@ const Dashboard = () => {
     try {
       // If there's a referral code in URL, use the referral/redeem endpoint (existing flow)
       if (rc) {
-        console.log('🔄 Using referral/redeem endpoint (referral code in URL)')
         // Decide which code to send:
         // - If rc is present in URL, use that as code and user input as inviteToken
         // - If rc is absent, treat user input as the invite code directly
@@ -389,7 +321,6 @@ const Dashboard = () => {
         }
 
         const data = await response.json()
-        console.log('Referral redemption response:', data)
 
         // Show success message with details
         const referredCredits = data.referred?.credits || 0
@@ -418,7 +349,6 @@ const Dashboard = () => {
         }
       } else {
         // No referral code in URL - use /invite endpoint
-        console.log('🔄 Using /invite endpoint (no referral code in URL)')
         const codeToUse = inputReferralCode.trim()
 
         if (!codeToUse) {
@@ -430,7 +360,6 @@ const Dashboard = () => {
           return
         }
 
-        console.log('📤 Calling /invite endpoint with code:', codeToUse, 'newUser:', address)
         const response = await fetch(`${getBackendBaseUrl()}invite`, {
           method: 'POST',
           headers: {
@@ -442,13 +371,10 @@ const Dashboard = () => {
           }),
         })
 
-        console.log('📥 /invite Response status:', response.status, response.statusText)
-
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
           const errorMessage = errorData.error || `Failed to assign invite code: ${response.status}`
           
-          console.error('❌ /invite Error:', errorMessage)
           toast.error(errorMessage, {
             style: { fontSize: '12px' },
             autoClose: 4000,
@@ -458,7 +384,6 @@ const Dashboard = () => {
         }
 
         const data = await response.json()
-        console.log('📋 /invite Response data:', JSON.stringify(data, null, 2))
 
         toast.success('Invite code assigned successfully!', {
           style: { fontSize: '12px' },
@@ -474,7 +399,6 @@ const Dashboard = () => {
         setInputReferralCode("")
       }
     } catch (error: unknown) {
-      console.error("Error processing invite code:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to process invite code"
       toast.error(`Invite code processing failed: ${errorMessage}`, {
         style: { fontSize: '12px' },

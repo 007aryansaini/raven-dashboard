@@ -52,7 +52,6 @@ const Setting = ({ onClose }: SettingProps) => {
       })
       onClose() // Close the settings modal after logout
     } catch (error: any) {
-      console.error('Logout error:', error)
       toast.error(`Logout failed: ${error.message}`, {
         style: { fontSize: '12px' }
       })

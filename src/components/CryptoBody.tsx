@@ -182,7 +182,7 @@ const body = () => {
               setMessages(parsed)
             }
           } catch (e) {
-            console.error('Error loading saved messages:', e)
+            // Error loading saved messages
           }
         }
         hasInitializedRef.current = true
@@ -503,7 +503,6 @@ const body = () => {
       let authorization: AuthorizeInferenceResponse = { allowed: true, reason: "", method: "credits", cost: 0 }
       
       if (shouldAuthorize) {
-        console.log('🔐 Authorizing inference - credits:', creditsPending, 'inference:', inferenceRemaining)
         authorization = await authorizeInference(address, {
           mode: mode,
           quantity: 1,
@@ -520,8 +519,6 @@ const body = () => {
           )
           return
         }
-      } else {
-        console.log('⏭️ Skipping authorization - credits:', creditsPending, 'inference:', inferenceRemaining, '(need credits >= 6 or inference >= 2)')
       }
 
       const response = await fetch(buildChatUrl(), {
@@ -691,8 +688,7 @@ const body = () => {
         reason: reason,
         tags: hasTags,
       }).catch((error: any) => {
-        console.error("Error recording inference:", error)
-        // Don't show error to user, just log it
+        // Error recording inference - don't show error to user
       })
 
       void refreshMetrics()
@@ -703,7 +699,6 @@ const body = () => {
       setSelectedAsset(null)
       setSelectedScore(null)
     } catch (error: any) {
-      console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
         style: { fontSize: "12px" },
       })

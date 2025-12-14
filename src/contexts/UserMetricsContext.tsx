@@ -116,7 +116,6 @@ export const UserMetricsProvider = ({ children }: { children: ReactNode }) => {
         setHasActiveSubscription(activeFlag || Boolean(planId));
       } catch (error: any) {
         if (signal?.aborted) return;
-        console.error("Error fetching user summary:", error);
         setCreditsPending(0);
         setInferenceRemaining(0);
         setHasActiveSubscription(false);
@@ -131,7 +130,7 @@ export const UserMetricsProvider = ({ children }: { children: ReactNode }) => {
     try {
       await fetchUserSummary(controller.signal);
     } catch (error) {
-      console.error("Error refreshing metrics:", error);
+      // Error refreshing metrics
     }
     // Note: We don't abort here as the request should complete naturally
     // The abort controller is used for cleanup if component unmounts during fetch

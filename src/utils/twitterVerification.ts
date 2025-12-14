@@ -74,8 +74,6 @@ export const verifyTweetUsingOEmbed = async (
       message: 'Could not verify tweet content',
     }
   } catch (error) {
-    console.error('oEmbed verification error:', error)
-    
     // Check if it's a CORS error
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
@@ -158,7 +156,6 @@ export const verifyTweetUsingAPIv2 = async (
       message: 'Tweet data not available',
     }
   } catch (error) {
-    console.error('Twitter API v2 verification error:', error)
     return {
       verified: false,
       postExists: false,

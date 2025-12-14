@@ -104,12 +104,10 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
       }
 
       const data = await response.json();
-      console.log("Initial grant response:", data);
       
       // Refresh metrics to get updated credits
       await refreshMetrics();
     } catch (error: any) {
-      console.error("Error requesting initial grant:", error);
       // Silently fail - don't show error to user as this is a background operation
     }
   }, [address, refreshMetrics]);
@@ -149,8 +147,6 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
       
       // The signed-in user info
       const user = result.user;
-      console.log('🎉 Twitter login successful:', user);
-      
       // Reset loading state immediately after successful login
       // The onAuthStateChanged will set twitterUser, which will update the UI
       setIsCheckingAuth(false);
@@ -206,7 +202,6 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
           });
         }
       } catch (error) {
-        console.error('Error checking/storing Twitter user:', error);
         const username = getTwitterUsername(user);
         toast.success(`Welcome ${username}!`, {
           toastId: `twitter-login-${user.uid}`,
@@ -216,8 +211,6 @@ const NavBar = ({ onMenuClick }: NavBarProps) => {
       }
       
     } catch (error: any) {
-      console.error('Firebase Twitter Auth Error:', error);
-      
       // Handle specific Twitter login errors
       if (error.code === 'auth/popup-closed-by-user') {
         toast.warning('Login cancelled. Please try again.', {

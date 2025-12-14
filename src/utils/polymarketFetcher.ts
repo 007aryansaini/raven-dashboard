@@ -42,8 +42,6 @@ export class PolymarketFetcher {
    */
   async fetchEventsWithMarkets(limit = 20): Promise<Array<{ event: PolymarketEvent; market?: PolymarketMarket }>> {
     try {
-      console.log(`Fetching ${limit} top events from Polymarket...`)
-
       // Fetch top 20 active events (not closed, active)
       // The API returns events sorted by popularity/volume by default
       const url = `${POLYMARKET_API_BASE}/events?limit=${limit}&offset=0&active=true&closed=false`
@@ -57,11 +55,8 @@ export class PolymarketFetcher {
       const data = await response.json()
 
       if (!Array.isArray(data)) {
-        console.warn('Unexpected events response format:', data)
         return []
       }
-
-      console.log(`Fetched ${data.length} events from Polymarket API`)
 
       // Map events with their first market (or best market)
       const eventsWithMarkets: Array<{ event: PolymarketEvent; market?: PolymarketMarket }> = []
@@ -120,10 +115,8 @@ export class PolymarketFetcher {
         })
       })
 
-      console.log(`Processed ${eventsWithMarkets.length} events with markets`)
       return eventsWithMarkets
     } catch (error: any) {
-      console.error('Error fetching events with markets:', error.message || error)
       return []
     }
   }

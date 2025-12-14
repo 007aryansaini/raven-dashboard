@@ -252,7 +252,6 @@ const SideBar = ({ onClose }: SideBarProps) => {
       await refreshMetrics()
 
     } catch (error: any) {
-      console.error('Subscription error:', error)
       toast.error(`Subscription failed`, {
         style: { fontSize: '12px' }
       })

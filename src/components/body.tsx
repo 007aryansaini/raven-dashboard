@@ -206,7 +206,7 @@ const body = () => {
               setMessages(parsed)
             }
           } catch (e) {
-            console.error('Error loading saved messages:', e)
+            // Error loading saved messages
           }
         }
         hasInitializedRef.current = true
@@ -275,10 +275,8 @@ const body = () => {
           })
         } else {
           setPolymarketEvents(eventsWithMarkets)
-          console.log('Fetched Polymarket events:', eventsWithMarkets.length, 'events')
         }
       } catch (error: any) {
-        console.error('Error fetching Polymarket events:', error)
         const errorMessage = 'Failed to load events. Please check your connection and try again.'
         setEventsError(errorMessage)
         toast.error(errorMessage, {
@@ -510,16 +508,12 @@ const body = () => {
       return
     }
 
-    console.log("Event card clicked - Question:", eventTitle, "Event ID:", eventId, "Image URL:", eventImageUrl)
-    
     // Set the input value to the question
     setInputValue(eventTitle)
-    console.log("Input value set to:", eventTitle)
     
     // Store the event image URL if available (for display in chat)
     if (eventImageUrl) {
       setSelectedCardImage(eventImageUrl)
-      console.log("Card image URL set to:", eventImageUrl)
     } else if (eventId) {
       // Fallback to event ID if no image URL
       setSelectedCardImage(eventId)
@@ -529,7 +523,6 @@ const body = () => {
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus()
-        console.log("Input field focused, current value:", inputRef.current.value)
       }
     }, 100)
   }
@@ -541,8 +534,6 @@ const body = () => {
       return
     }
 
-    console.log("Ask Raven clicked - Question:", eventTitle, "Image URL:", eventImageUrl)
-    
     // Validate before proceeding
     if (!twitterUser) {
       toast.warning('Please login with X (Twitter) to send messages', {
@@ -578,8 +569,6 @@ const body = () => {
       content: eventTitle,
       imageSrc: cardImageToUse
     }
-    
-    console.log("Submitting directly to chat - Question:", eventTitle, "Image:", cardImageToUse)
     
     // Add message to chat
     setMessages((prev) => [...prev, userMessage])
@@ -822,7 +811,6 @@ const body = () => {
       let authorization: AuthorizeInferenceResponse = { allowed: true, reason: "", method: "credits", cost: 0 }
       
       if (shouldAuthorize) {
-        console.log('🔐 Authorizing inference - credits:', creditsPending, 'inference:', inferenceRemaining)
         authorization = await authorizeInference(address, {
           mode: mode,
           quantity: 1,
@@ -839,11 +827,7 @@ const body = () => {
           )
           return
         }
-      } else {
-        console.log('⏭️ Skipping authorization - credits:', creditsPending, 'inference:', inferenceRemaining, '(need credits >= 6 or inference >= 2)')
       }
-
-      console.log("Building chat URL:", buildChatUrl())
 
       const response = await fetch(buildChatUrl(), {
         method: "POST",
@@ -1018,8 +1002,7 @@ const body = () => {
         reason: reason,
         tags: hasTags,
       }).catch((error: any) => {
-        console.error("Error recording inference:", error)
-        // Don't show error to user, just log it
+        // Error recording inference - don't show error to user
       })
 
       void refreshMetrics()
@@ -1032,7 +1015,6 @@ const body = () => {
       setSelectedEndingSoon(null)
       setSelectedScore(null)
     } catch (error: any) {
-      console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
         style: { fontSize: "12px" },
       })
@@ -1101,7 +1083,6 @@ const body = () => {
     const cardImageToUse = selectedCardImage && selectedCardImage.trim() !== '' 
       ? String(selectedCardImage).trim() 
       : undefined
-    console.log("Submitting - Selected card image URL:", cardImageToUse, "Type:", typeof cardImageToUse)
 
     const userMessage: ChatMessage = {
       id: Date.now(),
@@ -1110,14 +1091,8 @@ const body = () => {
       imageSrc: cardImageToUse
     }
     
-    console.log("User message created with imageSrc:", userMessage.imageSrc)
-
-    console.log("User message created:", userMessage)
-
     setMessages((prev) => {
-      console.log("Previous messages:", prev)
       const newMessages = [...prev, userMessage]
-      console.log("New messages:", newMessages)
       return newMessages
     })
     setInputValue("")
@@ -1341,9 +1316,6 @@ const body = () => {
                            // Pass the image URL so it appears in the chat
                            const imageUrl = (eventPair.event.image || eventPair.event.icon || '').trim()
                            const validImageUrl = imageUrl && imageUrl !== '' ? imageUrl : undefined
-                           console.log("Card onClick triggered - Question:", eventPair.event.title)
-                           console.log("Event image:", eventPair.event.image, "Event icon:", eventPair.event.icon)
-                           console.log("Final image URL:", validImageUrl)
                            handleCardClick(eventPair.event.title, eventPair.event.id, validImageUrl)
                          }}
                          onAskRaven={() => {
@@ -1351,7 +1323,6 @@ const body = () => {
                            // Directly submit to chat when "Ask Raven" button is clicked
                            const imageUrl = (eventPair.event.image || eventPair.event.icon || '').trim()
                            const validImageUrl = imageUrl && imageUrl !== '' ? imageUrl : undefined
-                           console.log("Ask Raven button clicked - Question:", eventPair.event.title, "Image URL:", validImageUrl)
                            handleAskRavenClick(eventPair.event.title, eventPair.event.id, validImageUrl)
                          }}
                        />
@@ -1395,10 +1366,10 @@ const body = () => {
                                className="w-24 h-24 lg:w-40 lg:h-40 rounded-lg lg:rounded-xl border-2 border-[#45FFAE]/50 object-contain bg-[#1A1A1A] p-1"
                                style={{ display: 'block', minWidth: '160px', minHeight: '160px' }}
                               onError={() => {
-                                console.error("Failed to load image:", message.imageSrc)
+                                // Failed to load image
                               }}
                                onLoad={() => {
-                                 console.log("Image loaded successfully:", message.imageSrc)
+                                 // Image loaded successfully
                                }}
                              />
                            </div>

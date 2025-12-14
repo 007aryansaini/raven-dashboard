@@ -95,7 +95,6 @@ const Points = () => {
         setXp(Number.isFinite(xpValue) ? xpValue : 0)
       } catch (error: unknown) {
         if (controller.signal.aborted) return
-        console.error("Error fetching XP:", error)
         setXp(0)
         setXpError("Unable to load XP")
       } finally {
@@ -153,7 +152,6 @@ const Points = () => {
         }
       } catch (error: unknown) {
         if (controller.signal.aborted) return
-        console.error("Error fetching referral code:", error)
         setReferralCode("")
         setReferralCodeError("Unable to load referral code")
       } finally {
@@ -193,7 +191,6 @@ const Points = () => {
       setCopyStatus("copied")
       setTimeout(() => setCopyStatus("idle"), 2200)
     } catch (error) {
-      console.error("Failed to copy referral link", error)
       setCopyStatus("error")
       setTimeout(() => setCopyStatus("idle"), 2200)
     }
@@ -300,7 +297,6 @@ const Points = () => {
       }
 
       const data = await response.json()
-      console.log('Whitelist response:', data)
 
       toast.success(`Successfully whitelisted ${data.updated || uniqueAddresses.length} address(es)!`, {
         style: { fontSize: '12px' },
@@ -312,7 +308,6 @@ const Points = () => {
       setWhitelistAddresses("")
       setWhitelistErrors([])
     } catch (error: unknown) {
-      console.error("Error whitelisting addresses:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to whitelist addresses"
       toast.error(`Whitelist failed: ${errorMessage}`, {
         style: { fontSize: '12px' },
@@ -352,7 +347,6 @@ const Points = () => {
       }
 
       const data = await response.json()
-      console.log("Quest API Response:", data)
       setQuestResponse(data)
       
       toast.success(`Quest completed! You earned ${data.credits} credits.`, {
@@ -380,7 +374,6 @@ const Points = () => {
         }
       }
     } catch (error: unknown) {
-      console.error("Error calculating credits:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to complete quest"
       toast.error(`Quest failed: ${errorMessage}`, {
         style: { fontSize: '12px' }
@@ -471,7 +464,6 @@ Join the future of trading predictions! 🎯`
       }
 
       const data = await response.json()
-      console.log('Referral redemption response:', data)
 
       // Show success message with details
       const referredCredits = data.referred?.credits || 0
@@ -515,7 +507,6 @@ Join the future of trading predictions! 🎯`
         window.history.replaceState({}, '', url.toString())
       }
     } catch (error: unknown) {
-      console.error("Error redeeming referral code:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to redeem invite code"
       toast.error(`Invite code redemption failed: ${errorMessage}`, {
         style: { fontSize: '12px' },
@@ -551,7 +542,6 @@ Join the future of trading predictions! 🎯`
       
       return null
     } catch (error) {
-      console.error("Error extracting tweet ID:", error)
       return null
     }
   }
@@ -600,8 +590,6 @@ Join the future of trading predictions! 🎯`
                               twitterUser?.displayName ||
                               null
 
-      console.log('Verifying tweet:', { tweetId, tweetUrl, address, twitterUsername })
-
       // DEVELOPMENT MODE: Check if we should use mock verification
       const USE_MOCK_VERIFICATION = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_VERIFICATION === 'true'
       
@@ -609,7 +597,6 @@ Join the future of trading predictions! 🎯`
 
       if (USE_MOCK_VERIFICATION) {
         // Mock verification for development/testing
-        console.log('Using mock verification (development mode)')
         await new Promise(resolve => setTimeout(resolve, 1500)) // Simulate API delay
         
         // In mock mode, we'll accept any valid tweet URL
@@ -620,8 +607,6 @@ Join the future of trading predictions! 🎯`
         }
       } else {
         // Use frontend Twitter API verification
-        console.log('Using frontend Twitter API verification')
-        
         // Optional: Get Twitter Bearer Token from environment variable if available
         // If not provided, will use public oEmbed API
         const twitterBearerToken = import.meta.env.VITE_TWITTER_BEARER_TOKEN || undefined
@@ -634,12 +619,8 @@ Join the future of trading predictions! 🎯`
           twitterBearerToken
         )
         
-        console.log('Twitter verification result:', verificationResult)
-        
         data = verificationResult
       }
-      
-      console.log('Verification response data:', data)
       
       if (data.verified && data.postExists) {
         // Post verified successfully
@@ -667,7 +648,6 @@ Join the future of trading predictions! 🎯`
         })
       }
     } catch (error: unknown) {
-      console.error("Error verifying tweet:", error)
       let errorMessage = "Failed to verify post"
       
       if (error instanceof TypeError && error.message.includes('fetch')) {
@@ -786,7 +766,7 @@ Join the future of trading predictions! 🎯`
                    <button
                      onClick={handleCopyReferralLink}
                      disabled={!referralCode || isReferralCodeLoading}
-                     className="flex items-center gap-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2A2A2A]"
+                     className="flex items-center gap-2 cursor-pointer rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2A2A2A]"
                    >
                      <Copy className="h-4 w-4 text-[#FFFFFF]" />
                      <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
@@ -813,7 +793,7 @@ Join the future of trading predictions! 🎯`
                      disabled={!referralCode || isReferralCodeLoading || !referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")}
                      className="flex w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2A2A2A]"
                    >
-                     <X className="h-4 w-4 text-[#FFFFFF]" />
+                     {/* <X className="h-4 w-4 text-[#FFFFFF]" /> */}
                      <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
                        Share on X
                      </span>
@@ -849,7 +829,7 @@ Join the future of trading predictions! 🎯`
                    onClick={handleShareAboutRaven}
                    className="flex w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 cursor-pointer"
                  >
-                   <X className="h-4 w-4 text-[#FFFFFF]" />
+                   {/* <X className="h-4 w-4 text-[#FFFFFF]" /> */}
                    <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
                      {hasShared ? "Shared!" : "Share on X"}
                    </span>

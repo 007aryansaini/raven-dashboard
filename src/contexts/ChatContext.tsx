@@ -84,7 +84,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           return
         } catch (updateError: any) {
           // If update fails, create a new one
-          console.warn('Failed to update chat, creating new one:', updateError)
         }
       }
 
@@ -101,7 +100,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       const docRef = await addDoc(collection(db, 'chats'), chatData)
       setCurrentChatId(docRef.id)
     } catch (error: any) {
-      console.error('Auto-save chat failed:', error)
+      // Auto-save chat failed
     } finally {
       setIsSaving(false)
     }
@@ -143,7 +142,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         userId: chatData.userId
       }
     } catch (error: any) {
-      console.error('Error loading chat:', error)
       toast.error(`Failed to load chat: ${error.message}`, {
         style: { fontSize: '12px' }
       })
@@ -198,7 +196,6 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
       return Array.from(uniqueChatsMap.values()).slice(0, limit)
     } catch (error: any) {
-      console.error('Error fetching recent chats:', error)
       return []
     }
   }

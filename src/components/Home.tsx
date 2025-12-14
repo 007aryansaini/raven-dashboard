@@ -336,7 +336,6 @@ const Home = () => {
       let authorization: AuthorizeInferenceResponse = { allowed: true, reason: "", method: "credits", cost: 0 }
       
       if (shouldAuthorize) {
-        console.log('🔐 Authorizing inference - credits:', creditsPending, 'inference:', inferenceRemaining)
         authorization = await authorizeInference(address, {
           tags: false,
           reason: query,
@@ -352,8 +351,6 @@ const Home = () => {
           )
           return
         }
-      } else {
-        console.log('⏭️ Skipping authorization - credits:', creditsPending, 'inference:', inferenceRemaining, '(need credits >= 6 or inference >= 2)')
       }
 
       const response = await fetch(buildChatUrl(), {
@@ -476,7 +473,6 @@ const Home = () => {
 
       void refreshMetrics()
     } catch (error: any) {
-      console.error("API Error:", error)
       toast.error(`Failed to get response: ${error.message}`, {
         style: { fontSize: "12px" },
       })

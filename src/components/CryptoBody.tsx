@@ -534,41 +534,58 @@ const body = () => {
       reasoning = cleanHtmlArtifacts(reasoning)
       answer = cleanHtmlArtifacts(answer)
       
-      // Process reasoning field - it may contain both reasoning AND answer text separated by "**ANSWER**"
+      // Process reasoning field - remove any answer content from reasoning
+      // Only keep pure reasoning, answer should only come from the answer field in JSON
       if (reasoning) {
-        // Check if reasoning contains "**ANSWER**" marker
-        // Split on "**ANSWER**" to separate reasoning from answer text
-        const answerSplit = reasoning.split(/\n\s*\*\*ANSWER\*\*\s*\n/i)
+        // Check for various answer markers and remove everything after them (including the marker itself)
+        // Handle both with and without newlines, and at the end of text
+        const answerMarkers = [
+          /\n\s*\*\*ANSWER\*\*\s*\n/i,           // **ANSWER** with newlines
+          /\n\s*ANSWER\s*:\s*\n/i,                // ANSWER: with newlines
+          /\n\s*Answer\s*:\s*\n/i,                // Answer: with newlines
+          /\n\s*\*\*Answer\*\*\s*\n/i,            // **Answer** with newlines
+          /\n\s*ANSWER\s*:/i,                     // ANSWER: with newline before (content after)
+          /\n\s*Answer\s*:/i,                     // Answer: with newline before (content after)
+          /^\s*ANSWER\s*:/i,                      // ANSWER: at start of line
+          /^\s*Answer\s*:/i,                      // Answer: at start of line
+          /\n\s*Recommendation\s*:/i,
+          /\n\s*\*\*Recommendation\*\*\s*:/i,
+        ]
         
-        if (answerSplit.length > 1) {
-          // There's an "**ANSWER**" marker in the middle
-          // Everything before "**ANSWER**" is reasoning
-          const reasoningText = answerSplit[0].trim()
-          // Everything after "**ANSWER**" is answer text from reasoning field
-          const answerTextFromReasoning = answerSplit.slice(1).join('\n').trim()
-          
-          // Clean reasoning: remove "**REASONING**" header at start
-          reasoning = reasoningText
-            .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
-            .replace(/^\s*REASONING\s*\n*/i, '')
-            .trim()
-          
-          
-          // Combine answer from reasoning with separate answer field
-          if (answerTextFromReasoning && answer) {
-            answer = `${answerTextFromReasoning}\n\n${answer}`.trim()
-          } else if (answerTextFromReasoning) {
-            answer = answerTextFromReasoning
+        let reasoningText = reasoning
+        let foundAnswerMarker = false
+        
+        // Find the first answer marker and split on it
+        for (const marker of answerMarkers) {
+          const match = reasoningText.match(marker)
+          if (match) {
+            // Found an answer marker - keep only the part before it
+            const index = reasoningText.search(marker)
+            reasoningText = reasoningText.substring(0, index).trim()
+            foundAnswerMarker = true
+            break
           }
-          // If only answer exists (no text after ANSWER in reasoning), keep it as-is
-        } else {
-          // No "**ANSWER**" marker - just clean up reasoning
-          reasoning = reasoning
-            .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
-            .replace(/^\s*REASONING\s*\n*/i, '')
-            .trim()
-          
         }
+        
+        // Also remove standalone "**ANSWER**" markers at the end (even without newline before)
+        reasoningText = reasoningText
+          .replace(/\s*\*\*ANSWER\*\*\s*$/i, '')  // Remove "**ANSWER**" at the end
+          .replace(/\s*\*\*Answer\*\*\s*$/i, '')  // Remove "**Answer**" at the end
+          .replace(/\s*ANSWER\s*:\s*.*$/i, '')   // Remove "ANSWER: ..." at the end
+          .replace(/\s*Answer\s*:\s*.*$/i, '')    // Remove "Answer: ..." at the end
+          .replace(/\s*ANSWER\s*$/i, '')          // Remove "ANSWER" at the end
+          .replace(/\s*Answer\s*$/i, '')          // Remove "Answer" at the end
+          .trim()
+        
+        // Clean reasoning: remove "**REASONING**" header at start
+        reasoning = reasoningText
+          .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
+          .replace(/^\s*REASONING\s*\n*/i, '')
+          .trim()
+        
+        // IMPORTANT: Do NOT use answer content from reasoning field
+        // Only use answer from the JSON response's answer field
+        // If answer was found in reasoning, it's been removed - don't add it to answer
       }
 
       // Clean up answer: remove "**ANSWER**" header if present at the start

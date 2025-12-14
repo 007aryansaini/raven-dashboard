@@ -301,8 +301,13 @@ const body = () => {
         const bulletMatch = line.match(/^(\*|\-)\s+(.+)$/)
         if (bulletMatch) {
           let bulletContent = bulletMatch[2]
-          // Process bold text within bullet points
+          // Process bold text within bullet points - handle both complete **text** and incomplete **text
           bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Also handle cases where ** appears but isn't closed (remove the **)
+          bulletContent = bulletContent.replace(/\*\*([^*]+)$/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          bulletContent = bulletContent.replace(/^\*\*([^*]+)/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Remove any remaining standalone **
+          bulletContent = bulletContent.replace(/\*\*/g, '')
           // Bold mathematical numbers in bullet content
           bulletContent = boldNumbers(bulletContent)
           formattedLines.push(`<div class="ml-4 my-2">• ${bulletContent}</div>`)
@@ -310,8 +315,13 @@ const body = () => {
         }
         
         // Default processing: preserve ALL content
-        // First process markdown bold
+        // First process markdown bold (complete pairs)
         let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // Handle incomplete ** markers (remove them if they don't form pairs)
+        processedLine = processedLine.replace(/\*\*([^*]+)$/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        processedLine = processedLine.replace(/^\*\*([^*]+)/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // Remove any remaining standalone ** that don't make sense
+        processedLine = processedLine.replace(/\*\*/g, '')
         // Then bold numbers (this avoids nested tags since bold markdown is processed first)
         processedLine = boldNumbers(processedLine)
         

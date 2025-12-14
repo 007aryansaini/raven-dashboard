@@ -207,34 +207,21 @@ const body = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    
     // Helper function to bold mathematical numbers in green
+    // Updated to handle currency with spaces like "$90 000"
     const boldNumbers = (str: string) => {
-      // Match numbers (integers, decimals, percentages, currency, etc.)
-      // Pattern matches: numbers, decimals, percentages, currency symbols with numbers
-      // Make them bold and green (#45FFAE) like headings
-      // Updated to handle "1.33 %" with space before %
-      return str.replace(/(\d+\.?\d*\s*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
+      // Match: numbers, percentages, currency (including with spaces like "$90 000")
+      // Pattern: $[\d,\s]+ for currency with spaces
+      return str.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
     }
     
-    // Comprehensive initial cleanup of all HTML artifacts and malformed patterns
+    // MINIMAL cleanup - only remove clearly malformed standalone artifacts
+    // DO NOT remove anything that could be legitimate content
     text = text
-      // Remove all variations of color code artifacts
-      .replace(/\[#?45FFAE\]"?>/g, '')
-      .replace(/45FFAE\]"?>/g, '')
-      .replace(/FFAE\]"?>/g, '')
-      .replace(/\[#45FFAE\]/g, '')
-      .replace(/45FFAE\]/g, '')
-      .replace(/FFAE\]/g, '')
-      // Remove malformed class attributes
-      .replace(/text-\[#45FFAE\]"?>/g, '')
-      .replace(/class="text-\[#45FFAE\]"?>/g, '')
-      .replace(/class="text-\[#45FFAE\]/g, '')
-      // Remove standalone malformed closing tags
-      .replace(/\s+FFAE\]/g, '')
+      // Only remove standalone patterns with spaces before them
+      .replace(/\s+\[#45FFAE\]/g, '')
       .replace(/\s+45FFAE\]/g, '')
-      // Fix malformed strong tags
-      .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
+      .replace(/\s+FFAE\]/g, '')
     
     // Split text into lines for better processing
     const lines = text.split('\n')
@@ -265,7 +252,20 @@ const body = () => {
           formattedLines.push('</div>')
         }
         
-        // Handle "REASONING" and "ANSWER" headers first - style them prominently
+        // Handle section headers like "PREDICTION:", "CONFIDENCE:", "REASONING:", "RISKS:", "ANSWER:"
+        const sectionHeaderMatch = line.match(/^(PREDICTION|CONFIDENCE|REASONING|RISKS|ANSWER):\s*(.*)$/i)
+        if (sectionHeaderMatch) {
+          const header = sectionHeaderMatch[1]
+          const content = sectionHeaderMatch[2]
+          // Process markdown bold first
+          let processedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Then bold numbers
+          processedContent = boldNumbers(processedContent)
+          formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${header}:</strong> ${processedContent}</div>`)
+          continue
+        }
+        
+        // Handle standalone "REASONING" and "ANSWER" headers
         if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
           const escapedText = line.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
           formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
@@ -306,38 +306,19 @@ const body = () => {
           continue
         }
         
-        // FIRST: Bold mathematical numbers in plain text (before processing markdown)
-        // This avoids creating nested strong tags
-        let processedLine = boldNumbers(line)
+        // Default processing: preserve ALL content
+        // First process markdown bold
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // Then bold numbers (this avoids nested tags since bold markdown is processed first)
+        processedLine = boldNumbers(processedLine)
         
-        // THEN: Handle bold **text** - convert to green
-        processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
-        
-        // Remove HTML artifacts - be VERY conservative, only remove clearly malformed patterns
-        // Split by HTML tags to preserve legitimate attributes
-        const parts = processedLine.split(/(<[^>]+>)/)
-        const cleanedParts = parts.map(part => {
-          // If it's an HTML tag, leave it alone
-          if (part.startsWith('<') && part.endsWith('>')) {
-            return part
-          }
-          // Only clean text content, not HTML attributes
-          return part
-            .replace(/\s+\[#45FFAE\]/g, '')
-            .replace(/\s+45FFAE\]/g, '')
-            .replace(/\s+FFAE\]/g, '')
-        })
-        processedLine = cleanedParts.join('')
-        
-        // Fix any malformed strong tags
+        // Minimal cleanup - only fix clearly broken HTML, never remove content
         processedLine = processedLine
           .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
           .replace(/<strong class="font-semibold text-">/g, '<strong class="font-semibold text-[#45FFAE]">')
         
-        // If line is not empty or already processed, add it
-        if (processedLine.trim() || line.trim() === '') {
-          formattedLines.push(processedLine || '<br />')
-        }
+        // Always add the line - preserve all content
+        formattedLines.push(processedLine || '<br />')
       }
     }
     
@@ -347,25 +328,10 @@ const body = () => {
     
     let finalOutput = formattedLines.join('\n')
     
-    // Final cleanup - ONLY fix malformed tags, NEVER modify legitimate HTML attributes
-    // Split by HTML tags to ensure we never touch attributes
-    const htmlParts = finalOutput.split(/(<[^>]*>)/)
-    finalOutput = htmlParts.map(part => {
-      // If it's an HTML tag, only fix malformed class attributes, never remove parts
-      if (part.startsWith('<') && part.endsWith('>')) {
-        return part
-          .replace(/class="text-\[#45FFAE\]"/g, 'class="text-[#45FFAE]"')
-          .replace(/class="font-semibold text-"/g, 'class="font-semibold text-[#45FFAE]"')
-      }
-      // For text content, only remove standalone artifacts (with word boundaries or spaces)
-      return part
-        .replace(/\s+\[#45FFAE\]/g, '')
-        .replace(/\s+45FFAE\]/g, '')
-        .replace(/\s+FFAE\]/g, '')
-        .replace(/\b\[#45FFAE\]/g, '')
-        .replace(/\b45FFAE\]/g, '')
-        .replace(/\bFFAE\]/g, '')
-    }).join('')
+    // Final minimal cleanup - ONLY fix clearly broken HTML tags, NEVER remove content
+    finalOutput = finalOutput
+      .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
+      .replace(/<strong class="font-semibold text-">/g, '<strong class="font-semibold text-[#45FFAE]">')
     
     return finalOutput
   }

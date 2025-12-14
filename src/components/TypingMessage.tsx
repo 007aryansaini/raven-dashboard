@@ -29,3 +29,4 @@ export function TypingMessage({
   return <>{displayedText}</>
 }
 
+

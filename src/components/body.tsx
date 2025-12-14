@@ -523,17 +523,22 @@ const body = () => {
     
     // Helper function to bold mathematical numbers in green
     // Updated to handle currency with spaces like "$90 000"
+    // IMPORTANT: Only process text content, NOT HTML attributes
     const boldNumbers = (str: string) => {
-      // Match: numbers, percentages, currency (including with spaces like "$90 000")
-      return str.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
+      // Split by HTML tags to avoid processing numbers inside attributes
+      const parts = str.split(/(<[^>]*>)/)
+      return parts.map(part => {
+        // If it's an HTML tag, leave it completely alone
+        if (part.startsWith('<') && part.endsWith('>')) {
+          return part
+        }
+        // Only process numbers in text content
+        return part.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
+      }).join('')
     }
     
-    // MINIMAL cleanup - only remove clearly malformed standalone artifacts
-    text = text
-      // Only remove standalone patterns with spaces before them
-      .replace(/\s+\[#45FFAE\]/g, '')
-      .replace(/\s+45FFAE\]/g, '')
-      .replace(/\s+FFAE\]/g, '')
+    // NO initial cleanup - we'll do minimal cleanup only at the very end
+    // This ensures we never accidentally remove legitimate content
     
     // Split text into lines for better processing
     const lines = text.split('\n')
@@ -622,11 +627,7 @@ const body = () => {
         // Then bold numbers (this avoids nested tags since bold markdown is processed first)
         processedLine = boldNumbers(processedLine)
         
-        // Minimal cleanup - only fix clearly broken HTML, never remove content
-        processedLine = processedLine
-          .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
-          .replace(/<strong class="font-semibold text-">/g, '<strong class="font-semibold text-[#45FFAE]">')
-        
+        // NO cleanup here - we'll do minimal cleanup only at the very end
         // Always add the line - preserve all content
         formattedLines.push(processedLine || '<br />')
       }
@@ -639,9 +640,23 @@ const body = () => {
     let finalOutput = formattedLines.join('\n')
     
     // Final minimal cleanup - ONLY fix clearly broken HTML tags, NEVER remove content
-    finalOutput = finalOutput
-      .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
-      .replace(/<strong class="font-semibold text-">/g, '<strong class="font-semibold text-[#45FFAE]">')
+    // Split by HTML tags to ensure we NEVER touch HTML attributes
+    const htmlParts = finalOutput.split(/(<[^>]*>)/)
+    finalOutput = htmlParts.map(part => {
+      // If it's an HTML tag, ONLY fix malformed class attributes, NEVER remove anything
+      if (part.startsWith('<') && part.endsWith('>')) {
+        // Only fix if the class attribute is malformed (has escaped brackets)
+        return part
+          .replace(/class="text-\[#45FFAE\]"/g, 'class="text-[#45FFAE]"')
+          .replace(/class="font-semibold text-"/g, 'class="font-semibold text-[#45FFAE]"')
+      }
+      // For text content, be VERY conservative - only remove clearly standalone artifacts
+      // Only remove if there's a space before it AND it's not part of a word
+      return part
+        .replace(/\s+\[#45FFAE\]\s/g, ' ')
+        .replace(/\s+45FFAE\]\s/g, ' ')
+        .replace(/\s+FFAE\]\s/g, ' ')
+    }).join('')
     
     return finalOutput
   }

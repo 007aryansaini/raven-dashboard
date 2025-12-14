@@ -180,13 +180,72 @@ const body = () => {
   
   const autoPlayInterval = 4000 // 4 seconds between slides
 
-  // Clear messages when navigating to this screen (detect route changes or navigation state)
+  // Persist messages in localStorage per route
+  const STORAGE_KEY = 'polymarket_chat_messages'
+  const lastPathnameRef = useRef<string | null>(null)
+  const hasInitializedRef = useRef(false)
+  
+  // Load messages from localStorage when navigating to this route
+  useEffect(() => {
+    const currentPath = location.pathname
+    const isPolymarketRoute = currentPath === '/polymarket'
+    
+    if (isPolymarketRoute) {
+      // Check if we just navigated to this route (pathname changed) or if this is initial mount
+      const justNavigatedTo = lastPathnameRef.current !== currentPath
+      const shouldLoad = justNavigatedTo || (!hasInitializedRef.current && messages.length === 0)
+      
+      if (shouldLoad) {
+        // We just navigated here or this is initial mount, try to load saved messages
+        const savedMessages = localStorage.getItem(STORAGE_KEY)
+        if (savedMessages) {
+          try {
+            const parsed = JSON.parse(savedMessages)
+            if (parsed.length > 0 && messages.length === 0) {
+              // Only load if current messages are empty (don't overwrite active chat)
+              setMessages(parsed)
+            }
+          } catch (e) {
+            console.error('Error loading saved messages:', e)
+          }
+        }
+        hasInitializedRef.current = true
+        lastPathnameRef.current = currentPath
+      }
+    } else {
+      // We navigated away, reset initialization flag so we can load again when coming back
+      hasInitializedRef.current = false
+      lastPathnameRef.current = currentPath
+    }
+  }, [location.pathname, messages.length])
+  
+  // Save messages to localStorage whenever they change
   useEffect(() => {
     if (location.pathname === '/polymarket') {
-      setMessages([])
-      setInputValue("")
+      if (messages.length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+      } else {
+        // If messages are cleared, remove from storage
+        localStorage.removeItem(STORAGE_KEY)
+      }
     }
-  }, [location.pathname, location.state])
+  }, [messages, location.pathname])
+  
+  // Reset chat function
+  const resetChat = () => {
+    setMessages([])
+    setInputValue("")
+    setTypingMessageIds(new Set())
+    localStorage.removeItem(STORAGE_KEY)
+    // Reset all filter states
+    setSelectedLiquidity(null)
+    setSelectedVolume(null)
+    setSelectedTimeframe(null)
+    setSelectedNewest(null)
+    setSelectedEndingSoon(null)
+    setSelectedScore(null)
+    setSelectedCardImage(null)
+  }
 
   // Monitor auth state changes
   useEffect(() => {
@@ -878,7 +937,6 @@ const body = () => {
         ]
         
         let reasoningText = reasoning
-        let foundAnswerMarker = false
         
         // Find the first answer marker and split on it
         for (const marker of answerMarkers) {
@@ -887,7 +945,6 @@ const body = () => {
             // Found an answer marker - keep only the part before it
             const index = reasoningText.search(marker)
             reasoningText = reasoningText.substring(0, index).trim()
-            foundAnswerMarker = true
             break
           }
         }
@@ -1179,7 +1236,7 @@ const body = () => {
          }}>
            {/* Content Area - Takes flex-1 to push input to bottom */}
            <div className="flex-1 w-full flex flex-col items-center min-h-0 overflow-hidden">
-           <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2">
+           <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2 w-full">
                 {messages.length === 0 && (
                   <>
                  <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">Polymarket Predictions</div>
@@ -1190,6 +1247,17 @@ const body = () => {
                  </div>
                  </div>
                   </>
+                )}
+                {messages.length > 0 && (
+                  <div className="w-full max-w-5xl flex justify-start mb-2">
+                    <button
+                      onClick={resetChat}
+                      className="flex cursor-pointer items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#282828] hover:bg-[#2A2A2A] transition-all duration-200 text-[#E0E0E0] text-xs sm:text-sm font-urbanist font-medium"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      New Chat
+                    </button>
+                  </div>
                 )}
            </div>
 

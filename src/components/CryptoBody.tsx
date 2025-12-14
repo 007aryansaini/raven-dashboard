@@ -1,4 +1,4 @@
-import { ArrowUp, MoveRight } from "lucide-react"
+import { ArrowUp, MoveRight, ChevronLeft } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { useAccount } from 'wagmi'
@@ -156,13 +156,70 @@ const body = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Clear messages when navigating to this screen (detect route changes or navigation state)
+  // Persist messages in localStorage per route
+  const STORAGE_KEY = 'crypto_chat_messages'
+  const lastPathnameRef = useRef<string | null>(null)
+  const hasInitializedRef = useRef(false)
+  
+  // Load messages from localStorage when navigating to this route
   useEffect(() => {
-    if (location.pathname === '/crypto' || location.pathname === '/') {
-      setMessages([])
-      setInputValue("")
+    const currentPath = location.pathname
+    const isCryptoRoute = currentPath === '/crypto' || currentPath === '/'
+    
+    if (isCryptoRoute) {
+      // Check if we just navigated to this route (pathname changed) or if this is initial mount
+      const justNavigatedTo = lastPathnameRef.current !== currentPath
+      const shouldLoad = justNavigatedTo || (!hasInitializedRef.current && messages.length === 0)
+      
+      if (shouldLoad) {
+        // We just navigated here or this is initial mount, try to load saved messages
+        const savedMessages = localStorage.getItem(STORAGE_KEY)
+        if (savedMessages) {
+          try {
+            const parsed = JSON.parse(savedMessages)
+            if (parsed.length > 0 && messages.length === 0) {
+              // Only load if current messages are empty (don't overwrite active chat)
+              setMessages(parsed)
+            }
+          } catch (e) {
+            console.error('Error loading saved messages:', e)
+          }
+        }
+        hasInitializedRef.current = true
+        lastPathnameRef.current = currentPath
+      }
+    } else {
+      // We navigated away, reset initialization flag so we can load again when coming back
+      hasInitializedRef.current = false
+      lastPathnameRef.current = currentPath
     }
-  }, [location.pathname, location.state])
+  }, [location.pathname, messages.length])
+  
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    const isCryptoRoute = location.pathname === '/crypto' || location.pathname === '/'
+    if (isCryptoRoute) {
+      if (messages.length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+      } else {
+        // If messages are cleared, remove from storage
+        localStorage.removeItem(STORAGE_KEY)
+      }
+    }
+  }, [messages, location.pathname])
+  
+  // Reset chat function
+  const resetChat = () => {
+    setMessages([])
+    setInputValue("")
+    setTypingMessageIds(new Set())
+    localStorage.removeItem(STORAGE_KEY)
+    // Reset all filter states
+    setSelectedTimeframe(null)
+    setSelectedAnalysis(null)
+    setSelectedAsset(null)
+    setSelectedScore(null)
+  }
 
   // Monitor auth state changes
   useEffect(() => {
@@ -553,7 +610,6 @@ const body = () => {
         ]
         
         let reasoningText = reasoning
-        let foundAnswerMarker = false
         
         // Find the first answer marker and split on it
         for (const marker of answerMarkers) {
@@ -562,7 +618,6 @@ const body = () => {
             // Found an answer marker - keep only the part before it
             const index = reasoningText.search(marker)
             reasoningText = reasoningText.substring(0, index).trim()
-            foundAnswerMarker = true
             break
           }
         }
@@ -776,7 +831,7 @@ const body = () => {
          }}>
            {/* Content Area - Takes flex-1 to push input to bottom */}
            <div className="flex-1 w-full flex flex-col items-center min-h-0 overflow-hidden">
-           <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2">
+           <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2 w-full">
                 {messages.length === 0 && (
                   <>
                  <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">
@@ -789,6 +844,17 @@ const body = () => {
                  </div>
                  </div>
                   </>
+                )}
+                {messages.length > 0 && (
+                  <div className="w-full max-w-5xl flex justify-start mb-2">
+                    <button
+                      onClick={resetChat}
+                      className="flex items-center cursor-pointer gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#282828] hover:bg-[#2A2A2A] transition-all duration-200 text-[#E0E0E0] text-xs sm:text-sm font-urbanist font-medium"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      New Chat
+                    </button>
+                  </div>
                 )}
 
            </div>

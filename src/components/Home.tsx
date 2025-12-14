@@ -11,6 +11,7 @@ import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference, type AuthorizeInferenceResponse } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
 import { useTypingEffect } from "../utils/useTypingEffect"
+import { useSequentialTyping } from "../utils/useSequentialTyping"
 
 type ChatMessage = {
   id: number
@@ -30,8 +31,20 @@ const TypingAssistantMessage = ({
   isTyping: boolean
   formatMarkdown: (text: string) => string
 }) => {
-  const displayedReasoning = useTypingEffect(message.reasoning || '', 8, isTyping && !!message.reasoning)
-  const displayedAnswer = useTypingEffect(message.answer || '', 8, isTyping && !!message.answer && !message.reasoning)
+  // Sequential typing: reasoning first, then answer
+  // Always show full text if not typing, or if typing is disabled
+  const { displayedFirst: displayedReasoning, displayedSecond: displayedAnswer, isFirstComplete } = useSequentialTyping(
+    message.reasoning || '',
+    message.answer || '',
+    8,
+    isTyping && !!(message.reasoning || message.answer)
+  )
+  
+  // Ensure full content is displayed when typing completes or is disabled
+  const finalReasoning = isTyping ? displayedReasoning : (message.reasoning || '')
+  const finalAnswer = isTyping ? displayedAnswer : (message.answer || '')
+  
+  // For content without reasoning/answer structure
   const displayedContent = useTypingEffect(message.content, 8, isTyping && !message.reasoning && !message.answer)
 
   return (
@@ -39,18 +52,30 @@ const TypingAssistantMessage = ({
       {message.reasoning && (
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] border border-[#2A2A2A]">
           <div 
+            className="font-semibold text-base text-[#45FFAE] mb-3"
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+          >
+            Reasoning
+          </div>
+          <div 
             className="text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedReasoning) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(finalReasoning) }}
           />
         </div>
       )}
-      {message.answer && (
+      {message.answer && isFirstComplete && (
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] text-[#FFFFFF]">
+          <div 
+            className="font-semibold text-base text-[#45FFAE] mb-3"
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+          >
+            Answer
+          </div>
           <div 
             className="text-xs lg:text-sm leading-relaxed"
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedAnswer) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(finalAnswer) }}
           />
         </div>
       )}
@@ -145,12 +170,32 @@ const Home = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    // Helper function to bold mathematical numbers
+    // Helper function to bold mathematical numbers in green
     const boldNumbers = (str: string) => {
       // Match numbers (integers, decimals, percentages, currency, etc.)
       // Pattern matches: numbers, decimals, percentages, currency symbols with numbers
-      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
+      // Make them bold and green (#45FFAE) like headings
+      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
     }
+    
+    // Comprehensive initial cleanup of all HTML artifacts and malformed patterns
+    text = text
+      // Remove all variations of color code artifacts
+      .replace(/\[#?45FFAE\]"?>/g, '')
+      .replace(/45FFAE\]"?>/g, '')
+      .replace(/FFAE\]"?>/g, '')
+      .replace(/\[#45FFAE\]/g, '')
+      .replace(/45FFAE\]/g, '')
+      .replace(/FFAE\]/g, '')
+      // Remove malformed class attributes
+      .replace(/text-\[#45FFAE\]"?>/g, '')
+      .replace(/class="text-\[#45FFAE\]"?>/g, '')
+      .replace(/class="text-\[#45FFAE\]/g, '')
+      // Remove standalone malformed closing tags
+      .replace(/\s+FFAE\]/g, '')
+      .replace(/\s+45FFAE\]/g, '')
+      // Fix malformed strong tags
+      .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
     
     // Split text into lines for better processing
     const lines = text.split('\n')
@@ -183,34 +228,61 @@ const Home = () => {
         
         // Handle "REASONING" and "ANSWER" headers first - style them prominently
         if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
-          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${line.trim()}</div>`)
+          const escapedText = line.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
           continue
         }
         
-        // Handle numbered headings (e.g., "1. Current Market Position & Momentum")
-        // These should be on new lines with green text
+        // Handle section headings like "**Key implications**" - make them green and bold
+        const sectionHeadingMatch = line.match(/^\*\*(.+?)\*\*\s*$/)
+        if (sectionHeadingMatch && !line.match(/^\*\*REASONING\*\*/i) && !line.match(/^\*\*ANSWER\*\*/i)) {
+          const headingText = sectionHeadingMatch[1]
+          formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${boldNumbers(headingText)}</div>`)
+          continue
+        }
+        
+        // Handle numbered list items (e.g., "1. **Macro momentum** – ...")
+        // Format as list items with bold headings
         const numberedHeadingMatch = line.match(/^(\d+\.)\s+(.+)$/)
         if (numberedHeadingMatch) {
           const headingText = numberedHeadingMatch[2]
-          // Check if it contains bold text or looks like a heading
-          const hasBold = headingText.includes('**')
-          if (hasBold) {
-            const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
-            formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${numberedHeadingMatch[1]} ${boldNumbers(processedHeading)}</div>`)
-          } else {
-            formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${numberedHeadingMatch[1]} ${boldNumbers(headingText)}</div>`)
-          }
+          // Process bold text and numbers
+          const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Format as a numbered list item
+          formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${boldNumbers(processedHeading)}</div>`)
+          continue
+        }
+        
+        // Handle bullet points FIRST (before processing bold text) to preserve structure
+        const bulletMatch = line.match(/^(\*|\-)\s+(.+)$/)
+        if (bulletMatch) {
+          let bulletContent = bulletMatch[2]
+          // Process bold text within bullet points
+          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Bold mathematical numbers in bullet content
+          bulletContent = boldNumbers(bulletContent)
+          formattedLines.push(`<div class="ml-4 my-2">• ${bulletContent}</div>`)
           continue
         }
         
         // Handle bold **text** - convert to green and ensure proper line breaks
         let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
         
+        // Remove any HTML artifacts with comprehensive cleanup
+        processedLine = processedLine
+          .replace(/\[#?45FFAE\]"?>/g, '')
+          .replace(/45FFAE\]"?>/g, '')
+          .replace(/FFAE\]"?>/g, '')
+          .replace(/\[#45FFAE\]/g, '')
+          .replace(/45FFAE\]/g, '')
+          .replace(/FFAE\]/g, '')
+          .replace(/text-\[#45FFAE\]"?>/g, '')
+          .replace(/class="text-\[#45FFAE\]"?>/g, '')
+          .replace(/class="text-\[#45FFAE\]/g, '')
+          .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
+        
         // Bold mathematical numbers
         processedLine = boldNumbers(processedLine)
-        
-        // Handle bullet points
-        processedLine = processedLine.replace(/^(\*|\-)\s+(.+)$/, '<div class="ml-4 my-2">• $2</div>')
         
         // If line is not empty or already processed, add it
         if (processedLine.trim() || line.trim() === '') {
@@ -223,7 +295,28 @@ const Home = () => {
       formattedLines.push('</div>')
     }
     
-    return formattedLines.join('\n')
+    let finalOutput = formattedLines.join('\n')
+    
+    // Final comprehensive cleanup of any remaining HTML artifacts
+    finalOutput = finalOutput
+      // Remove all variations of color code artifacts
+      .replace(/\[#?45FFAE\]"?>/g, '')
+      .replace(/45FFAE\]"?>/g, '')
+      .replace(/FFAE\]"?>/g, '')
+      .replace(/\[#45FFAE\]/g, '')
+      .replace(/45FFAE\]/g, '')
+      .replace(/FFAE\]/g, '')
+      // Remove malformed class attributes
+      .replace(/text-\[#45FFAE\]"?>/g, '')
+      .replace(/class="text-\[#45FFAE\]"?>/g, '')
+      .replace(/class="text-\[#45FFAE\]/g, '')
+      // Remove standalone malformed patterns
+      .replace(/\s+FFAE\]/g, '')
+      .replace(/\s+45FFAE\]/g, '')
+      // Fix malformed strong tags
+      .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
+    
+    return finalOutput
   }
 
   const buildChatUrl = () => {
@@ -283,6 +376,9 @@ const Home = () => {
       const data = await response.json()
 
       // Extract reasoning and answer from response
+      // Handle multiple possible structures:
+      // 1. data.results[0].results[0].response.results[0].reasoning (nested response)
+      // 2. data.results[0].results[0].reasoning (direct)
       let reasoning = ""
       let answer = ""
 
@@ -290,26 +386,74 @@ const Home = () => {
         const firstResult = data.results[0]
         if (firstResult.results && firstResult.results.length > 0) {
           const resultData = firstResult.results[0]
-          reasoning = resultData.reasoning || ""
-          answer = resultData.answer || ""
+          
+          // Check for nested response structure first
+          if (resultData.response && resultData.response.results && resultData.response.results.length > 0) {
+            const nestedResult = resultData.response.results[0]
+            reasoning = (nestedResult.reasoning || "").trim()
+            answer = (nestedResult.answer || "").trim()
+          } else {
+            // Fallback to direct structure
+            reasoning = (resultData.reasoning || "").trim()
+            answer = (resultData.answer || "").trim()
+          }
         }
       }
 
-      // If reasoning contains "ANSWER" heading, split it properly
-      // Move "ANSWER" heading and everything after it to the answer field
+      // Clean up HTML artifacts helper
+      const cleanHtmlArtifacts = (text: string) => {
+        return text
+          .replace(/45FFAE]">/g, '')
+          .replace(/45FFAE]/g, '')
+          .replace(/\[#45FFAE\]">/g, '')
+          .replace(/\[#45FFAE\]/g, '')
+      }
+
+      // Clean artifacts from both fields
+      reasoning = cleanHtmlArtifacts(reasoning)
+      answer = cleanHtmlArtifacts(answer)
+      
+      // Process reasoning field - it may contain both reasoning AND answer text separated by "**ANSWER**"
       if (reasoning) {
-        const answerMatch = reasoning.match(/(.*?)(\n\s*)?(ANSWER|Answer)(\s*\n)(.*)/is)
-        if (answerMatch) {
-          // Everything before "ANSWER" stays in reasoning
-          reasoning = answerMatch[1].trim()
-          // "ANSWER" heading + everything after goes to answer
-          const answerHeading = answerMatch[3] // "ANSWER" or "Answer"
-          const answerContent = answerMatch[5] // Content after ANSWER
-          // Combine existing answer (if any) with the extracted answer
-          answer = answer 
-            ? `${answerHeading}\n\n${answerContent}\n\n${answer}`.trim()
-            : `${answerHeading}\n\n${answerContent}`.trim()
+        // Check if reasoning contains "**ANSWER**" marker
+        // Split on "**ANSWER**" to separate reasoning from answer text
+        const answerSplit = reasoning.split(/\n\s*\*\*ANSWER\*\*\s*\n/i)
+        
+        if (answerSplit.length > 1) {
+          // There's an "**ANSWER**" marker in the middle
+          // Everything before "**ANSWER**" is reasoning
+          const reasoningText = answerSplit[0].trim()
+          // Everything after "**ANSWER**" is answer text from reasoning field
+          const answerTextFromReasoning = answerSplit.slice(1).join('\n').trim()
+          
+          // Clean reasoning: remove "**REASONING**" header at start
+          reasoning = reasoningText
+            .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
+            .replace(/^\s*REASONING\s*\n*/i, '')
+            .trim()
+          
+          // Combine answer from reasoning with separate answer field
+          if (answerTextFromReasoning && answer) {
+            answer = `${answerTextFromReasoning}\n\n${answer}`.trim()
+          } else if (answerTextFromReasoning) {
+            answer = answerTextFromReasoning
+          }
+          // If only answer exists (no text after ANSWER in reasoning), keep it as-is
+        } else {
+          // No "**ANSWER**" marker - just clean up reasoning
+          reasoning = reasoning
+            .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
+            .replace(/^\s*REASONING\s*\n*/i, '')
+            .trim()
         }
+      }
+
+      // Clean up answer: remove "**ANSWER**" header if present at the start
+      if (answer) {
+        answer = answer
+          .replace(/^\s*\*\*ANSWER\*\*\s*\n*/i, '')
+          .replace(/^\s*ANSWER\s*\n*/i, '')
+          .trim()
       }
 
       // Add assistant message with reasoning and answer

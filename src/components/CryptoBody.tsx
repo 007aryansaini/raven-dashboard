@@ -12,7 +12,6 @@ import { createChart, ColorType } from "lightweight-charts"
 import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference, recordInference, type AuthorizeInferenceResponse } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
-import { useTypingEffect } from "../utils/useTypingEffect"
 type ChatMessage = {
   id: number
   role: "user" | "assistant"
@@ -25,34 +24,40 @@ type ChatMessage = {
 // Component to handle typing effect for assistant messages
 const TypingAssistantMessage = ({ 
   message, 
-  isTyping, 
   formatMarkdown 
 }: { 
   message: ChatMessage
-  isTyping: boolean
   formatMarkdown: (text: string) => string
 }) => {
-  const displayedReasoning = useTypingEffect(message.reasoning || '', 8, isTyping && !!message.reasoning)
-  const displayedAnswer = useTypingEffect(message.answer || '', 8, isTyping && !!message.answer && !message.reasoning)
-  const displayedContent = useTypingEffect(message.content, 8, isTyping && !message.reasoning && !message.answer)
-
   return (
     <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4">
       {message.reasoning && (
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] border border-[#2A2A2A]">
           <div 
+            className="font-semibold text-base text-[#45FFAE] mb-3"
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+          >
+            Reasoning
+          </div>
+          <div 
             className="text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedReasoning) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.reasoning || '') }}
           />
         </div>
       )}
       {message.answer && (
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] text-[#FFFFFF]">
           <div 
+            className="font-semibold text-base text-[#45FFAE] mb-3"
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+          >
+            Answer
+          </div>
+          <div 
             className="text-xs lg:text-sm leading-relaxed"
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedAnswer) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.answer) }}
           />
         </div>
       )}
@@ -60,7 +65,7 @@ const TypingAssistantMessage = ({
         <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm leading-relaxed bg-[#1F1F1F] text-[#FFFFFF]">
           <div 
             style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
-            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedContent) }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(message.content) }}
           />
         </div>
       )}
@@ -122,7 +127,6 @@ const body = () => {
   const [selectedScore, setSelectedScore] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [typingMessageIds, setTypingMessageIds] = useState<Set<number>>(new Set())
   const dropdownRef = useRef<HTMLDivElement>(null)
   const tfRef = useRef<HTMLDivElement>(null)
   const analysisRef = useRef<HTMLDivElement>(null)
@@ -136,7 +140,6 @@ const body = () => {
     if (location.pathname === '/crypto' || location.pathname === '/') {
       setMessages([])
       setInputValue("")
-      setTypingMessageIds(new Set())
     }
   }, [location.pathname, location.state])
 
@@ -204,12 +207,34 @@ const body = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    // Helper function to bold mathematical numbers
+    
+    // Helper function to bold mathematical numbers in green
     const boldNumbers = (str: string) => {
       // Match numbers (integers, decimals, percentages, currency, etc.)
       // Pattern matches: numbers, decimals, percentages, currency symbols with numbers
-      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
+      // Make them bold and green (#45FFAE) like headings
+      // Updated to handle "1.33 %" with space before %
+      return str.replace(/(\d+\.?\d*\s*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
     }
+    
+    // Comprehensive initial cleanup of all HTML artifacts and malformed patterns
+    text = text
+      // Remove all variations of color code artifacts
+      .replace(/\[#?45FFAE\]"?>/g, '')
+      .replace(/45FFAE\]"?>/g, '')
+      .replace(/FFAE\]"?>/g, '')
+      .replace(/\[#45FFAE\]/g, '')
+      .replace(/45FFAE\]/g, '')
+      .replace(/FFAE\]/g, '')
+      // Remove malformed class attributes
+      .replace(/text-\[#45FFAE\]"?>/g, '')
+      .replace(/class="text-\[#45FFAE\]"?>/g, '')
+      .replace(/class="text-\[#45FFAE\]/g, '')
+      // Remove standalone malformed closing tags
+      .replace(/\s+FFAE\]/g, '')
+      .replace(/\s+45FFAE\]/g, '')
+      // Fix malformed strong tags
+      .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
     
     // Split text into lines for better processing
     const lines = text.split('\n')
@@ -242,34 +267,72 @@ const body = () => {
         
         // Handle "REASONING" and "ANSWER" headers first - style them prominently
         if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
-          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${line.trim()}</div>`)
+          const escapedText = line.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
           continue
         }
         
-        // Handle numbered headings (e.g., "1. Current Market Position & Momentum")
-        // These should be on new lines with green text
+        // Handle section headings like "**Key implications**" - make them green and bold
+        const sectionHeadingMatch = line.match(/^\*\*(.+?)\*\*\s*$/)
+        if (sectionHeadingMatch && !line.match(/^\*\*REASONING\*\*/i) && !line.match(/^\*\*ANSWER\*\*/i)) {
+          const headingText = sectionHeadingMatch[1]
+          formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${boldNumbers(headingText)}</div>`)
+          continue
+        }
+        
+        // Handle numbered list items (e.g., "1. **Macro momentum** – ...")
+        // Format as list items with bold headings
         const numberedHeadingMatch = line.match(/^(\d+\.)\s+(.+)$/)
         if (numberedHeadingMatch) {
           const headingText = numberedHeadingMatch[2]
-          // Check if it contains bold text or looks like a heading
-          const hasBold = headingText.includes('**')
-          if (hasBold) {
-            const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
-            formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${numberedHeadingMatch[1]} ${boldNumbers(processedHeading)}</div>`)
-          } else {
-            formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${numberedHeadingMatch[1]} ${boldNumbers(headingText)}</div>`)
-          }
+          // First bold numbers in the plain text
+          let processedHeading = boldNumbers(headingText)
+          // Then process bold markdown text
+          processedHeading = processedHeading.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Format as a numbered list item
+          formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${processedHeading}</div>`)
           continue
         }
         
-        // Handle bold **text** - convert to green and ensure proper line breaks
-        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // Handle bullet points FIRST (before processing bold text) to preserve structure
+        const bulletMatch = line.match(/^(\*|\-)\s+(.+)$/)
+        if (bulletMatch) {
+          let bulletContent = bulletMatch[2]
+          // Process bold text within bullet points
+          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Bold mathematical numbers in bullet content
+          bulletContent = boldNumbers(bulletContent)
+          formattedLines.push(`<div class="ml-4 my-2">• ${bulletContent}</div>`)
+          continue
+        }
         
-        // Bold mathematical numbers
-        processedLine = boldNumbers(processedLine)
+        // FIRST: Bold mathematical numbers in plain text (before processing markdown)
+        // This avoids creating nested strong tags
+        let processedLine = boldNumbers(line)
         
-        // Handle bullet points
-        processedLine = processedLine.replace(/^(\*|\-)\s+(.+)$/, '<div class="ml-4 my-2">• $2</div>')
+        // THEN: Handle bold **text** - convert to green
+        processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        
+        // Remove HTML artifacts - be VERY conservative, only remove clearly malformed patterns
+        // Split by HTML tags to preserve legitimate attributes
+        const parts = processedLine.split(/(<[^>]+>)/)
+        const cleanedParts = parts.map(part => {
+          // If it's an HTML tag, leave it alone
+          if (part.startsWith('<') && part.endsWith('>')) {
+            return part
+          }
+          // Only clean text content, not HTML attributes
+          return part
+            .replace(/\s+\[#45FFAE\]/g, '')
+            .replace(/\s+45FFAE\]/g, '')
+            .replace(/\s+FFAE\]/g, '')
+        })
+        processedLine = cleanedParts.join('')
+        
+        // Fix any malformed strong tags
+        processedLine = processedLine
+          .replace(/<strong class="text-\[#45FFAE\]">/g, '<strong class="text-[#45FFAE]">')
+          .replace(/<strong class="font-semibold text-">/g, '<strong class="font-semibold text-[#45FFAE]">')
         
         // If line is not empty or already processed, add it
         if (processedLine.trim() || line.trim() === '') {
@@ -282,7 +345,29 @@ const body = () => {
       formattedLines.push('</div>')
     }
     
-    return formattedLines.join('\n')
+    let finalOutput = formattedLines.join('\n')
+    
+    // Final cleanup - ONLY fix malformed tags, NEVER modify legitimate HTML attributes
+    // Split by HTML tags to ensure we never touch attributes
+    const htmlParts = finalOutput.split(/(<[^>]*>)/)
+    finalOutput = htmlParts.map(part => {
+      // If it's an HTML tag, only fix malformed class attributes, never remove parts
+      if (part.startsWith('<') && part.endsWith('>')) {
+        return part
+          .replace(/class="text-\[#45FFAE\]"/g, 'class="text-[#45FFAE]"')
+          .replace(/class="font-semibold text-"/g, 'class="font-semibold text-[#45FFAE]"')
+      }
+      // For text content, only remove standalone artifacts (with word boundaries or spaces)
+      return part
+        .replace(/\s+\[#45FFAE\]/g, '')
+        .replace(/\s+45FFAE\]/g, '')
+        .replace(/\s+FFAE\]/g, '')
+        .replace(/\b\[#45FFAE\]/g, '')
+        .replace(/\b45FFAE\]/g, '')
+        .replace(/\bFFAE\]/g, '')
+    }).join('')
+    
+    return finalOutput
   }
 
   const buildChatUrl = () => {
@@ -391,79 +476,90 @@ const body = () => {
 
       const data = await response.json()
 
-      // Helper function to recursively search for a field in the JSON object
-      const findInObject = (obj: any, fieldName: string, visited = new Set()): string => {
-        if (!obj || typeof obj !== 'object' || visited.has(obj)) {
-          return ""
-        }
-        visited.add(obj)
-
-        // Check if current object has the field
-        if (obj[fieldName] && typeof obj[fieldName] === 'string' && obj[fieldName].trim()) {
-          return obj[fieldName]
-        }
-
-        // Recursively search in all properties
-        for (const key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            const value = obj[key]
-            if (value && typeof value === 'object') {
-              const found = findInObject(value, fieldName, visited)
-              if (found) {
-                return found
-              }
-            }
-          }
-        }
-
-        return ""
-      }
-
-      // Step 1: Search for final_answer anywhere in the response
-      let finalAnswer = findInObject(data, 'final_answer')
-
-      // Step 2: If final_answer not found, search for reasoning and answer
+      // Extract reasoning and answer from the new response structure
+      // Handle multiple possible structures:
+      // 1. data.results[0].results[0].response.results[0].reasoning (nested response)
+      // 2. data.results[0].results[0].reasoning (direct)
       let reasoning = ""
       let answer = ""
-      
-      if (!finalAnswer) {
-        reasoning = findInObject(data, 'reasoning')
-        answer = findInObject(data, 'answer')
-      }
 
-      // If reasoning contains "ANSWER" heading and we don't have final_answer, split it properly
-      if (!finalAnswer && reasoning) {
-        const answerMatch = reasoning.match(/(.*?)(\n\s*)?(ANSWER|Answer)(\s*\n)(.*)/is)
-        if (answerMatch) {
-          // Everything before "ANSWER" stays in reasoning
-          reasoning = answerMatch[1].trim()
-          // "ANSWER" heading + everything after goes to answer
-          const answerHeading = answerMatch[3] // "ANSWER" or "Answer"
-          const answerContent = answerMatch[5] // Content after ANSWER
-          // Combine existing answer (if any) with the extracted answer
-          answer = answer 
-            ? `${answerHeading}\n\n${answerContent}\n\n${answer}`.trim()
-            : `${answerHeading}\n\n${answerContent}`.trim()
+      if (data.success && data.results && data.results.length > 0) {
+        const firstResult = data.results[0]
+        if (firstResult.results && firstResult.results.length > 0) {
+          const resultData = firstResult.results[0]
+          
+          // Check for nested response structure first
+          if (resultData.response && resultData.response.results && resultData.response.results.length > 0) {
+            const nestedResult = resultData.response.results[0]
+            reasoning = (nestedResult.reasoning || "").trim()
+            answer = (nestedResult.answer || "").trim()
+          } else {
+            // Fallback to direct structure
+            reasoning = (resultData.reasoning || "").trim()
+            answer = (resultData.answer || "").trim()
+          }
         }
       }
 
-      // Step 3: Determine display content with fallback mechanism
-      let displayContent = ""
-      if (finalAnswer) {
-        // Priority 1: Use final_answer if available
-        displayContent = finalAnswer
-      } else if (answer) {
-        // Priority 2: Use answer if available
-        displayContent = answer
-      } else if (reasoning) {
-        // Priority 3: Use reasoning if available
-        displayContent = reasoning
-      } else {
-        // Priority 4: Fallback to "No data available"
-        displayContent = "No data available"
+      // Clean up HTML artifacts helper
+      const cleanHtmlArtifacts = (text: string) => {
+        return text
+          .replace(/45FFAE]">/g, '')
+          .replace(/45FFAE]/g, '')
+          .replace(/\[#45FFAE\]">/g, '')
+          .replace(/\[#45FFAE\]/g, '')
       }
 
-      // Add assistant message with final_answer or answer/reasoning
+      // Clean artifacts from both fields
+      reasoning = cleanHtmlArtifacts(reasoning)
+      answer = cleanHtmlArtifacts(answer)
+      
+      // Process reasoning field - it may contain both reasoning AND answer text separated by "**ANSWER**"
+      if (reasoning) {
+        // Check if reasoning contains "**ANSWER**" marker
+        // Split on "**ANSWER**" to separate reasoning from answer text
+        const answerSplit = reasoning.split(/\n\s*\*\*ANSWER\*\*\s*\n/i)
+        
+        if (answerSplit.length > 1) {
+          // There's an "**ANSWER**" marker in the middle
+          // Everything before "**ANSWER**" is reasoning
+          const reasoningText = answerSplit[0].trim()
+          // Everything after "**ANSWER**" is answer text from reasoning field
+          const answerTextFromReasoning = answerSplit.slice(1).join('\n').trim()
+          
+          // Clean reasoning: remove "**REASONING**" header at start
+          reasoning = reasoningText
+            .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
+            .replace(/^\s*REASONING\s*\n*/i, '')
+            .trim()
+          
+          
+          // Combine answer from reasoning with separate answer field
+          if (answerTextFromReasoning && answer) {
+            answer = `${answerTextFromReasoning}\n\n${answer}`.trim()
+          } else if (answerTextFromReasoning) {
+            answer = answerTextFromReasoning
+          }
+          // If only answer exists (no text after ANSWER in reasoning), keep it as-is
+        } else {
+          // No "**ANSWER**" marker - just clean up reasoning
+          reasoning = reasoning
+            .replace(/^\s*\*\*REASONING\*\*\s*\n*/i, '')
+            .replace(/^\s*REASONING\s*\n*/i, '')
+            .trim()
+          
+        }
+      }
+
+      // Clean up answer: remove "**ANSWER**" header if present at the start
+      if (answer) {
+        answer = answer
+          .replace(/^\s*\*\*ANSWER\*\*\s*\n*/i, '')
+          .replace(/^\s*ANSWER\s*\n*/i, '')
+          .trim()
+      }
+
+      // Add assistant message with reasoning and answer
       const newMessageId = Date.now() + 1
       setMessages((prev) => {
         const newMessages: ChatMessage[] = [
@@ -471,16 +567,13 @@ const body = () => {
           {
             id: newMessageId,
             role: "assistant" as const,
-            content: displayContent,
-            reasoning: finalAnswer ? undefined : (reasoning || undefined),
-            answer: finalAnswer || answer || undefined,
+            content: answer || reasoning || "No data available",
+            reasoning: reasoning || undefined,
+            answer: answer || undefined,
           },
         ]
         return newMessages
       })
-      // Mark this message for typing effect
-      setTypingMessageIds((prev) => new Set(prev).add(newMessageId))
-
       // Set loading to false immediately after response is received and message is added
       setIsLoading(false)
 
@@ -520,8 +613,6 @@ const body = () => {
         ]
         return newMessages
       })
-      // Mark this message for typing effect
-      setTypingMessageIds((prev) => new Set(prev).add(errorMessageId))
       setIsLoading(false)
     }
   }
@@ -718,7 +809,6 @@ const body = () => {
                   ) : (
                     <TypingAssistantMessage 
                       message={message} 
-                      isTyping={typingMessageIds.has(message.id)}
                       formatMarkdown={formatMarkdown}
                     />
                   )}

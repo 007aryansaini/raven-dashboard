@@ -38,26 +38,31 @@ const TypingAssistantMessage = ({
   const displayedContent = useTypingEffect(message.content, 8, isTyping && !message.reasoning && !message.answer)
 
   return (
-    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-2 lg:gap-3">
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4">
       {message.reasoning && (
-        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] border border-[#2A2A2A]">
+        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] border border-[#2A2A2A]">
           <div 
-            className="font-urbanist text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+            className="text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
             dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedReasoning) }}
           />
         </div>
       )}
       {message.answer && (
-        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
+        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] text-[#FFFFFF]">
           <div 
-            className="font-urbanist text-xs lg:text-sm leading-relaxed"
+            className="text-xs lg:text-sm leading-relaxed"
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
             dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedAnswer) }}
           />
         </div>
       )}
       {!message.reasoning && !message.answer && (
-        <div className="rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#1F1F1F] text-[#FFFFFF]">
-          {displayedContent}
+        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm leading-relaxed bg-[#1F1F1F] text-[#FFFFFF]">
+          <div 
+            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+            dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedContent) }}
+          />
         </div>
       )}
     </div>
@@ -513,6 +518,13 @@ const body = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
+    // Helper function to bold mathematical numbers
+    const boldNumbers = (str: string) => {
+      // Match numbers (integers, decimals, percentages, currency, etc.)
+      // Pattern matches: numbers, decimals, percentages, currency symbols with numbers
+      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
+    }
+    
     // Split text into lines for better processing
     const lines = text.split('\n')
     const formattedLines: string[] = []
@@ -526,13 +538,13 @@ const body = () => {
       if (isTableRow && !isTableSeparator) {
         if (!inTable) {
           inTable = true
-          formattedLines.push('<div class="my-2 space-y-1">')
+          formattedLines.push('<div class="my-3 space-y-1">')
         }
         const cells = line.split('|').filter(cell => cell.trim() && !cell.trim().match(/^:?-+:?$/))
         if (cells.length > 0) {
           formattedLines.push(
-            `<div class="flex gap-3 py-1 border-b border-[#2A2A2A]">${cells.map(cell => 
-              `<span class="text-[#E0E0E0] flex-1">${cell.trim()}</span>`
+            `<div class="flex gap-3 py-2 border-b border-[#2A2A2A]">${cells.map(cell => 
+              `<span class="text-[#E0E0E0] flex-1">${boldNumbers(cell.trim())}</span>`
             ).join('')}</div>`
           )
         }
@@ -544,7 +556,7 @@ const body = () => {
         
         // Handle "REASONING" and "ANSWER" headers first - style them prominently
         if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
-          formattedLines.push(`<div class="font-urbanist font-semibold text-base text-[#45FFAE] mb-3 mt-4">${line.trim()}</div>`)
+          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${line.trim()}</div>`)
           continue
         }
         
@@ -557,9 +569,9 @@ const body = () => {
           const hasBold = headingText.includes('**')
           if (hasBold) {
             const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
-            formattedLines.push(`<div class="font-urbanist font-semibold text-sm text-[#45FFAE] mt-4 mb-2">${numberedHeadingMatch[1]} ${processedHeading}</div>`)
+            formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${numberedHeadingMatch[1]} ${boldNumbers(processedHeading)}</div>`)
           } else {
-            formattedLines.push(`<div class="font-urbanist font-semibold text-sm text-[#45FFAE] mt-4 mb-2">${numberedHeadingMatch[1]} ${headingText}</div>`)
+            formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${numberedHeadingMatch[1]} ${boldNumbers(headingText)}</div>`)
           }
           continue
         }
@@ -567,8 +579,11 @@ const body = () => {
         // Handle bold **text** - convert to green and ensure proper line breaks
         let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
         
+        // Bold mathematical numbers
+        processedLine = boldNumbers(processedLine)
+        
         // Handle bullet points
-        processedLine = processedLine.replace(/^(\*|\-)\s+(.+)$/, '<div class="ml-4 my-1">• $2</div>')
+        processedLine = processedLine.replace(/^(\*|\-)\s+(.+)$/, '<div class="ml-4 my-2">• $2</div>')
         
         // If line is not empty or already processed, add it
         if (processedLine.trim() || line.trim() === '') {
@@ -1102,7 +1117,7 @@ const body = () => {
           </div>
         ) : (
           <div className="flex-1 w-full max-w-5xl rounded-2xl lg:rounded-3xl bg-[#141414] p-3 sm:p-4 lg:p-6 flex flex-col min-h-0 overflow-hidden">
-               <div className="flex-1 min-h-0 overflow-y-auto rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-3 lg:p-4 space-y-3 lg:space-y-4">
+               <div className="flex-1 min-h-0 overflow-y-auto rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-3 lg:p-4 space-y-4 lg:space-y-5">
                  {messages.map((message) => (
                    <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                      {message.role === 'user' ? (

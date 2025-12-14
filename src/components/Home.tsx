@@ -342,6 +342,11 @@ const Home = () => {
   }
 
   const handleSubmit = async () => {
+    // Prevent multiple submissions while loading
+    if (isLoading) {
+      return
+    }
+
     const trimmed = inputValue.trim()
     if (!trimmed) {
       return
@@ -388,7 +393,7 @@ const Home = () => {
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isLoading) {
       handleSubmit()
     }
   }
@@ -474,19 +479,25 @@ const Home = () => {
                    value={inputValue}
                    onChange={handleInputChange}
                    onKeyPress={handleKeyPress}
-                   className="font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none sm:text-lg bg-transparent flex-1"
+                   disabled={isLoading}
+                   className={`font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] placeholder-[#3E3E3E] focus:outline-none sm:text-lg bg-transparent flex-1 ${
+                     isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                   }`}
                  />
                </div>
 
                <button
                  type="button"
                  onClick={handleSubmit}
+                 disabled={!inputValue.trim() || isLoading}
                  className={`flex h-8 w-8 lg:h-10 lg:w-10 items-center justify-center rounded-full border transition-all duration-200 ${
-                   inputValue.trim()
-                     ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
-                     : 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed'}`}
+                   isLoading
+                     ? 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed opacity-50'
+                     : inputValue.trim()
+                       ? 'border-[#45FFAE] bg-[#45FFAE]/10 text-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer'
+                       : 'border-transparent bg-[#2A2A2A] text-[#808080] cursor-not-allowed'
+                 }`}
                  aria-label="Submit query"
-                 disabled={!inputValue.trim()}
                >
                  <ArrowUp className="h-4 w-4 lg:h-5 lg:w-5" />
                </button>

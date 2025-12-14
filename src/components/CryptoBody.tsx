@@ -188,6 +188,10 @@ const body = () => {
   }
 
   const handleSuggestedQuestion = (question: string) => {
+    // Prevent interaction while loading
+    if (isLoading) {
+      return
+    }
     setInputValue(question)
     requestAnimationFrame(() => inputRef.current?.focus())
   }
@@ -508,6 +512,11 @@ const body = () => {
   }
 
   const handleSubmit = async () => {
+    // Prevent multiple submissions while loading
+    if (isLoading) {
+      return
+    }
+
     // Validate user is logged in with Twitter
     if (!twitterUser) {
       toast.warning('Please login with X (Twitter) to send messages', {
@@ -591,7 +600,7 @@ const body = () => {
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isLoading) {
       handleSubmit()
     }
   }
@@ -632,29 +641,39 @@ const body = () => {
              <div className="flex flex-col gap-3 lg:gap-5 w-full min-h-0 lg:h-96 p-2 sm:p-4 items-center justify-center">
                <div className="flex flex-col gap-2.5 lg:gap-3.5 items-center justify-center w-full">
                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Tell me the sentiment around ETH ?')}>
+                  <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
+                  }`} onClick={() => handleSuggestedQuestion('Tell me the sentiment around ETH ?')}>
                      <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Tell me the sentiment around ETH ?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('What is the Expected CPI in USA?')}>
+                  <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
+                  }`} onClick={() => handleSuggestedQuestion('What is the Expected CPI in USA?')}>
                      <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What is the Expected CPI in USA?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
                  
                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion("What's the primarily reason of Bitcoin falling recently?")}>
+                  <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
+                  }`} onClick={() => handleSuggestedQuestion("What's the primarily reason of Bitcoin falling recently?")}>
                      <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What's the primarily reason of Bitcoin falling recently?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Which airdrop to target right now in coming 2026?')}>
+                  <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
+                  }`} onClick={() => handleSuggestedQuestion('Which airdrop to target right now in coming 2026?')}>
                      <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Which airdrop to target right now in coming 2026?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
                  
                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-center">
-                  <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between cursor-pointer hover:bg-[#2A2A2A] transition-all duration-200 w-full sm:w-fit" onClick={() => handleSuggestedQuestion('Should I invest in Bitcoin now?')}>
+                  <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
+                  }`} onClick={() => handleSuggestedQuestion('Should I invest in Bitcoin now?')}>
                      <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Should I invest in Bitcoin now?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
@@ -727,13 +746,22 @@ const body = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
+                  disabled={isLoading}
+                  className={`font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E] ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 />
             </div>
 
             <ArrowUp 
-              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 cursor-pointer transition-all duration-200 ${(inputValue.trim() || buildQueryFromTags()) ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
-              onClick={handleSubmit}
+              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 transition-all duration-200 ${
+                isLoading 
+                  ? 'text-[#808080] cursor-not-allowed opacity-50' 
+                  : (inputValue.trim() || buildQueryFromTags()) 
+                    ? 'text-[#45FFAE] hover:scale-110 cursor-pointer' 
+                    : 'text-[#808080] cursor-not-allowed'
+              }`} 
+              onClick={isLoading ? undefined : handleSubmit}
             />
 
          </div>

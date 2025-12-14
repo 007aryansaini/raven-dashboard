@@ -423,6 +423,11 @@ const body = () => {
   }
 
   const handleCardClick = (eventTitle: string, eventId?: string, eventImageUrl?: string) => {
+    // Prevent interaction while loading
+    if (isLoading) {
+      return
+    }
+
     console.log("Event card clicked - Question:", eventTitle, "Event ID:", eventId, "Image URL:", eventImageUrl)
     
     // Set the input value to the question
@@ -449,6 +454,11 @@ const body = () => {
 
   // Handle direct submission from "Ask Raven" button on card
   const handleAskRavenClick = async (eventTitle: string, _eventId?: string, eventImageUrl?: string) => {
+    // Prevent multiple submissions while loading
+    if (isLoading) {
+      return
+    }
+
     console.log("Ask Raven clicked - Question:", eventTitle, "Image URL:", eventImageUrl)
     
     // Validate before proceeding
@@ -774,6 +784,11 @@ const body = () => {
   }
 
   const handleSubmit = async () => {
+    // Prevent multiple submissions while loading
+    if (isLoading) {
+      return
+    }
+
     // Validate user is logged in with Twitter
     if (!twitterUser) {
       toast.warning('Please login with X (Twitter) to send messages', {
@@ -844,7 +859,7 @@ const body = () => {
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !isLoading) {
       handleSubmit()
     }
   }
@@ -1041,6 +1056,7 @@ const body = () => {
                          event={eventPair.event}
                          market={eventPair.market}
                          onClick={() => {
+                           if (isLoading) return
                            // Send the event title (the question displayed on the card) to chat input
                            // Pass the image URL so it appears in the chat
                            const imageUrl = (eventPair.event.image || eventPair.event.icon || '').trim()
@@ -1051,6 +1067,7 @@ const body = () => {
                            handleCardClick(eventPair.event.title, eventPair.event.id, validImageUrl)
                          }}
                          onAskRaven={() => {
+                           if (isLoading) return
                            // Directly submit to chat when "Ask Raven" button is clicked
                            const imageUrl = (eventPair.event.image || eventPair.event.icon || '').trim()
                            const validImageUrl = imageUrl && imageUrl !== '' ? imageUrl : undefined
@@ -1158,13 +1175,22 @@ const body = () => {
                   value={inputValue}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}
-                  className="font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E]"
+                  disabled={isLoading}
+                  className={`font-urbanist font-medium text-sm lg:text-base text-[#FFFFFF] bg-transparent outline-none focus:outline-none focus:ring-0 focus:border-none flex-1 placeholder-[#3E3E3E] ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 />
             </div>
 
             <ArrowUp 
-              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 cursor-pointer transition-all duration-200 ${(inputValue.trim() || buildQueryFromTags()) ? 'text-[#45FFAE] hover:scale-110' : 'text-[#808080]'}`} 
-              onClick={handleSubmit}
+              className={`h-3.5 w-3.5 lg:h-4 lg:w-4 transition-all duration-200 ${
+                isLoading 
+                  ? 'text-[#808080] cursor-not-allowed opacity-50' 
+                  : (inputValue.trim() || buildQueryFromTags()) 
+                    ? 'text-[#45FFAE] hover:scale-110 cursor-pointer' 
+                    : 'text-[#808080] cursor-not-allowed'
+              }`} 
+              onClick={isLoading ? undefined : handleSubmit}
             />
 
          </div>

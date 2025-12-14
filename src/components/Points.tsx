@@ -704,11 +704,11 @@ Join the future of trading predictions! 🎯`
              backgroundSize: '100% 100%, 60px 60px, 60px 60px',
              backgroundColor: '#000000'
            }}>
-        <div className="flex flex-col items-center gap-4 text-center max-w-md">
-          <div className="font-urbanist text-xl sm:text-2xl lg:text-3xl font-medium leading-tight tracking-[0%] text-[#FFFFFF]">
+        <div className="flex flex-col items-center gap-4 text-center max-w-lg">
+          <div className="font-urbanist text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-[0%] text-[#FFFFFF]">
             Connect to View Points
           </div>
-          <div className="font-urbanist text-sm sm:text-base font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+          <div className="font-urbanist text-sm sm:text-base font-medium leading-relaxed tracking-[0%] text-[#D1D1D1]">
             Please connect your wallet and login with Twitter to view your points and rewards.
           </div>
         </div>
@@ -729,116 +729,158 @@ Join the future of trading predictions! 🎯`
          }}>
      
 
-     <div className="flex h-full w-full max-w-6xl flex-col items-center justify-start gap-6">
+     <div className="flex h-full w-full max-w-6xl flex-col items-center justify-start gap-8">
+       <div className="flex w-full flex-col items-center gap-8">
+         {/* Header Section */}
+         <div className="flex w-full flex-col items-center justify-center gap-3 rounded-3xl bg-[#141414] border border-[#2A2A2A] px-6 py-8 text-center sm:px-10 sm:py-12">
+           <div className="font-urbanist text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight tracking-[0%] text-[#FFFFFF]">
+             Earn Points, Unlock Rewards
+           </div> 
+           <div className="font-urbanist text-sm sm:text-base font-medium leading-relaxed tracking-[0%] text-[#D1D1D1] max-w-2xl">
+             Finish quick quests and stack points to claim rewards.
+           </div>
+         </div>
+
+         {/* Cards Container */}
+         <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+           {/* Achievement Card */}
+           <div className="flex w-full flex-col gap-4 rounded-3xl bg-[#1A1A1A] border border-[#2A2A2A] p-6 sm:p-8 min-h-[280px]">
+             <div className="flex flex-col items-center justify-center flex-1 gap-3">
+               <div className="font-urbanist text-xs sm:text-sm font-medium leading-none tracking-[0%] text-[#808080] uppercase">
+                 Total Points
+               </div>
+               <div className="font-urbanist text-3xl sm:text-4xl lg:text-5xl font-bold leading-none tracking-[0%] text-[#45FFAE] text-center">
+                 {xpDisplayText}
+               </div>
+               {xpError && (
+                 <div className="text-center text-xs font-urbanist text-[#FF7D7D] mt-2">
+                   {xpError}
+                 </div>
+               )}
+               {!xpError && !isXpLoading && (
+                 <div className="text-center text-xs font-urbanist text-[#808080] mt-2">
+                   Keep earning to unlock more rewards
+                 </div>
+               )}
+             </div>
+           </div>
+
+           {/* Invite Friends Card */}
+           <div className="flex w-full flex-col gap-4 rounded-3xl bg-[#1A1A1A] border border-[#2A2A2A] p-6 sm:p-8 min-h-[280px]">
+             <div className="flex flex-col items-center justify-center flex-1 gap-4">
+               <div className="font-urbanist text-base sm:text-lg font-semibold leading-none tracking-[0%] text-[#FFFFFF] text-center">
+                 Invite Your Friends
+               </div>
+               <div className="font-urbanist text-xs sm:text-sm font-medium leading-relaxed tracking-[0%] text-[#D1D1D1] text-center">
+                 Share your referral link and earn rewards
+               </div>
                
-               <div className="flex w-full flex-col items-center gap-6">
-                      
-                       <div className="flex w-full flex-col items-center justify-center gap-2 rounded-3xl bg-[#141414] px-6 py-8 text-center sm:px-10 sm:py-10">
-                             <div className="font-urbanist text-xl sm:text-2xl lg:text-3xl font-medium leading-tight tracking-[0%] text-[#FFFFFF]">Earn Points, Unlock Rewards</div> 
-                             <div className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">Finish quick quests and stack points to claim rewards.</div>
-                       </div>
+               <div className="flex flex-col gap-3 w-full items-center">
+                 <div className="flex flex-1 items-center rounded-xl bg-[#0F0F0F] border border-[#2A2A2A] px-4 py-3 w-full">
+                   <span className="font-urbanist text-xs sm:text-sm font-medium leading-none tracking-[0%] text-[#D1D1D1] truncate w-full text-center">
+                     {referralUrl}
+                   </span>
+                 </div>
+                 
+                 <div className="flex items-center gap-2">
+                   <button
+                     onClick={handleCopyReferralLink}
+                     disabled={!referralCode || isReferralCodeLoading}
+                     className="flex items-center gap-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2A2A2A]"
+                   >
+                     <Copy className="h-4 w-4 text-[#FFFFFF]" />
+                     <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                       Copy Link
+                     </span>
+                   </button>
+                 </div>
+                 
+                 <div className="text-xs font-urbanist text-center min-h-[20px]">
+                   {copyStatus === "copied" && (
+                     <span className="text-[#45FFAE]">✓ Link copied!</span>
+                   )}
+                   {copyStatus === "error" && (
+                     <span className="text-[#FF7D7D]">Copy failed</span>
+                   )}
+                   {referralCodeError && (
+                     <span className="text-[#FF7D7D]">{referralCodeError}</span>
+                   )}
+                 </div>
+                 
+                 <div className="flex flex-col gap-2 w-full items-center mt-2">
+                   <button 
+                     onClick={handleShareOnTwitter}
+                     disabled={!referralCode || isReferralCodeLoading || !referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")}
+                     className="flex w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#2A2A2A]"
+                   >
+                     <X className="h-4 w-4 text-[#FFFFFF]" />
+                     <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                       Share on X
+                     </span>
+                   </button>
+                   
+                   <button 
+                     onClick={() => setIsWhitelistModalOpen(true)}
+                     disabled={!address || !isConnected}
+                     className="flex w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#45FFAE] hover:bg-[#35EF9E] px-4 py-2.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                   >
+                     <CheckCircle2 className="h-4 w-4" />
+                     <span className="font-urbanist text-xs font-semibold leading-none tracking-[0%]">
+                       Whitelist Addresses
+                     </span>
+                   </button>
+                 </div>
+               </div>
+             </div>
+           </div>
 
-                       {/* Cards Container */}
-                       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
-                         {/* Achievement Card */}
-                         <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                          <div className="flex flex-col items-center justify-center min-h-[100px]">
-                              <div className="font-urbanist text-2xl md:text-4xl lg:text-5xl font-bold leading-none tracking-[0%] text-[#45FFAE] text-center">{xpDisplayText}</div>
-                              {xpError && (
-                                <div className="text-center text-xs font-urbanist text-[#FF7D7D] mt-2">{xpError}</div>
-                              )}
-                          </div>
-                         </div>
+           {/* Share About Raven Quest Card */}
+           <div className="flex w-full flex-col gap-4 rounded-3xl bg-[#1A1A1A] border border-[#2A2A2A] p-6 sm:p-8 min-h-[280px]">
+             <div className="flex flex-col items-center justify-center flex-1 gap-4">
+               <div className="font-urbanist text-base sm:text-lg font-semibold leading-none tracking-[0%] text-[#FFFFFF] text-center">
+                 Share About Raven
+               </div>
+               <div className="font-urbanist text-xs sm:text-sm font-medium leading-relaxed tracking-[0%] text-[#D1D1D1] text-center">
+                 Spread the word about Raven on Twitter and earn rewards!
+               </div>
+               
+               <div className="flex flex-col items-center gap-3 w-full mt-2">
+                 <button
+                   onClick={handleShareAboutRaven}
+                   className="flex w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3A3A3A] border border-[#3A3A3A] px-4 py-2.5 transition-all duration-200 cursor-pointer"
+                 >
+                   <X className="h-4 w-4 text-[#FFFFFF]" />
+                   <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
+                     {hasShared ? "Shared!" : "Share on X"}
+                   </span>
+                 </button>
 
-                         {/* Invite Friends Card */}
-                         <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                           <div className="flex flex-col items-center justify-center gap-3 text-center min-h-[100px]">
-                             <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Invite your friends</div>
-                             
-                             <div className="flex flex-col gap-2 w-full items-center">
-                               <div className="flex flex-1 items-center rounded-xl bg-[#2A2A2A] px-3 py-2 w-full max-w-md">
-                                 <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#D1D1D1] truncate w-full text-center">
-                                   {referralUrl}
-                                 </span>
-                               </div>
-                               <button
-                                 onClick={handleCopyReferralLink}
-                                 disabled={!referralCode || isReferralCodeLoading}
-                                 className="rounded-xl bg-[#2A2A2A] p-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
-                               >
-                                 <Copy className="h-4 w-4 text-white cursor-pointer" />
-                               </button>
-                             </div>
-                             
-                             <div className="text-xs font-urbanist text-center">
-                               {copyStatus === "copied" && (
-                                 <span className="text-[#45FFAE] cursor-pointer">Link copied!</span>
-                               )}
-                               {copyStatus === "error" && (
-                                 <span className="text-[#FF7D7D]">Copy failed</span>
-                               )}
-                               {referralCodeError && (
-                                 <span className="text-[#FF7D7D]">{referralCodeError}</span>
-                               )}
-                             
-                             </div>
-                             
-                             <button 
-                               onClick={handleShareOnTwitter}
-                               disabled={!referralCode || isReferralCodeLoading || !referralUrl || referralUrl.includes("Loading") || referralUrl.includes("Unable")}
-                               className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                             >
-                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">Share on</span>
-                               <X className="h-4 w-4 text-white" />
-                             </button>
-                             
-                             <button 
-                               onClick={() => setIsWhitelistModalOpen(true)}
-                               disabled={!address || !isConnected}
-                               className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-black"
-                             >
-                               <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">Whitelist Addresses</span>
-                               <CheckCircle2 className="h-4 w-4" />
-                             </button>
-                           </div>
-                         </div>
-
-                         {/* Share About Raven Quest Card */}
-                         <div className="flex w-full flex-col gap-3 rounded-3xl bg-[#1A1A1A] p-4">
-                            <div className="flex flex-col items-center justify-center gap-2 text-center min-h-[100px]">
-                              <div className="font-urbanist text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">
-                                Share about Raven on Twitter
-                              </div>
-                              <div className="font-urbanist text-xs font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
-                                Spread the word about Raven and earn rewards!
-                              </div>
-                              
-                              <div className="flex flex-col items-center gap-2">
-                                <button
-                                  onClick={handleShareAboutRaven}
-                                  className="flex w-fit flex-row cursor-pointer items-center gap-2 rounded-xl bg-[#2A2A2A] px-3 py-2 transition-colors hover:bg-[#3A3A3A] disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  <span className="font-urbanist text-xs font-medium leading-none tracking-[0%] text-[#FFFFFF]">
-                                    {hasShared ? "Shared!" : "Share on"}
-                                  </span>
-                                  <X className="h-4 w-4 text-white" />
-                                </button>
-
-                                {hasShared && (
-                                  <button
-                                    onClick={() => setIsVerifyModalOpen(true)}
-                                    disabled={isVerifying}
-                                    className="flex w-fit flex-row items-center gap-2 rounded-xl bg-[#45FFAE] px-3 py-2 transition-colors hover:bg-[#35EF9E] disabled:opacity-50 disabled:cursor-not-allowed text-black"
-                                  >
-                                    <span className="font-urbanist text-xs font-medium leading-none tracking-[0%]">
-                                      {isVerifying ? "Verifying..." : "Verify Post"}
-                                    </span>
-                                    {!isVerifying && <CheckCircle2 className="h-4 w-4" />}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                         </div>
+                 {hasShared && (
+                   <button
+                     onClick={() => setIsVerifyModalOpen(true)}
+                     disabled={isVerifying}
+                     className="flex w-full flex-row items-center justify-center gap-2 rounded-xl bg-[#45FFAE] hover:bg-[#35EF9E] px-4 py-2.5 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-black"
+                   >
+                     {isVerifying ? (
+                       <>
+                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent"></div>
+                         <span className="font-urbanist text-xs font-semibold leading-none tracking-[0%]">
+                           Verifying...
+                         </span>
+                       </>
+                     ) : (
+                       <>
+                         <CheckCircle2 className="h-4 w-4" />
+                         <span className="font-urbanist text-xs font-semibold leading-none tracking-[0%]">
+                           Verify Post
+                         </span>
+                       </>
+                     )}
+                   </button>
+                 )}
+               </div>
+             </div>
+           </div>
                        </div>
 
     
@@ -954,10 +996,10 @@ const VerifyModal = ({ isOpen, onClose, tweetUrl, setTweetUrl, onVerify, isVerif
 
         {/* Modal Header */}
         <div className="mb-6">
-          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+          <h2 className="font-urbanist text-2xl font-semibold leading-tight tracking-[0%] text-[#FFFFFF] mb-3">
             Verify Your Post
           </h2>
-          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+          <p className="font-urbanist text-sm font-medium leading-relaxed tracking-[0%] text-[#D1D1D1]">
             Enter the URL of your Twitter post to verify you shared about Raven.
           </p>
         </div>
@@ -1073,10 +1115,10 @@ const ReferralInputModal = ({ isOpen, onClose, referralCode, setReferralCode, on
 
         {/* Modal Header */}
         <div className="mb-6">
-          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+          <h2 className="font-urbanist text-2xl font-semibold leading-tight tracking-[0%] text-[#FFFFFF] mb-3">
             Enter Invite Code
           </h2>
-          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+          <p className="font-urbanist text-sm font-medium leading-relaxed tracking-[0%] text-[#D1D1D1]">
             Enter the invite code of the person who referred you to Raven.
           </p>
         </div>
@@ -1192,10 +1234,10 @@ const WhitelistModal = ({ isOpen, onClose, addresses, setAddresses, onSubmit, is
 
         {/* Modal Header */}
         <div className="mb-6">
-          <h2 className="font-urbanist text-2xl font-medium leading-tight tracking-[0%] text-[#FFFFFF] mb-2">
+          <h2 className="font-urbanist text-2xl font-semibold leading-tight tracking-[0%] text-[#FFFFFF] mb-3">
             Whitelist Addresses
           </h2>
-          <p className="font-urbanist text-sm font-medium leading-normal tracking-[0%] text-[#D1D1D1]">
+          <p className="font-urbanist text-sm font-medium leading-relaxed tracking-[0%] text-[#D1D1D1]">
             Enter wallet addresses (comma-separated) that you want to allow as valid referrals.
           </p>
         </div>

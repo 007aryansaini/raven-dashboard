@@ -50,7 +50,7 @@ const TypingAssistantMessage = ({
   const displayedContent = useTypingEffect(message.content, 3, isTyping && !message.reasoning && !message.answer)
 
   return (
-    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-[#808080]">
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-[#BFBFBF]">
       {message.reasoning && (
         <div className="px-1 lg:px-1.5">
           <div 
@@ -703,17 +703,20 @@ const body = () => {
         })
       }, typingDuration)
 
-      // 3. After successful AI response, record the usage (async, don't wait)
-      recordInference(address, {
+      // 3. After successful AI response, record the usage, then refresh summary
+      void recordInference(address, {
         mode: mode,
         quantity: 1,
         reason: reason,
         tags: hasTags,
-      }).catch(() => {
-        // Error recording inference - don't show error to user
       })
-
-      void refreshMetrics()
+        .then(() => {
+          // Only refresh metrics (summary) after recordInference succeeds
+          return refreshMetrics()
+        })
+        .catch(() => {
+          // Error recording inference - don't show error to user
+        })
       
       // Reset tags after successful query
       setSelectedTimeframe(null)
@@ -933,12 +936,12 @@ const body = () => {
                       <div className="rounded-lg lg:rounded-xl bg-[#0B0B0B] p-2 lg:p-3">
                         <BTCPriceChart />
                       </div>
-                      <div className="mt-2 lg:mt-3 font-sans text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">
+                      <div className="mt-2 lg:mt-3 font-sans text-xs lg:text-sm leading-none tracking-[0%] text-[#BFBFBF]">
                         Displaying sample BTC closing prices for illustrative purposes.
                       </div>
                     </div>
                   ) : message.role === 'user' ? (
-                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#1F1F1F] text-[#808080]">
+                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#1F1F1F] text-[#BFBFBF]">
                       {message.content}
                     </div>
                   ) : (
@@ -953,7 +956,7 @@ const body = () => {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
-                    <div className="font-sans text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
+                    <div className="font-sans text-xs lg:text-sm text-[#BFBFBF]">Raven is predicting...</div>
                   </div>
                 </div>
               )}
@@ -997,10 +1000,10 @@ const body = () => {
             <ArrowUp 
               className={`h-3.5 w-3.5 lg:h-4 lg:w-4 transition-all duration-200 ${
                 isLoading 
-                  ? 'text-[#808080] cursor-not-allowed opacity-50' 
+                  ? 'text-[#BFBFBF] cursor-not-allowed opacity-50' 
                   : (inputValue.trim() || buildQueryFromTags()) 
                     ? 'text-white hover:scale-110 cursor-pointer' 
-                    : 'text-[#808080] cursor-not-allowed'
+                    : 'text-[#BFBFBF] cursor-not-allowed'
               }`} 
               onClick={isLoading ? undefined : handleSubmit}
             />

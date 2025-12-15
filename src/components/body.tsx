@@ -51,7 +51,7 @@ const TypingAssistantMessage = ({
   const displayedContent = useTypingEffect(message.content, 3, isTyping && !message.reasoning && !message.answer)
 
   return (
-    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-[#808080]">
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-[#BFBFBF]">
       {message.reasoning && (
         <div className="px-1 lg:px-1.5">
           <div 
@@ -991,17 +991,20 @@ const body = () => {
         })
       }, typingDuration)
 
-      // 3. After successful AI response, record the usage (async, don't wait)
-      recordInference(address, {
+      // 3. After successful AI response, record the usage, then refresh summary
+      void recordInference(address, {
         mode: mode,
         quantity: 1,
         reason: reason,
         tags: hasTags,
-      }).catch(() => {
-        // Error recording inference - don't show error to user
       })
-
-      void refreshMetrics()
+        .then(() => {
+          // Only refresh metrics (summary) after recordInference succeeds
+          return refreshMetrics()
+        })
+        .catch(() => {
+          // Error recording inference - don't show error to user
+        })
       
       // Reset tags after successful query
       setSelectedLiquidity(null)
@@ -1275,7 +1278,7 @@ const body = () => {
                {/* Animated Card Container */}
                {isLoadingEvents ? (
                  <div className="flex items-center justify-center py-12">
-                   <div className="font-urbanist text-sm text-[#808080]">Loading Polymarket events...</div>
+                   <div className="font-urbanist text-sm text-[#BFBFBF]">Loading Polymarket events...</div>
                  </div>
                ) : eventsError ? (
                  <div className="flex items-center justify-center py-12">
@@ -1283,7 +1286,7 @@ const body = () => {
                  </div>
                ) : sortedEvents.length === 0 ? (
                  <div className="flex items-center justify-center py-12">
-                   <div className="font-urbanist text-sm text-[#808080]">No events available</div>
+                   <div className="font-urbanist text-sm text-[#BFBFBF]">No events available</div>
                  </div>
                ) : (
                  <div 
@@ -1371,7 +1374,7 @@ const body = () => {
                            </div>
                          )}
                          <div className="flex flex-col gap-1 flex-1 min-w-0">
-                           <div className="font-sans text-xs lg:text-sm leading-relaxed tracking-[0%] break-words text-[#808080]">
+                           <div className="font-sans text-xs lg:text-sm leading-relaxed tracking-[0%] break-words text-[#BFBFBF]">
                              {message.content}
                            </div>
                          </div>
@@ -1388,7 +1391,7 @@ const body = () => {
                  {isLoading && (
                    <div className="flex justify-start">
                      <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
-                       <div className="font-urbanist text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
+                       <div className="font-urbanist text-xs lg:text-sm text-[#BFBFBF]">Raven is predicting...</div>
                      </div>
                    </div>
                  )}

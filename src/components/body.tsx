@@ -51,35 +51,31 @@ const TypingAssistantMessage = ({
   const displayedContent = useTypingEffect(message.content, 3, isTyping && !message.reasoning && !message.answer)
 
   return (
-    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4">
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-white">
       {message.reasoning && (
-        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] border border-[#2A2A2A]">
+        <div className="px-1 lg:px-1.5">
           <div 
-            className="text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+            className="text-xs lg:text-sm leading-relaxed prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: formatMarkdown(finalReasoning) }}
           />
         </div>
       )}
       {message.answer && (isFirstComplete || !isTyping) && (
-        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] text-[#FFFFFF]">
+        <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-3"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+            className="font-semibold text-base text-[#45FFAE] mb-2"
           >
             Answer
           </div>
           <div 
             className="text-xs lg:text-sm leading-relaxed"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
             dangerouslySetInnerHTML={{ __html: formatMarkdown(finalAnswer) }}
           />
         </div>
       )}
       {!message.reasoning && !message.answer && (
-        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm leading-relaxed bg-[#1F1F1F] text-[#FFFFFF]">
+        <div className="px-1 lg:px-1.5 text-xs lg:text-sm leading-relaxed">
           <div 
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
             dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedContent) }}
           />
         </div>

@@ -50,41 +50,36 @@ const TypingAssistantMessage = ({
   const displayedContent = useTypingEffect(message.content, 3, isTyping && !message.reasoning && !message.answer)
 
   return (
-    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4">
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-white">
       {message.reasoning && (
-        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] border border-[#2A2A2A]">
+        <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-3"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+            className="font-semibold text-base text-[#45FFAE] mb-2"
           >
             Reasoning
           </div>
           <div 
-            className="text-xs lg:text-sm leading-relaxed text-[#FFFFFF] prose prose-invert max-w-none"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+            className="text-xs lg:text-sm leading-relaxed prose prose-invert max-w-none"
             dangerouslySetInnerHTML={{ __html: formatMarkdown(finalReasoning) }}
           />
         </div>
       )}
       {message.answer && (isFirstComplete || !isTyping) && (
-        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 bg-[#1F1F1F] text-[#FFFFFF]">
+        <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-3"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
+            className="font-semibold text-base text-[#45FFAE] mb-2"
           >
             Answer
           </div>
           <div 
             className="text-xs lg:text-sm leading-relaxed"
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
             dangerouslySetInnerHTML={{ __html: formatMarkdown(finalAnswer) }}
           />
         </div>
       )}
       {!message.reasoning && !message.answer && (
-        <div className="rounded-xl lg:rounded-2xl px-4 py-3 lg:px-5 lg:py-4 text-xs lg:text-sm leading-relaxed bg-[#1F1F1F] text-[#FFFFFF]">
+        <div className="px-1 lg:px-1.5 text-xs lg:text-sm leading-relaxed">
           <div 
-            style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" }}
             dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedContent) }}
           />
         </div>
@@ -829,13 +824,13 @@ const body = () => {
            <div className="flex flex-col items-center gap-2 lg:gap-3 text-center px-2 w-full">
                 {messages.length === 0 && (
                   <>
-                 <div className="font-urbanist font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">
+                <div className="font-sans font-medium text-xl sm:text-2xl lg:text-3xl leading-tight tracking-[0%] text-[#FFFFFF] text-center">
                    {activeTab === 'polymarket' ? 'Polymarket Predictions' : 'Crypto Market Predictions'}
                  </div>
                 <div className="w-full flex flex-row justify-center items-center px-2">
                  <div className="flex flex-row border border-gray-500 w-full sm:w-fit h-auto sm:h-9 rounded-full mt-2 gap-2 sm:gap-3 items-center px-2 sm:px-3 py-1.5">
-                    <div className="font-urbanist font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
-                    <div className="font-urbanist font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
+                   <div className="font-sans font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#4f4f4f] p-0.5 sm:p-1 bg-[#45FFAE] h-fit bg-opacity-50 rounded-full text-center">Raven</div>
+                   <div className="font-sans font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
                   </>
@@ -844,7 +839,7 @@ const body = () => {
                   <div className="w-full max-w-5xl flex justify-start mb-2">
                     <button
                       onClick={resetChat}
-                      className="flex items-center cursor-pointer gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#282828] hover:bg-[#2A2A2A] transition-all duration-200 text-[#E0E0E0] text-xs sm:text-sm font-urbanist font-medium"
+                     className="flex items-center cursor-pointer gap-2 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#282828] hover:bg-[#2A2A2A] transition-all duration-200 text-[#E0E0E0] text-xs sm:text-sm font-sans font-medium"
                     >
                       <ChevronLeft className="h-4 w-4" />
                       New Chat
@@ -863,13 +858,13 @@ const body = () => {
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
                   }`} onClick={() => handleSuggestedQuestion('Tell me the sentiment around ETH ?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Tell me the sentiment around ETH ?</span>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">Tell me the sentiment around ETH ?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
                   }`} onClick={() => handleSuggestedQuestion('What is the Expected CPI in USA?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What is the Expected CPI in USA?</span>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">What is the Expected CPI in USA?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
@@ -878,13 +873,13 @@ const body = () => {
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
                   }`} onClick={() => handleSuggestedQuestion("What's the primarily reason of Bitcoin falling recently?")}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">What's the primarily reason of Bitcoin falling recently?</span>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">What's the primarily reason of Bitcoin falling recently?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
                   }`} onClick={() => handleSuggestedQuestion('Which airdrop to target right now in coming 2026?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Which airdrop to target right now in coming 2026?</span>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">Which airdrop to target right now in coming 2026?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
@@ -893,7 +888,7 @@ const body = () => {
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
                   }`} onClick={() => handleSuggestedQuestion('Should I invest in Bitcoin now?')}>
-                     <span className="text-white font-urbanist font-medium text-xs sm:text-sm">Should I invest in Bitcoin now?</span>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">Should I invest in Bitcoin now?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
@@ -907,16 +902,16 @@ const body = () => {
                 <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                   {message.chartType === 'btc' ? (
                     <div className="w-full rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#121212] p-3 lg:p-4">
-                      <div className="mb-2 lg:mb-3 font-urbanist text-xs lg:text-sm font-medium text-white">{message.content}</div>
+                      <div className="mb-2 lg:mb-3 font-sans text-xs lg:text-sm font-medium text-white">{message.content}</div>
                       <div className="rounded-lg lg:rounded-xl bg-[#0B0B0B] p-2 lg:p-3">
                         <BTCPriceChart />
                       </div>
-                      <div className="mt-2 lg:mt-3 font-urbanist text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">
+                      <div className="mt-2 lg:mt-3 font-sans text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">
                         Displaying sample BTC closing prices for illustrative purposes.
                       </div>
                     </div>
                   ) : message.role === 'user' ? (
-                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#45FFAE]/15 text-[#45FFAE]">
+                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#45FFAE]/15 text-[#45FFAE]">
                       {message.content}
                     </div>
                   ) : (
@@ -931,7 +926,7 @@ const body = () => {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="max-w-[90%] lg:max-w-[85%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 bg-[#1F1F1F] text-[#FFFFFF]">
-                    <div className="font-urbanist text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
+                    <div className="font-sans text-xs lg:text-sm text-[#808080]">Raven is predicting...</div>
                   </div>
                 </div>
               )}

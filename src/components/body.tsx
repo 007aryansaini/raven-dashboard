@@ -63,7 +63,7 @@ const TypingAssistantMessage = ({
       {message.answer && (isFirstComplete || !isTyping) && (
         <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-2"
+            className="font-semibold text-base text-white mb-2"
           >
             Answer
           </div>
@@ -580,7 +580,7 @@ const body = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    // Helper function to bold mathematical numbers in green
+    // Helper function to bold mathematical numbers (no color)
     // Updated to handle currency with spaces like "$90 000"
     // IMPORTANT: Only process text content, NOT HTML attributes
     const boldNumbers = (str: string) => {
@@ -592,7 +592,7 @@ const body = () => {
           return part
         }
         // Only process numbers in text content
-        return part.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
+        return part.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
       }).join('')
     }
     
@@ -633,8 +633,8 @@ const body = () => {
         if (sectionHeaderMatch) {
           const header = sectionHeaderMatch[1]
           const content = sectionHeaderMatch[2]
-          // Process markdown bold first
-          let processedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Process markdown bold first (no color)
+          let processedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Then bold numbers
           processedContent = boldNumbers(processedContent)
           formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${header}:</strong> ${processedContent}</div>`)
@@ -661,8 +661,8 @@ const body = () => {
         const numberedHeadingMatch = line.match(/^(\d+\.)\s+(.+)$/)
         if (numberedHeadingMatch) {
           const headingText = numberedHeadingMatch[2]
-          // Process bold text and numbers
-          const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Process bold text and numbers (no color on bold)
+          const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Format as a numbered list item
           formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${boldNumbers(processedHeading)}</div>`)
           continue
@@ -673,10 +673,10 @@ const body = () => {
         if (bulletMatch) {
           let bulletContent = bulletMatch[2]
           // Process bold text within bullet points - handle both complete **text** and incomplete **text
-          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Also handle cases where ** appears but isn't closed (remove the **)
-          bulletContent = bulletContent.replace(/\*\*([^*]+)$/g, '<strong class="text-[#45FFAE]">$1</strong>')
-          bulletContent = bulletContent.replace(/^\*\*([^*]+)/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          bulletContent = bulletContent.replace(/\*\*([^*]+)$/g, '<strong>$1</strong>')
+          bulletContent = bulletContent.replace(/^\*\*([^*]+)/g, '<strong>$1</strong>')
           // Remove any remaining standalone **
           bulletContent = bulletContent.replace(/\*\*/g, '')
           // Bold mathematical numbers in bullet content
@@ -686,11 +686,11 @@ const body = () => {
         }
         
         // Default processing: preserve ALL content
-        // First process markdown bold (complete pairs)
-        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // First process markdown bold (complete pairs, no color)
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         // Handle incomplete ** markers (remove them if they don't form pairs)
-        processedLine = processedLine.replace(/\*\*([^*]+)$/g, '<strong class="text-[#45FFAE]">$1</strong>')
-        processedLine = processedLine.replace(/^\*\*([^*]+)/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        processedLine = processedLine.replace(/\*\*([^*]+)$/g, '<strong>$1</strong>')
+        processedLine = processedLine.replace(/^\*\*([^*]+)/g, '<strong>$1</strong>')
         // Remove any remaining standalone ** that don't make sense
         processedLine = processedLine.replace(/\*\*/g, '')
         // Then bold numbers (this avoids nested tags since bold markdown is processed first)
@@ -1353,7 +1353,7 @@ const body = () => {
                  {messages.map((message) => (
                    <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                      {message.role === 'user' ? (
-                       <div className={`flex flex-row gap-2 lg:gap-3 max-w-[90%] lg:max-w-[80%] rounded-xl lg:rounded-2xl border border-[#1F1F1F] p-3 lg:p-4 bg-[#45FFAE]/10 border-[#45FFAE]/30`}>
+                       <div className={`flex flex-row gap-2 lg:gap-3 max-w-[90%] lg:max-w-[80%] rounded-xl lg:rounded-2xl border border-[#1F1F1F] p-3 lg:p-4 bg-[#1F1F1F]`}>
                          {message.imageSrc && message.imageSrc !== '' && (
                            <div className="flex-shrink-0">
                              <img 
@@ -1371,7 +1371,7 @@ const body = () => {
                            </div>
                          )}
                          <div className="flex flex-col gap-1 flex-1 min-w-0">
-                           <div className="font-urbanist text-xs lg:text-sm leading-relaxed tracking-[0%] break-words text-[#45FFAE]">
+                           <div className="font-sans text-xs lg:text-sm leading-relaxed tracking-[0%] break-words text-[#FFFFFF]">
                              {message.content}
                            </div>
                          </div>

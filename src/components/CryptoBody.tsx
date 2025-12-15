@@ -54,7 +54,7 @@ const TypingAssistantMessage = ({
       {message.reasoning && (
         <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-2"
+            className="font-semibold text-base text-white mb-2"
           >
             Reasoning
           </div>
@@ -67,7 +67,7 @@ const TypingAssistantMessage = ({
       {message.answer && (isFirstComplete || !isTyping) && (
         <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-2"
+            className="font-semibold text-base text-white mb-2"
           >
             Answer
           </div>
@@ -280,7 +280,7 @@ const body = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    // Helper function to bold mathematical numbers in green
+    // Helper function to bold mathematical numbers (no color)
     // Updated to handle currency with spaces like "$90 000"
     // IMPORTANT: Only process text content, NOT HTML attributes
     const boldNumbers = (str: string) => {
@@ -292,7 +292,7 @@ const body = () => {
           return part
         }
         // Only process numbers in text content
-        return part.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
+        return part.replace(/(\d+\.?\d*\s*%?|\$[\d,\s]+\.?\d*|€[\d,\s]+\.?\d*|£[\d,\s]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
       }).join('')
     }
     
@@ -333,8 +333,8 @@ const body = () => {
         if (sectionHeaderMatch) {
           const header = sectionHeaderMatch[1]
           const content = sectionHeaderMatch[2]
-          // Process markdown bold first
-          let processedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Process markdown bold first (no color, just bold)
+          let processedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Then bold numbers
           processedContent = boldNumbers(processedContent)
           formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${header}:</strong> ${processedContent}</div>`)
@@ -363,8 +363,8 @@ const body = () => {
           const headingText = numberedHeadingMatch[2]
           // First bold numbers in the plain text
           let processedHeading = boldNumbers(headingText)
-          // Then process bold markdown text
-          processedHeading = processedHeading.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Then process bold markdown text (no color)
+          processedHeading = processedHeading.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Format as a numbered list item
           formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${processedHeading}</div>`)
           continue
@@ -375,10 +375,10 @@ const body = () => {
         if (bulletMatch) {
           let bulletContent = bulletMatch[2]
           // Process bold text within bullet points - handle both complete **text** and incomplete **text
-          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Also handle cases where ** appears but isn't closed (remove the **)
-          bulletContent = bulletContent.replace(/\*\*([^*]+)$/g, '<strong class="text-[#45FFAE]">$1</strong>')
-          bulletContent = bulletContent.replace(/^\*\*([^*]+)/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          bulletContent = bulletContent.replace(/\*\*([^*]+)$/g, '<strong>$1</strong>')
+          bulletContent = bulletContent.replace(/^\*\*([^*]+)/g, '<strong>$1</strong>')
           // Remove any remaining standalone **
           bulletContent = bulletContent.replace(/\*\*/g, '')
           // Bold mathematical numbers in bullet content
@@ -388,11 +388,11 @@ const body = () => {
         }
         
         // Default processing: preserve ALL content
-        // First process markdown bold (complete pairs)
-        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // First process markdown bold (complete pairs, no color)
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         // Handle incomplete ** markers (remove them if they don't form pairs)
-        processedLine = processedLine.replace(/\*\*([^*]+)$/g, '<strong class="text-[#45FFAE]">$1</strong>')
-        processedLine = processedLine.replace(/^\*\*([^*]+)/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        processedLine = processedLine.replace(/\*\*([^*]+)$/g, '<strong>$1</strong>')
+        processedLine = processedLine.replace(/^\*\*([^*]+)/g, '<strong>$1</strong>')
         // Remove any remaining standalone ** that don't make sense
         processedLine = processedLine.replace(/\*\*/g, '')
         // Then bold numbers (this avoids nested tags since bold markdown is processed first)
@@ -938,7 +938,7 @@ const body = () => {
                       </div>
                     </div>
                   ) : message.role === 'user' ? (
-                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#45FFAE]/15 text-[#45FFAE]">
+                    <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#1F1F1F] text-[#FFFFFF]">
                       {message.content}
                     </div>
                   ) : (

@@ -52,7 +52,7 @@ const TypingAssistantMessage = ({
       {message.reasoning && (
         <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-2"
+            className="font-semibold text-base text-white mb-2"
           >
             Reasoning
           </div>
@@ -65,7 +65,7 @@ const TypingAssistantMessage = ({
       {message.answer && isFirstComplete && (
         <div className="px-1 lg:px-1.5">
           <div 
-            className="font-semibold text-base text-[#45FFAE] mb-2"
+            className="font-semibold text-base text-white mb-2"
           >
             Answer
           </div>
@@ -165,12 +165,12 @@ const Home = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    // Helper function to bold mathematical numbers in green
+    // Helper function to bold mathematical numbers (no color)
     const boldNumbers = (str: string) => {
       // Match numbers (integers, decimals, percentages, currency, etc.)
       // Pattern matches: numbers, decimals, percentages, currency symbols with numbers
-      // Make them bold and green (#45FFAE) like headings
-      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-[#45FFAE]">$1</strong>')
+      // Make them bold only
+      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
     }
     
     // Comprehensive initial cleanup of all HTML artifacts and malformed patterns
@@ -228,7 +228,7 @@ const Home = () => {
           continue
         }
         
-        // Handle section headings like "**Key implications**" - make them green and bold
+        // Handle section headings like "**Key implications**" - keep them bold and green header label
         const sectionHeadingMatch = line.match(/^\*\*(.+?)\*\*\s*$/)
         if (sectionHeadingMatch && !line.match(/^\*\*REASONING\*\*/i) && !line.match(/^\*\*ANSWER\*\*/i)) {
           const headingText = sectionHeadingMatch[1]
@@ -241,8 +241,8 @@ const Home = () => {
         const numberedHeadingMatch = line.match(/^(\d+\.)\s+(.+)$/)
         if (numberedHeadingMatch) {
           const headingText = numberedHeadingMatch[2]
-          // Process bold text and numbers
-          const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Process bold text and numbers (no extra color on bold)
+          const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Format as a numbered list item
           formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${boldNumbers(processedHeading)}</div>`)
           continue
@@ -252,16 +252,16 @@ const Home = () => {
         const bulletMatch = line.match(/^(\*|\-)\s+(.+)$/)
         if (bulletMatch) {
           let bulletContent = bulletMatch[2]
-          // Process bold text within bullet points
-          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+          // Process bold text within bullet points (no color)
+          bulletContent = bulletContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Bold mathematical numbers in bullet content
           bulletContent = boldNumbers(bulletContent)
           formattedLines.push(`<div class="ml-4 my-2">• ${bulletContent}</div>`)
           continue
         }
         
-        // Handle bold **text** - convert to green and ensure proper line breaks
-        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#45FFAE]">$1</strong>')
+        // Handle bold **text** - make bold, no color
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         
         // Remove any HTML artifacts with comprehensive cleanup
         processedLine = processedLine
@@ -584,10 +584,10 @@ const Home = () => {
              <div className="flex w-full max-w-4xl flex-1 flex-col gap-2 lg:gap-4 min-h-0 px-2 lg:px-0">
                <div className="flex-1 rounded-2xl lg:rounded-3xl bg-[#141414] p-3 sm:p-4 lg:p-6 flex flex-col min-h-0 overflow-hidden">
                  <div className="flex-1 min-h-0 overflow-y-auto rounded-xl lg:rounded-2xl border border-[#1F1F1F] bg-[#0F0F0F]/80 p-3 lg:p-4 space-y-4 lg:space-y-5">
-                   {messages.map((message) => (
+                      {messages.map((message) => (
                      <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                        {message.role === 'user' ? (
-                         <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-urbanist bg-[#45FFAE]/15 text-[#45FFAE]">
+                            <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#1F1F1F] text-[#FFFFFF]">
                            {message.content}
                          </div>
                        ) : (

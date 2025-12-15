@@ -535,11 +535,11 @@ const body = () => {
 
       const data = await response.json()
 
-      // Extract reasoning and answer from the new response structure
+      // Extract reasoning and answer from the response structure
       // Handle multiple possible structures:
-      // 1. data.results[0].results[0].response.results[0].predictions.reasoning (predictions structure)
-      // 2. data.results[0].results[0].response.results[0].reasoning (nested response)
-      // 3. data.results[0].results[0].reasoning (direct)
+      // 1. data.results[0].results[0].response.results[0].predictions.reasoning / final_answer (predictions structure)
+      // 2. data.results[0].results[0].response.results[0].reasoning / answer (nested response)
+      // 3. data.results[0].results[0].reasoning / answer (direct)
       let reasoning = ""
       let answer = ""
 
@@ -566,6 +566,33 @@ const body = () => {
             // Fallback to direct structure
             reasoning = (resultData.reasoning || "").trim()
             answer = (resultData.answer || "").trim()
+          }
+        }
+      }
+
+      // Fallback: if both reasoning and answer are empty, but a final_answer exists,
+      // use final_answer as the answer so the user still sees a response.
+      if (!reasoning && !answer && data && data.results && data.results.length > 0) {
+        const firstResult = data.results[0]
+        if (firstResult.results && firstResult.results.length > 0) {
+          const resultData = firstResult.results[0]
+
+          // Direct final_answer on the result object
+          let finalAnswer: string | undefined = (resultData.final_answer || "").trim()
+
+          // Or nested under response.results[0]
+          if ((!finalAnswer || finalAnswer.length === 0) && resultData.response && Array.isArray(resultData.response.results) && resultData.response.results.length > 0) {
+            const nested = resultData.response.results[0]
+            finalAnswer = (
+              (nested.final_answer) ||
+              (nested.predictions && nested.predictions.final_answer)
+            )
+              ? String(nested.final_answer || nested.predictions.final_answer).trim()
+              : ""
+          }
+
+          if (finalAnswer && finalAnswer.length > 0) {
+            answer = finalAnswer
           }
         }
       }

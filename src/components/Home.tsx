@@ -48,7 +48,7 @@ const TypingAssistantMessage = ({
   const displayedContent = useTypingEffect(message.content, 8, isTyping && !message.reasoning && !message.answer)
 
   return (
-    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-white">
+    <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-[#808080]">
       {message.reasoning && (
         <div className="px-1 lg:px-1.5">
           <div 
@@ -165,12 +165,12 @@ const Home = () => {
   const formatMarkdown = (text: string) => {
     if (!text) return ''
     
-    // Helper function to bold mathematical numbers (no color)
+    // Helper function to bold mathematical numbers as white
     const boldNumbers = (str: string) => {
       // Match numbers (integers, decimals, percentages, currency, etc.)
       // Pattern matches: numbers, decimals, percentages, currency symbols with numbers
-      // Make them bold only
-      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold">$1</strong>')
+      // Make them bold white
+      return str.replace(/(\d+\.?\d*%?|\$[\d,]+\.?\d*|€[\d,]+\.?\d*|£[\d,]+\.?\d*|[\d,]+\.\d+)/g, '<strong class="font-semibold text-white">$1</strong>')
     }
     
     // Comprehensive initial cleanup of all HTML artifacts and malformed patterns
@@ -587,7 +587,7 @@ const Home = () => {
                       {messages.map((message) => (
                      <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} gap-2`}>
                        {message.role === 'user' ? (
-                            <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#1F1F1F] text-[#FFFFFF]">
+                            <div className="max-w-[85%] lg:max-w-[75%] rounded-xl lg:rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm leading-relaxed font-sans bg-[#1F1F1F] text-[#808080]">
                            {message.content}
                          </div>
                        ) : (

@@ -337,14 +337,14 @@ const body = () => {
           let processedContent = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Then bold numbers
           processedContent = boldNumbers(processedContent)
-          formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${header}:</strong> ${processedContent}</div>`)
+          formattedLines.push(`<div class="my-2"><strong class="text-white">${header}:</strong> ${processedContent}</div>`)
           continue
         }
         
         // Handle standalone "REASONING" and "ANSWER" headers
         if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
           const escapedText = line.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
+          formattedLines.push(`<div class="font-semibold text-base text-white mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
           continue
         }
         
@@ -352,7 +352,7 @@ const body = () => {
         const sectionHeadingMatch = line.match(/^\*\*(.+?)\*\*\s*$/)
         if (sectionHeadingMatch && !line.match(/^\*\*REASONING\*\*/i) && !line.match(/^\*\*ANSWER\*\*/i)) {
           const headingText = sectionHeadingMatch[1]
-          formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${boldNumbers(headingText)}</div>`)
+          formattedLines.push(`<div class="font-semibold text-sm text-white mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${boldNumbers(headingText)}</div>`)
           continue
         }
         
@@ -366,7 +366,7 @@ const body = () => {
           // Then process bold markdown text (no color)
           processedHeading = processedHeading.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Format as a numbered list item
-          formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${processedHeading}</div>`)
+          formattedLines.push(`<div class="my-2"><strong class="text-white">${numberedHeadingMatch[1]}</strong> ${processedHeading}</div>`)
           continue
         }
         
@@ -400,7 +400,7 @@ const body = () => {
         
         // NO cleanup here - we'll do minimal cleanup only at the very end
         // Always add the line - preserve all content
-        formattedLines.push(processedLine || '<br />')
+          formattedLines.push(processedLine || '<br />')
       }
     }
     
@@ -418,8 +418,8 @@ const body = () => {
       if (part.startsWith('<') && part.endsWith('>')) {
         // Only fix if the class attribute is malformed (has escaped brackets)
         return part
-          .replace(/class="text-\[#45FFAE\]"/g, 'class="text-[#45FFAE]"')
-          .replace(/class="font-semibold text-"/g, 'class="font-semibold text-[#45FFAE]"')
+          .replace(/class="text-\[#45FFAE\]"/g, 'class="text-white"')
+          .replace(/class="font-semibold text-"/g, 'class="font-semibold text-white"')
       }
       // For text content, be VERY conservative - only remove clearly standalone artifacts
       // Only remove if there's a space before it AND it's not part of a word
@@ -499,20 +499,20 @@ const body = () => {
       
       if (shouldAuthorize) {
         authorization = await authorizeInference(address, {
-          mode: mode,
+        mode: mode,
           quantity: 1,
           reason: reason,
           tags: hasTags,
-        })
+      })
 
-        if (!authorization.allowed) {
-          toast.warning(
-            `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
-            {
-              style: { fontSize: "12px" },
-            }
-          )
-          return
+      if (!authorization.allowed) {
+        toast.warning(
+          `Request denied: ${authorization.reason.replace(/_/g, " ")}`,
+          {
+            style: { fontSize: "12px" },
+          }
+        )
+        return
         }
       }
 
@@ -999,7 +999,7 @@ const body = () => {
                 isLoading 
                   ? 'text-[#808080] cursor-not-allowed opacity-50' 
                   : (inputValue.trim() || buildQueryFromTags()) 
-                    ? 'text-[#45FFAE] hover:scale-110 cursor-pointer' 
+                    ? 'text-white hover:scale-110 cursor-pointer' 
                     : 'text-[#808080] cursor-not-allowed'
               }`} 
               onClick={isLoading ? undefined : handleSubmit}

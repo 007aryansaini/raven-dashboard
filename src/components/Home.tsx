@@ -224,7 +224,7 @@ const Home = () => {
         // Handle "REASONING" and "ANSWER" headers first - style them prominently
         if (line.trim().toUpperCase() === 'REASONING' || line.trim().toUpperCase() === 'ANSWER') {
           const escapedText = line.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-          formattedLines.push(`<div class="font-semibold text-base text-[#45FFAE] mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
+          formattedLines.push(`<div class="font-semibold text-base text-white mb-4 mt-5" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${escapedText}</div>`)
           continue
         }
         
@@ -232,7 +232,7 @@ const Home = () => {
         const sectionHeadingMatch = line.match(/^\*\*(.+?)\*\*\s*$/)
         if (sectionHeadingMatch && !line.match(/^\*\*REASONING\*\*/i) && !line.match(/^\*\*ANSWER\*\*/i)) {
           const headingText = sectionHeadingMatch[1]
-          formattedLines.push(`<div class="font-semibold text-sm text-[#45FFAE] mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${boldNumbers(headingText)}</div>`)
+          formattedLines.push(`<div class="font-semibold text-sm text-white mt-4 mb-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;">${boldNumbers(headingText)}</div>`)
           continue
         }
         
@@ -244,7 +244,7 @@ const Home = () => {
           // Process bold text and numbers (no extra color on bold)
           const processedHeading = headingText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           // Format as a numbered list item
-          formattedLines.push(`<div class="my-2"><strong class="text-[#45FFAE]">${numberedHeadingMatch[1]}</strong> ${boldNumbers(processedHeading)}</div>`)
+          formattedLines.push(`<div class="my-2"><strong class="text-white">${numberedHeadingMatch[1]}</strong> ${boldNumbers(processedHeading)}</div>`)
           continue
         }
         

@@ -286,15 +286,45 @@ const Tooltip = ({ children, content, className = "", position = "bottom", align
     }
   }
 
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setIsVisible(true)
+  }
+
+  const handleMouseLeave = () => {
+    // Add a small delay before hiding to allow smooth transition to tooltip
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false)
+    }, 150)
+  }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
   return (
     <div
       className={`relative ${className}`}
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {children}
       {isVisible && (
-        <div className={`absolute ${position === "top" ? "bottom-full mb-2" : "top-full mt-2"} ${getAlignmentClasses()} z-50 transform`}>
+        <div 
+          className={`absolute ${position === "top" ? "bottom-full mb-2" : "top-full mt-2"} ${getAlignmentClasses()} z-50 transform pointer-events-auto`}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <div className={`${width} rounded-lg border border-[#45FFAE]/40 bg-[#0B0B0B] px-4 py-3 text-white shadow-lg`}>
             {typeof content === 'string' ? (
               <div className="font-urbanist text-xs leading-relaxed whitespace-pre-line">{content}</div>

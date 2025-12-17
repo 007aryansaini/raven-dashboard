@@ -41,6 +41,12 @@ const SideBar = ({ onClose }: SideBarProps) => {
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null)
   const [subcribeButtonText, setSubcribeButtonText] = useState("Subscribe")
   const [isSubscribing, setIsSubscribing] = useState(false)
+  const [showEnterpriseModal, setShowEnterpriseModal] = useState(false)
+  const [enterpriseForm, setEnterpriseForm] = useState({
+    name: '',
+    email: '',
+    contactNumber: ''
+  })
   const { setIsUserSubscribed, showSubscriptionModal, setShowSubscriptionModal } = useSubscription()
   const { refreshMetrics, hasActiveSubscription, subscriptionPlanId, inferenceRemaining } = useUserMetrics()
 
@@ -92,6 +98,49 @@ const SideBar = ({ onClose }: SideBarProps) => {
     setSelectedPlan(null)
   }
 
+  const handleEnterpriseSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validate mandatory fields
+    if (!enterpriseForm.name.trim() || !enterpriseForm.email.trim()) {
+      toast.error('Please fill in all mandatory fields (Name and Email)', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(enterpriseForm.email)) {
+      toast.error('Please enter a valid email address', {
+        style: { fontSize: '12px' }
+      })
+      return
+    }
+
+    // Print to console
+    console.log('Enterprise Plan Form Submission:', {
+      name: enterpriseForm.name,
+      email: enterpriseForm.email,
+      contactNumber: enterpriseForm.contactNumber || 'Not provided'
+    })
+
+    toast.success('Thank you! We will contact you soon.', {
+      style: { fontSize: '12px' }
+    })
+
+    // Reset form and close modal
+    setEnterpriseForm({ name: '', email: '', contactNumber: '' })
+    setShowEnterpriseModal(false)
+  }
+
+  const handleEnterpriseInputChange = (field: 'name' | 'email' | 'contactNumber', value: string) => {
+    setEnterpriseForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
   const plans = [
     {
       id: 1,
@@ -116,6 +165,14 @@ const SideBar = ({ onClose }: SideBarProps) => {
       priceUnits: 149_000_000,
       description: 'Price Accuracy + Reasoning + Scores',
       requests: '5,000 requests/month'
+    },
+    {
+      id: 4,
+      name: 'Enterprise',
+      price: 'Custom',
+      priceUnits: 0,
+      description: 'Custom Solutions',
+      requests: 'Unlimited requests'
     }
   ]
 
@@ -126,6 +183,11 @@ const SideBar = ({ onClose }: SideBarProps) => {
   const getPlanStatus = (
     planId: number
   ): { disabled: boolean; note: string | null } => {
+    // Enterprise plan is always available
+    if (planId === 4) {
+      return { disabled: false, note: null }
+    }
+
     if (!hasCurrentPlan) {
       return { disabled: false, note: null }
     }
@@ -583,7 +645,12 @@ const SideBar = ({ onClose }: SideBarProps) => {
                       className={`relative flex flex-col p-4 rounded-lg border transition-all duration-200 ease-in-out ${selectionClasses} ${interactivityClasses}`}
                       onClick={() => {
                         if (planDisabled) return
-                        setSelectedPlan(plan.id)
+                        if (plan.id === 4) {
+                          // Enterprise plan - show form modal
+                          setShowEnterpriseModal(true)
+                        } else {
+                          setSelectedPlan(plan.id)
+                        }
                       }}
                     >
                       {/* Plan Header */}
@@ -689,6 +756,166 @@ const SideBar = ({ onClose }: SideBarProps) => {
                 {subcribeButtonText}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Enterprise Form Modal */}
+      {showEnterpriseModal && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ 
+            height: '100vh', 
+            width: '100vw',
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)'
+          }}
+          onClick={() => setShowEnterpriseModal(false)}
+        >
+          <div 
+            className="border border-[#45FFAE]/30 rounded-xl w-full max-w-md lg:max-w-lg h-auto max-h-[90vh] p-6 sm:p-8 flex flex-col gap-6 overflow-y-auto relative z-[10000]"
+            style={{
+              background: '#000000',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between">
+              <h2 
+                style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontWeight: 600,
+                  fontSize: '24px',
+                  lineHeight: '100%',
+                  color: '#45FFAE',
+                  margin: 0
+                }}
+              >
+                Enterprise Plan Inquiry
+              </h2>
+              
+              {/* Close Button */}
+              <button
+                onClick={() => setShowEnterpriseModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full border border-[#45FFAE]/30 hover:border-[#45FFAE]/50 transition-colors cursor-pointer bg-[#0A0A0A]"
+              >
+                <svg 
+                  className="w-5 h-5 text-[#45FFAE]" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M6 18L18 6M6 6l12 12" 
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleEnterpriseSubmit} className="flex flex-col gap-4">
+              {/* Name/Company Name */}
+              <div className="flex flex-col gap-2">
+                <label 
+                  htmlFor="enterprise-name"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px',
+                    color: '#45FFAE',
+                    fontWeight: 500
+                  }}
+                >
+                  Name or Company Name <span style={{ color: '#ff4444' }}>*</span>
+                </label>
+                <input
+                  id="enterprise-name"
+                  type="text"
+                  value={enterpriseForm.name}
+                  onChange={(e) => handleEnterpriseInputChange('name', e.target.value)}
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg border border-[#45FFAE]/30 bg-[#0A0A0A] text-white focus:outline-none focus:border-[#45FFAE] transition-colors"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px'
+                  }}
+                  placeholder="Enter your name or company name"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="flex flex-col gap-2">
+                <label 
+                  htmlFor="enterprise-email"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px',
+                    color: '#45FFAE',
+                    fontWeight: 500
+                  }}
+                >
+                  Email <span style={{ color: '#ff4444' }}>*</span>
+                </label>
+                <input
+                  id="enterprise-email"
+                  type="email"
+                  value={enterpriseForm.email}
+                  onChange={(e) => handleEnterpriseInputChange('email', e.target.value)}
+                  required
+                  className="w-full px-4 py-2.5 rounded-lg border border-[#45FFAE]/30 bg-[#0A0A0A] text-white focus:outline-none focus:border-[#45FFAE] transition-colors"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px'
+                  }}
+                  placeholder="Enter your email address"
+                />
+              </div>
+
+              {/* Contact Number */}
+              <div className="flex flex-col gap-2">
+                <label 
+                  htmlFor="enterprise-contact"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px',
+                    color: '#45FFAE',
+                    fontWeight: 500
+                  }}
+                >
+                  Contact Number
+                </label>
+                <input
+                  id="enterprise-contact"
+                  type="tel"
+                  value={enterpriseForm.contactNumber}
+                  onChange={(e) => handleEnterpriseInputChange('contactNumber', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg border border-[#45FFAE]/30 bg-[#0A0A0A] text-white focus:outline-none focus:border-[#45FFAE] transition-colors"
+                  style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: '14px'
+                  }}
+                  placeholder="Enter your contact number (optional)"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full py-3 rounded-lg font-medium transition-all mt-2 bg-[#45FFAE]/10 border border-[#45FFAE] hover:bg-[#45FFAE]/20 cursor-pointer"
+                style={{
+                  color: '#45FFAE',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: '16px',
+                  fontWeight: 500
+                }}
+              >
+                Submit
+              </button>
+            </form>
           </div>
         </div>,
         document.body

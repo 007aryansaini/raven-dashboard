@@ -865,6 +865,22 @@ const body = () => {
                    <div className="font-sans font-medium text-xs sm:text-sm leading-none tracking-[0%] text-[#E0E0E0]">I predict what the market hasn't priced yet.</div>
                  </div>
                  </div>
+                 
+                 {/* Tags with glow effect */}
+                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4 mb-2 px-2">
+                   <div className="px-3 py-1.5">
+                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Price forecasting</span>
+                   </div>
+                   <div className="px-3 py-1.5">
+                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Sentimental Analysis</span>
+                   </div>
+                   <div className="px-3 py-1.5">
+                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Logic Reasoning</span>
+                   </div>
+                   <div className="px-3 py-1.5">
+                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Event Prediction <span className="text-[#BFBFBF]">( Coming Soon )</span></span>
+                   </div>
+                 </div>
                   </>
                 )}
                 {messages.length > 0 && (

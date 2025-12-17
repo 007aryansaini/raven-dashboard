@@ -471,9 +471,30 @@ const SideBar = ({ onClose }: SideBarProps) => {
         )}
 
         <div className="flex flex-row items-center justify-center w-52 lg:w-64 gap-4 lg:gap-6">
-          <img className="w-8 lg:w-10 h-8 lg:h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={telegram} alt="logout" />
-          <img className="w-8 lg:w-10 h-8 lg:h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={twitter} alt="logout" />
-          <img className="w-8 lg:w-10 h-8 lg:h-10 cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out" src={discord} alt="logout" />
+          <a 
+            href="https://t.me/astron_ai" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out"
+          >
+            <img className="w-8 lg:w-10 h-8 lg:h-10" src={telegram} alt="Telegram" />
+          </a>
+          <a 
+            href="https://x.com/Astron_Markets" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out"
+          >
+            <img className="w-8 lg:w-10 h-8 lg:h-10" src={twitter} alt="X (Twitter)" />
+          </a>
+          <a 
+            href="https://discord.com/invite/yWCBPsqmdw" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="cursor-pointer hover:scale-110 hover:opacity-80 transition-all duration-200 ease-in-out"
+          >
+            <img className="w-8 lg:w-10 h-8 lg:h-10" src={discord} alt="Discord" />
+          </a>
         </div>
       </div>
 

@@ -1457,15 +1457,15 @@ const body = () => {
               <div className="relative" ref={dropdownRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
                   <img src={polymarketLogo} alt="polymarket" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">Polymarket</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                      <div className="cursor-default rounded-t-lg bg-[#222] px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0]">Polymarket</div>
-                      <div className="cursor-pointer rounded-b-lg px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222]" onClick={() => { setIsDropdownOpen(false); navigate('/crypto') }}>Crypto</div>
+                      <div className="cursor-default rounded-t-lg bg-[#222] px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0]">Polymarket</div>
+                      <div className="cursor-pointer rounded-b-lg px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222]" onClick={() => { setIsDropdownOpen(false); navigate('/crypto') }}>Crypto</div>
                     </div>
                   </div>
                 )}
@@ -1474,14 +1474,14 @@ const body = () => {
               {/* Liquidity Dropdown */}
               <div className="relative" ref={liquidityRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isLiquidityOpen ? closeAllModals() : openLiquidity()}>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedLiquidity ?? 'Liquidity'}</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isLiquidityOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isLiquidityOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['High','Medium','Low'].map(v => (
-                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedLiquidity(v); setIsLiquidityOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedLiquidity(v); setIsLiquidityOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1491,14 +1491,14 @@ const body = () => {
               {/* Volume Dropdown */}
               <div className="relative" ref={volumeRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isVolumeOpen ? closeAllModals() : openVolume()}>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedVolume ?? 'Volume'}</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isVolumeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isVolumeOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['High','Medium','Low'].map(v => (
-                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedVolume(v); setIsVolumeOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedVolume(v); setIsVolumeOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1508,14 +1508,14 @@ const body = () => {
               {/* Timeframe Dropdown */}
               <div className="relative" ref={timeframeRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isTimeframeOpen ? closeAllModals() : openTimeframe()}>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isTimeframeOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTimeframeOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
-                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedTimeframe(v); setIsTimeframeOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedTimeframe(v); setIsTimeframeOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1525,14 +1525,14 @@ const body = () => {
               {/* Newest Dropdown */}
               <div className="relative" ref={newestRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isNewestOpen ? closeAllModals() : openNewest()}>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedNewest ?? 'Newest'}</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isNewestOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isNewestOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['Today','This Week','This Month'].map(v => (
-                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedNewest(v); setIsNewestOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedNewest(v); setIsNewestOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1542,14 +1542,14 @@ const body = () => {
               {/* Ending Soon Dropdown */}
               <div className="relative" ref={endingSoonRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isEndingSoonOpen ? closeAllModals() : openEndingSoon()}>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedEndingSoon ?? 'Ending Soon'}</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isEndingSoonOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isEndingSoonOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1h','6h','12h','24h','3d','7d'].map(v => (
-                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedEndingSoon(v); setIsEndingSoonOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1559,14 +1559,14 @@ const body = () => {
               {/* Score Dropdown */}
               <div className="relative" ref={scoreRef}>
                 <button className="flex h-8 lg:h-10 items-center justify-center gap-1.5 lg:gap-2 rounded-lg bg-black/70 px-2.5 lg:px-4 py-1.5 lg:py-2 transition-all hover:bg-black/80" onClick={() => isScoreOpen ? closeAllModals() : openScore()}>
-                  <div className="font-urbanist text-xs lg:text-sm font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
+                  <div className="font-urbanist text-[7px] lg:text-[8px] font-medium leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
                   <ArrowUp className={`h-3.5 w-3.5 lg:h-4 lg:w-4 text-[#808080] transition-transform ${isScoreOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isScoreOpen && (
                   <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                     <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['Logical','Sentiment'].map(v => (
-                        <div key={v} className="px-4 py-2 text-center font-urbanist text-sm text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedScore(v); setIsScoreOpen(false) }}>{v}</div>
+                        <div key={v} className="px-4 py-2 text-center font-urbanist text-[7px] lg:text-[8px] text-[#E0E0E0] hover:bg-[#222] cursor-pointer" onClick={() => { setSelectedScore(v); setIsScoreOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>

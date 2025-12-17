@@ -1422,7 +1422,7 @@ const body = () => {
 
 
 
-          <div className="h-auto lg:h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 lg:p-2 items-start justify-between" >
+          <div className="h-auto lg:h-28 w-full bg-[#1A1A1A] rounded-lg flex flex-row p-2 lg:p-2 items-center justify-between" >
 
             <div className="flex flex-row items-center justify-between gap-1.5 lg:gap-2 flex-1">
                 <input 

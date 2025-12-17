@@ -43,3 +43,19 @@
   animation: textGlow 3s ease-in-out infinite;
   display: inline-block;
 }
+
+/* Heartbeat text size animation - smooth single pulse */
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.text-heartbeat {
+  animation: heartbeat 3s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center;
+}

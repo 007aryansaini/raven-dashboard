@@ -866,21 +866,29 @@ const body = () => {
                  </div>
                  </div>
                  
-                 {/* Tags with glow effect */}
-                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4 mb-2 px-2">
-                   <div className="px-3 py-1.5">
-                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Price forecasting</span>
-                   </div>
-                   <div className="px-3 py-1.5">
-                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Sentimental Analysis</span>
-                   </div>
-                   <div className="px-3 py-1.5">
-                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Logic Reasoning</span>
-                   </div>
-                   <div className="px-3 py-1.5">
-                     <span className="font-sans font-medium text-xs sm:text-sm text-[#45FFAE] text-glow-animation">Event Prediction <span className="text-[#BFBFBF]">( Coming Soon )</span></span>
-                   </div>
-                 </div>
+                {/* Tags with glow effect */}
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-4 mb-2 px-2">
+                  <div className="px-3 py-1.5">
+                    <span className="font-sans font-medium text-sm sm:text-base text-[#45FFAE] text-glow-animation text-heartbeat">
+                      Price forecasting
+                    </span>
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <span className="font-sans font-medium text-sm sm:text-base text-[#45FFAE] text-glow-animation text-heartbeat">
+                      Sentimental Analysis
+                    </span>
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <span className="font-sans font-medium text-sm sm:text-base text-[#45FFAE] text-glow-animation text-heartbeat">
+                      Logic Reasoning
+                    </span>
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <span className="font-sans font-medium text-sm sm:text-base text-[#45FFAE] text-glow-animation text-heartbeat">
+                      Event Prediction <span className="text-[#BFBFBF]">( Coming Soon )</span>
+                    </span>
+                  </div>
+                </div>
                   </>
                 )}
                 {messages.length > 0 && (

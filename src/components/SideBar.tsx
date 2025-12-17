@@ -512,7 +512,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
         >
           {/* Modal - Left Sidebar on Mobile, Centered on Desktop */}
           <div 
-            className="border-r lg:border border-[#45FFAE]/30 lg:rounded-xl w-full max-w-md h-full lg:h-auto lg:max-h-[90vh] p-6 sm:p-8 flex flex-col gap-6 overflow-y-auto relative z-[10000]"
+            className="border-r lg:border border-[#45FFAE]/30 lg:rounded-xl w-full max-w-md lg:max-w-3xl h-full lg:h-auto lg:max-h-[90vh] p-6 sm:p-8 flex flex-col gap-6 overflow-y-auto relative z-[10000]"
             style={{
               background: '#000000',
               position: 'relative'

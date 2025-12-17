@@ -1022,17 +1022,17 @@ const body = () => {
               <div className="relative" ref={dropdownRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isDropdownOpen ? closeAllModals() : openDropdown()}>
                   <img src={cryptoTrade} alt="crypto" className="h-3.5 w-3.5 lg:h-4 lg:w-4"/>
-                  <div className="font-urbanist font-medium text-[7px] lg:text-[8px] leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">Crypto</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {isDropdownOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
-                       <div className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-[7px] lg:text-[8px] rounded-t-lg" onClick={() => { setIsDropdownOpen(false); navigate('/polymarket') }}>
+                       <div className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-xs lg:text-sm rounded-t-lg" onClick={() => { setIsDropdownOpen(false); navigate('/polymarket') }}>
                          Polymarket
                        </div>
-                       <div className="px-3 py-2 cursor-default bg-[#222] text-[#E0E0E0] font-urbanist text-[7px] lg:text-[8px] rounded-b-lg">
+                       <div className="px-3 py-2 cursor-default bg-[#222] text-[#E0E0E0] font-urbanist text-xs lg:text-sm rounded-b-lg">
                          Crypto
                        </div>
                     </div>
@@ -1043,14 +1043,14 @@ const body = () => {
               {/* Timeframe Dropdown */}
               <div className="relative" ref={tfRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isTfOpen ? closeAllModals() : openTf()}>
-                  <div className="font-urbanist font-medium text-[7px] lg:text-[8px] leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedTimeframe ?? 'Timeframe'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isTfOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isTfOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['1m','5m','15m','1h','4h','12h','24h','3d','7d','30d','90d','YTD','1y'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-[7px] lg:text-[8px] text-center" onClick={() => { setSelectedTimeframe(v); setIsTfOpen(false) }}>{v}</div>
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-xs lg:text-sm text-center" onClick={() => { setSelectedTimeframe(v); setIsTfOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1060,14 +1060,14 @@ const body = () => {
               {/* Analysis Dropdown */}
               <div className="relative" ref={analysisRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isAnalysisOpen ? closeAllModals() : openAnalysis()}>
-                  <div className="font-urbanist font-medium text-[7px] lg:text-[8px] leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedAnalysis ?? 'Analysis'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAnalysisOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAnalysisOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['Sentiment','Accuracy'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-[7px] lg:text-[8px] text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-xs lg:text-sm text-center" onClick={() => { setSelectedAnalysis(v); setIsAnalysisOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1077,14 +1077,14 @@ const body = () => {
               {/* Assets Dropdown */}
               <div className="relative" ref={assetsRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isAssetsOpen ? closeAllModals() : openAssets()}>
-                  <div className="font-urbanist font-medium text-[7px] lg:text-[8px] leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedAsset ?? 'Assets'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isAssetsOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isAssetsOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['BTC','ETH','SOL','XRP','AAVE','UNI','BNB','ADA','DOGE','SUI','TRX','LINK'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-[7px] lg:text-[8px] text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-xs lg:text-sm text-center" onClick={() => { setSelectedAsset(v); setIsAssetsOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>
@@ -1094,14 +1094,14 @@ const body = () => {
               {/* Score Dropdown */}
               <div className="relative" ref={scoreRef}>
                 <button className="flex flex-row items-center justify-center gap-1.5 lg:gap-2 bg-black bg-opacity-70 rounded-lg px-2.5 lg:px-3 py-1.5 lg:py-2 cursor-pointer w-fit h-8 lg:h-10 hover:bg-opacity-80" onClick={() => isScoreOpen ? closeAllModals() : openScore()}>
-                  <div className="font-urbanist font-medium text-[7px] lg:text-[8px] leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
+                  <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#FFFFFF]">{selectedScore ?? 'Score'}</div>
                    <ArrowUp className={`text-[#808080] h-3 w-3 transition-transform ${isScoreOpen ? 'rotate-180' : ''}`}/>
                 </button>
                 {isScoreOpen && (
                    <div className="absolute bottom-full left-0 z-50 mb-3 w-48 rounded-xl border border-gray-700 bg-[#1A1A1A] p-1 shadow-xl">
                      <div className="max-h-48 overflow-y-auto rounded-lg bg-[#121212]">
                       {['Logical','Sentiment'].map(v => (
-                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-[7px] lg:text-[8px] text-center" onClick={() => { setSelectedScore(v); setIsScoreOpen(false) }}>{v}</div>
+                        <div key={v} className="px-3 py-2 cursor-pointer hover:bg-[#222] text-[#E0E0E0] font-urbanist text-xs lg:text-sm text-center" onClick={() => { setSelectedScore(v); setIsScoreOpen(false) }}>{v}</div>
                       ))}
                     </div>
                   </div>

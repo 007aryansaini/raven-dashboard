@@ -880,12 +880,12 @@ const body = () => {
                   </div>
                   <div className="px-3 py-1.5">
                     <span className="font-sans font-medium text-sm sm:text-base text-[#45FFAE] text-glow-animation text-heartbeat">
-                      Logic Reasoning
+                      Logic Reasoning <span className="text-[#BFBFBF] text-xs">( Coming Soon )</span>
                     </span>
                   </div>
                   <div className="px-3 py-1.5">
                     <span className="font-sans font-medium text-sm sm:text-base text-[#45FFAE] text-glow-animation text-heartbeat">
-                      Event Prediction <span className="text-[#BFBFBF]">( Coming Soon )</span>
+                      Event Prediction <span className="text-[#BFBFBF] text-xs">( Coming Soon )</span>
                     </span>
                   </div>
                 </div>

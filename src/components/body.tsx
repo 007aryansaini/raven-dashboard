@@ -9,6 +9,7 @@ import bolt from "../assets/bolt.svg"
 import { CHAT_API_BASE } from "../utils/constants"
 import { authorizeInference, recordInference, type AuthorizeInferenceResponse } from "../utils/inference"
 import { useUserMetrics } from "../contexts/UserMetricsContext"
+import { useSubscription } from '../contexts/SubscriptionContext'
 import { useSequentialTyping } from "../utils/useSequentialTyping"
 import { useTypingEffect } from "../utils/useTypingEffect"
 import polymarketLogo from "../assets/polymarketLogo.svg"
@@ -89,7 +90,8 @@ const polymarketFetcher = new PolymarketFetcher()
 
 const body = () => {
   const { isConnected, address } = useAccount()
-  const { refreshMetrics, creditsPending, inferenceRemaining } = useUserMetrics()
+  const { refreshMetrics, creditsPending, inferenceRemaining, hasActiveSubscription } = useUserMetrics()
+  const { setShowSubscriptionModal } = useSubscription()
   const [twitterUser, setTwitterUser] = useState<User | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
@@ -1405,13 +1407,18 @@ const body = () => {
            {/* Input Area - Always at bottom */}
            <div className="flex flex-col gap-2.5 lg:gap-3.5 w-full max-w-5xl lg:h-40 bg-[#141414] rounded-lg p-3 lg:p-4 justify-between flex-shrink-0">
                
-               <div className="flex flex-row items-center justify-between">
-                       <div className="flex flex-row gap-1 lg:gap-2 items-center">
-                            <img src={bolt} alt="bolt"  className="h-2.5 w-2.5 lg:h-3 lg:w-3"/>
-                            <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
-                            <MoveRight className="text-[#808080] text-center h-3 w-3 lg:h-4 lg:w-4"/>
-                       </div>
-               </div>
+               {!hasActiveSubscription && (
+                 <div className="flex flex-row items-center justify-between">
+                         <div 
+                           className="flex flex-row gap-1 lg:gap-2 items-center cursor-pointer hover:opacity-80 transition-opacity duration-200"
+                           onClick={() => setShowSubscriptionModal(true)}
+                         >
+                              <img src={bolt} alt="bolt"  className="h-2.5 w-2.5 lg:h-3 lg:w-3"/>
+                              <div className="font-urbanist font-medium text-xs lg:text-sm leading-none tracking-[0%] text-[#808080]">Unlock more with paid plans</div>
+                              <MoveRight className="text-[#808080] text-center h-3 w-3 lg:h-4 lg:w-4"/>
+                         </div>
+                 </div>
+               )}
 
 
 

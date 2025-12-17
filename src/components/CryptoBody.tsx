@@ -895,8 +895,8 @@ const body = () => {
                    </div>
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
-                  }`} onClick={() => handleSuggestedQuestion('What is the Expected CPI in USA?')}>
-                     <span className="text-white font-sans font-medium text-xs sm:text-sm">What is the Expected CPI in USA?</span>
+                  }`} onClick={() => handleSuggestedQuestion('what be the price of BTC after 4 hours ?')}>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">what be the price of BTC after 4 hours ?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>
@@ -910,8 +910,8 @@ const body = () => {
                    </div>
                   <div className={`bg-[#1A1A1A] border border-[#282828] rounded-lg p-2.5 sm:p-3 flex items-center justify-between transition-all duration-200 w-full sm:w-fit ${
                     isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-[#2A2A2A]'
-                  }`} onClick={() => handleSuggestedQuestion('Which airdrop to target right now in coming 2026?')}>
-                     <span className="text-white font-sans font-medium text-xs sm:text-sm">Which airdrop to target right now in coming 2026?</span>
+                  }`} onClick={() => handleSuggestedQuestion('what be the price of ETH after 4 hours ?')}>
+                     <span className="text-white font-sans font-medium text-xs sm:text-sm">what be the price of ETH after 4 hours ?</span>
                      <MoveRight className="text-white h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2 flex-shrink-0" />
                    </div>
                  </div>

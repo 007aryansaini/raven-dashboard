@@ -538,10 +538,12 @@ const body = () => {
       const data = await response.json()
 
       // Extract reasoning and answer from the response structure
-      // Handle multiple possible structures:
-      // 1. data.results[0].results[0].response.results[0].predictions.reasoning / final_answer (predictions structure)
-      // 2. data.results[0].results[0].response.results[0].reasoning / answer (nested response)
-      // 3. data.results[0].results[0].reasoning / answer (direct)
+      // Priority order:
+      // 1. data.results[0].results[0].predictions.reasoning and predictions.final_answer (FIRST PRIORITY)
+      // 2. data.results[0].results[0].response.results[0].predictions.reasoning / final_answer (nested response)
+      // 3. data.results[0].results[0].response.results[0].reasoning / answer (nested response)
+      // 4. data.results[0].results[0].reasoning / answer (direct)
+      // 5. data.results[0].results[0].final_answer (fallback if no reasoning)
       let reasoning = ""
       let answer = ""
 
@@ -550,8 +552,14 @@ const body = () => {
         if (firstResult.results && firstResult.results.length > 0) {
           const resultData = firstResult.results[0]
           
-          // Check for predictions structure first (new structure)
-          if (resultData.response && resultData.response.results && resultData.response.results.length > 0) {
+          // FIRST PRIORITY: Check for predictions structure directly on resultData
+          if (resultData.predictions) {
+            reasoning = (resultData.predictions.reasoning || "").trim()
+            // Use final_answer first, then prediction, then answer
+            answer = (resultData.predictions.final_answer || resultData.predictions.prediction || resultData.predictions.answer || "").trim()
+          }
+          // SECOND PRIORITY: Check for nested response structure
+          else if (resultData.response && resultData.response.results && resultData.response.results.length > 0) {
             const nestedResult = resultData.response.results[0]
             
             // Check for predictions object
@@ -565,16 +573,16 @@ const body = () => {
               answer = (nestedResult.answer || "").trim()
             }
           } else {
-            // Fallback to direct structure
+            // THIRD PRIORITY: Fallback to direct structure
             reasoning = (resultData.reasoning || "").trim()
             answer = (resultData.answer || "").trim()
           }
         }
       }
 
-      // Fallback: if both reasoning and answer are empty, but a final_answer exists,
+      // FALLBACK: If reasoning is not found, but a final_answer exists at top level,
       // use final_answer as the answer so the user still sees a response.
-      if (!reasoning && !answer && data && data.results && data.results.length > 0) {
+      if (!reasoning && data && data.results && data.results.length > 0) {
         const firstResult = data.results[0]
         if (firstResult.results && firstResult.results.length > 0) {
           const resultData = firstResult.results[0]
@@ -670,6 +678,80 @@ const body = () => {
           .replace(/^\s*\*\*ANSWER\*\*\s*\n*/i, '')
           .replace(/^\s*ANSWER\s*\n*/i, '')
           .trim()
+      }
+
+      // Format price prediction responses (model predictions with bullet or space separators)
+      // Pattern: "ModelName_Binance_SYMBOL_seq10_multiresolution_INTERVAL: $price • ..."
+      // Or: "ModelName_SYMBOL_INTERVAL: $price ModelName_SYMBOL_INTERVAL: $price ..."
+      if (answer) {
+        // Check for two patterns:
+        // 1. Full pattern with Binance: ModelName_Binance_SYMBOL_seq10_multiresolution_INTERVAL: $price
+        // 2. Short pattern: ModelName_SYMBOL_INTERVAL: $price (already formatted)
+        const fullPattern = /([A-Za-z_]+)_Binance_([A-Z0-9]+)_seq\d+_multiresolution_(\d+[mhd]):\s*\$?([\d,]+\.?\d*)/g
+        const shortPattern = /([A-Za-z_]+)_([A-Z0-9]+)_(\d+[mhd]):\s*\$?([\d,]+\.?\d*)/g
+        
+        const fullMatches = [...answer.matchAll(fullPattern)]
+        const shortMatches = [...answer.matchAll(shortPattern)]
+        
+        if (fullMatches.length > 0 || shortMatches.length > 0) {
+          const matches = fullMatches.length > 0 ? fullMatches : shortMatches
+          const useFullPattern = fullMatches.length > 0
+          
+          // Extract symbol and interval from first match
+          const firstMatch = matches[0]
+          const symbol = firstMatch[2] // e.g., "BTCUSDT" or "ETHUSDT"
+          const interval = firstMatch[3] // e.g., "5m"
+          
+          // Parse all model predictions
+          const modelPredictions: Array<{ model: string; price: string }> = []
+          let match
+          const regex = useFullPattern 
+            ? /([A-Za-z_]+)_Binance_([A-Z0-9]+)_seq\d+_multiresolution_(\d+[mhd]):\s*\$?([\d,]+\.?\d*)/g
+            : /([A-Za-z_]+)_([A-Z0-9]+)_(\d+[mhd]):\s*\$?([\d,]+\.?\d*)/g
+          
+          // Reset regex
+          regex.lastIndex = 0
+          
+          while ((match = regex.exec(answer)) !== null) {
+            const fullModelName = match[1]
+            const priceValue = match[4] // Price is in the 4th capture group
+            
+            // Extract model name (first part before any additional underscores)
+            // Examples: "Astrax" from "Astrax", "Helion" from "Helion", "Kryos" from "Kryos"
+            let cleanModelName = fullModelName.split('_')[0]
+            
+            // Capitalize first letter
+            cleanModelName = cleanModelName.charAt(0).toUpperCase() + cleanModelName.slice(1).toLowerCase()
+            
+            modelPredictions.push({
+              model: cleanModelName,
+              price: `$${priceValue}`
+            })
+          }
+          
+          // Format as list with each prediction on a separate line
+          if (modelPredictions.length > 0) {
+            const formattedPredictions = modelPredictions
+              .map(pred => `${pred.model}_${symbol}_${interval}: ${pred.price}`)
+              .join('\n') // Ensure each is on a separate line
+            
+            // Extract symbol without USDT/USD for display (e.g., "BTC" from "BTCUSDT")
+            const displaySymbol = symbol.replace(/USDT?$/, '').replace(/USD$/, '')
+            
+            answer = `📊 Price Prediction for ${displaySymbol} (${interval} interval)\nModel Predictions:\n\n${formattedPredictions}`
+            
+            // Remove any trailing metadata lines (Source, Generated, etc.) from original answer
+            const lines = answer.split('\n')
+            const filteredLines = lines.filter(line => {
+              return !line.match(/^\*Source:/) && 
+                     !line.match(/^\*Generated:/) &&
+                     !line.trim().match(/^\*.*\*$/) &&
+                     !line.match(/Source:.*Neo4j/) &&
+                     !line.match(/Generated:.*\d+/)
+            })
+            answer = filteredLines.join('\n')
+          }
+        }
       }
 
       // Add assistant message with reasoning and answer

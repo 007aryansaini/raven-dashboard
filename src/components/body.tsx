@@ -29,11 +29,13 @@ type ChatMessage = {
 const TypingAssistantMessage = ({ 
   message, 
   isTyping,
-  formatMarkdown 
+  formatMarkdown,
+  navigate
 }: { 
   message: ChatMessage
   isTyping: boolean
   formatMarkdown: (text: string) => string
+  navigate: (path: string) => void
 }) => {
   // Sequential typing: reasoning first, then answer
   // Fast typing speed: 3ms per character (like ChatGPT)
@@ -50,6 +52,25 @@ const TypingAssistantMessage = ({
   
   // For content without reasoning/answer structure
   const displayedContent = useTypingEffect(message.content, 3, isTyping && !message.reasoning && !message.answer)
+
+  // Detect if this is a crypto price prediction query (not general reasoning)
+  // Only trigger for actual crypto price predictions, not general market analysis
+  const isPriceQuery = message.reasoning && (
+    // Must have price-related terms combined with crypto/technical indicators
+    (/price\s+(prediction|forecast|target|range|level)/i.test(message.reasoning) ||
+     /(btc|eth|bitcoin|ethereum|crypto|cryptocurrency).*price/i.test(message.reasoning) ||
+     /price.*(btc|eth|bitcoin|ethereum|crypto)/i.test(message.reasoning) ||
+     // Technical analysis specific to price predictions
+     /(support|resistance|rsi|macd).*price|price.*(support|resistance|rsi|macd)/i.test(message.reasoning) ||
+     // Actual price values with dollar signs or crypto symbols
+     /\$\d+[,.]?\d*.*(btc|eth|bitcoin|ethereum|crypto)/i.test(message.reasoning) ||
+     /\d+[,.]?\d*\s*(usd|usdt).*(btc|eth|bitcoin|ethereum)/i.test(message.reasoning) ||
+     // Price prediction specific phrases
+     /(what|will|be).*price.*(after|in|at)/i.test(message.reasoning.toLowerCase()))
+  )
+
+  // Determine the route based on query type
+  const learnMoreRoute = isPriceQuery ? '/mathematical-accuracy' : '/score'
 
   return (
     <div className="max-w-[90%] lg:max-w-[85%] flex flex-col gap-3 lg:gap-4 font-sans text-[#BFBFBF]">
@@ -79,6 +100,17 @@ const TypingAssistantMessage = ({
           <div 
             dangerouslySetInnerHTML={{ __html: formatMarkdown(displayedContent) }}
           />
+        </div>
+      )}
+      {/* Learn more link - only show when typing is complete and there's content */}
+      {!isTyping && (message.reasoning || message.answer || message.content) && (
+        <div className="px-1 lg:px-1.5 mt-2">
+          <button
+            onClick={() => navigate(learnMoreRoute)}
+            className="text-[#45FFAE] hover:text-[#45FFAE]/80 text-xs lg:text-sm font-medium underline transition-colors cursor-pointer"
+          >
+            Learn more
+          </button>
         </div>
       )}
     </div>
@@ -1386,6 +1418,7 @@ const body = () => {
                          message={message} 
                          isTyping={typingMessageIds.has(message.id)}
                          formatMarkdown={formatMarkdown}
+                         navigate={navigate}
                        />
                      )}
                    </div>

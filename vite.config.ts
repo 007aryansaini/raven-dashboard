@@ -2,8 +2,8 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const SCORE_API_HOST = 'http://provider.h100.hou.sfc.akash.pub:30567'
-const CHAT_API_HOST = 'http://opcejqgtutd6p2urshq4j1qc3k.ingress.h100.hou.sfc.akash.pub'
+const SCORE_API_HOST = 'http://provider.h100.ams2.val.akash.pub:30643'
+const CHAT_API_HOST = 'http://31d0kf3rq99kh78f1dum2fr28g.ingress.h100.ams2.val.akash.pub'
 const BACKEND_HOST = 'https://agent-asva-temp.vercel.app'
 
 // https://vite.dev/config/
